@@ -9,7 +9,7 @@
 import { cookies } from "next/headers";
 import { ApiError } from "@/lib/api";
 
-const INTERNAL = process.env.INTERNAL_API_URL ?? "http://127.0.0.1:8080";
+const INTERNAL = process.env.INTERNAL_API_URL ?? "http://127.0.0.1:8090";
 const SESSION_COOKIE = "ur_session";
 
 export interface ServerFetchOptions {

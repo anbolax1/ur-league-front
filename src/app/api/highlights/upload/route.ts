@@ -6,7 +6,7 @@
 
 export const runtime = "nodejs";
 
-const INTERNAL = process.env.INTERNAL_API_URL ?? "http://127.0.0.1:8080";
+const INTERNAL = process.env.INTERNAL_API_URL ?? "http://127.0.0.1:8090";
 
 export async function POST(req: Request): Promise<Response> {
   const res = await fetch(`${INTERNAL}/api/highlights`, {
