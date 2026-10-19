@@ -61,14 +61,6 @@ export function YouTubeIcon(props: IconProps) {
   );
 }
 
-export function MenuIcon(props: IconProps) {
-  return (
-    <Svg stroke="currentColor" strokeWidth="2" strokeLinecap="round" {...props}>
-      <path d="M4 7h16M4 12h16M4 17h16" />
-    </Svg>
-  );
-}
-
 export function CloseIcon(props: IconProps) {
   return (
     <Svg stroke="currentColor" strokeWidth="2" strokeLinecap="round" {...props}>
@@ -81,14 +73,6 @@ export function LogoutIcon(props: IconProps) {
   return (
     <Svg stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 12h9M16 8l3 4-3 4" />
-    </Svg>
-  );
-}
-
-export function ArrowRightIcon(props: IconProps) {
-  return (
-    <Svg stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M5 12h14M13 6l6 6-6 6" />
     </Svg>
   );
 }
@@ -118,37 +102,11 @@ export function TrophyIcon(props: IconProps) {
   );
 }
 
-export function CalendarIcon(props: IconProps) {
-  return (
-    <Svg stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="3.5" y="5" width="17" height="15" rx="2" />
-      <path d="M3.5 9.5h17M8 3v4M16 3v4" />
-    </Svg>
-  );
-}
-
-export function ScrollIcon(props: IconProps) {
-  return (
-    <Svg stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
-      <path d="M9 8h6M9 12h6M9 16h4" />
-    </Svg>
-  );
-}
-
 export function CopyIcon(props: IconProps) {
   return (
     <Svg stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <rect x="9" y="9" width="11" height="11" rx="2" />
       <path d="M5 15a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2" />
-    </Svg>
-  );
-}
-
-export function PlayIcon(props: IconProps) {
-  return (
-    <Svg fill="currentColor" {...props}>
-      <path d="M8 5.5v13l11-6.5-11-6.5Z" />
     </Svg>
   );
 }

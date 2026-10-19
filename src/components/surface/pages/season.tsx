@@ -4,6 +4,7 @@ import "./season.css";
 import type { RecapMatch, SeasonRecap } from "@/lib/types";
 import { mapImage } from "@/lib/match";
 import { Stripes } from "@/components/surface/stripes";
+import { SurfaceMissing } from "@/components/surface/missing";
 import { CountUp } from "@/components/surface/motion";
 import { SecHead, signed } from "@/components/surface/ui";
 import { hhmm } from "@/components/surface/fmt";
@@ -1088,6 +1089,18 @@ function HowSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
 /** Страница итогов сезона: что было, кто выиграл и как. Разделы без данных (у старых сезонов нет пиков-банов
     и заданий) пропускаются, полосы ночь/бумага чередуются по оставшимся. */
 export function SurfaceSeason({ recap, no }: { recap: SeasonRecap; no: string }) {
+  if (!recap.players.length) {
+    return (
+      <SurfaceMissing eyebrow={`Сезон ${no}`} title="итогов пока нет" lead="Итоги появятся после первого сыгранного матча сезона.">
+        <Link className="sf-btn sf-btn-amber" href="/schedule">
+          К матчам
+        </Link>
+        <Link className="sf-btn sf-btn-line" href="/rating">
+          Рейтинг
+        </Link>
+      </SurfaceMissing>
+    );
+  }
   const S = recap.summary;
   const parts: Part[] = [
     {

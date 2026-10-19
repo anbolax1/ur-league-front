@@ -5,10 +5,6 @@ const MONTHS = [
   "января", "февраля", "марта", "апреля", "мая", "июня",
   "июля", "августа", "сентября", "октября", "ноября", "декабря",
 ];
-const MONTHS_SHORT = [
-  "янв", "фев", "мар", "апр", "май", "июн",
-  "июл", "авг", "сен", "окт", "ноя", "дек",
-];
 
 /** Инициалы для аватара: первые 2 буквенно-цифровых символа имени, в верхнем
     регистре. Пустое имя → «··». */
@@ -103,24 +99,10 @@ export function fmtDate(iso?: string | null): string {
   return `${p.d} ${MONTHS[p.m - 1]} ${p.y}`;
 }
 
-export function fmtDay(iso?: string | null): string {
-  return mskParts(iso)?.d.toString() ?? "";
-}
-
-export function fmtMonShort(iso?: string | null): string {
-  const p = mskParts(iso);
-  return p ? MONTHS_SHORT[p.m - 1] : "";
-}
-
 /** «20:00» по МСК. */
 export function fmtTime(iso?: string | null): string {
   const p = mskParts(iso);
   return p ? `${p.hh}:${p.mm}` : "";
-}
-
-/** Процент побед: «70%»; без сыгранных матчей - прочерк. */
-export function fmtWinrate(wins: number, games: number): string {
-  return games > 0 ? `${Math.round((wins * 100) / games)}%` : "—";
 }
 
 /** Награда задания: «+2 балла» (fixed) или «+15%» (percent). points — сырое значение. */

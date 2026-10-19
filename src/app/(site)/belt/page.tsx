@@ -1,5 +1,3 @@
-import { notFound } from "next/navigation";
-import { getDesign } from "@/lib/design";
 import { SurfaceBelt } from "@/components/surface/pages/belt";
 
 export const metadata = {
@@ -7,8 +5,6 @@ export const metadata = {
   description: "Пояс лиги: правила, нынешний носитель и вся история с первого матча.",
 };
 
-/** Пояс лиги есть только в новом дизайне. */
-export default async function BeltPage() {
-  if ((await getDesign()) !== "surface") notFound();
+export default function BeltPage() {
   return <SurfaceBelt />;
 }

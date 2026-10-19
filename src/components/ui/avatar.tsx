@@ -33,8 +33,3 @@ export function Avatar({ name, src, tone = "lead", size = "md", className, ...pr
     </span>
   );
 }
-
-/** Тон аватара по позиции в списке (топ-3 в рейтинге). */
-export function toneByIndex(i: number): AvatarTone {
-  return i === 0 ? "lead" : i === 1 ? "cyan" : i === 2 ? "bronze" : "muted";
-}

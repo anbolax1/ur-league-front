@@ -23,16 +23,3 @@ export function TagBadge({
     </span>
   );
 }
-
-/** Теги игрока на сайте: роль и остальные, если организатор их не скрыл. */
-export function PublicTags({ tags }: { tags?: UserTag[] }) {
-  return (
-    <>
-      {(tags ?? [])
-        .filter((t) => t.visible && !t.hiddenByUser)
-        .map((t) => (
-          <TagBadge key={t.id} tag={t} />
-        ))}
-    </>
-  );
-}

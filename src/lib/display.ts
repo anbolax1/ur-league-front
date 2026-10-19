@@ -39,21 +39,6 @@ export function tournamentPill(status: string): { status: PillStatus; label: str
   }
 }
 
-/** Статус заявки (pending|accepted|declined) → пилл + подпись. */
-export function registrationPill(
-  status: Registration["status"] | string,
-): { status: PillStatus; label: string } {
-  switch (status) {
-    case "accepted":
-      return { status: "ok", label: "Принята" };
-    case "declined":
-      return { status: "no", label: "Отклонена" };
-    case "pending":
-    default:
-      return { status: "wait", label: "На рассмотрении" };
-  }
-}
-
 /** Подходит ли заявка под поисковый запрос (по нику, логину, Embark ID, заметке). */
 export function registrationMatches(r: Registration, query: string): boolean {
   const q = query.trim().toLowerCase();

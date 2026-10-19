@@ -4,8 +4,10 @@ import * as React from "react";
 import type { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { api, errorText } from "@/lib/api";
-import { EMBARK_RE } from "@/components/domain/embark-id-editor";
 import type { User, UserTag } from "@/lib/types";
+
+// Формат Embark ID: ник, решётка, ровно 4 цифры - напр. «Istwood#1234».
+const EMBARK_RE = /^[^#]+#\d{4}$/;
 
 /** Embark ID для лобби: после сохранения пропуск перерисуется с новым значением. */
 function EmbarkField({ initial }: { initial: string }) {
