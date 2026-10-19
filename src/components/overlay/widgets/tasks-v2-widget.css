@@ -1,0 +1,66 @@
+/* Виджет «Задания V2»: px сцены 1920×1080, цвета макета без переменных дизайна.
+   Стили вне слоёв, поэтому перекрывают общую панель .ov-panel. */
+.tw-panel {
+  display: flex;
+  flex-direction: column;
+  border-radius: 30px;
+  background-color: rgba(18, 9, 24, var(--ov-bg-alpha, 1));
+  box-shadow: none;
+}
+/* Общая сетка на все строки: плашки вида одной ширины. Поля auto ставят строки по центру,
+   если высоту виджета задали больше, и не обрезают верх, если меньше. */
+.tw-list {
+  display: grid;
+  grid-template-columns: repeat(3, max-content) minmax(0, 1fr);
+  column-gap: 5px;
+  row-gap: 10px;
+  /* по линии текста: при центровке каждой ячейки отдельно масштаб сцены разводит надписи на пиксель */
+  align-items: baseline;
+  margin: auto 0;
+  padding: 36px 10px;
+}
+/* Квадрат по верху строки, вровень с плашками: знак центруется по квадрату, а не по линии текста */
+.tw-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #eba900;
+  background: #120918;
+  color: #ebe2cf;
+}
+/* Строка текста высотой с плашку: надпись по центру плашки и на общей линии с названием */
+.tw-kind,
+.tw-pts {
+  height: 36px;
+  color: #120918;
+  font: 900 18px/36px var(--font-montserrat), sans-serif;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* у плашек сплошной фон: тень .ov-legible при выключенном фоне виджета только смазала бы текст */
+  text-shadow: none;
+}
+.tw-kind {
+  padding: 0 6px;
+  background: #eba900;
+}
+.tw-pts {
+  width: 36px;
+  background: #f55841;
+}
+.tw-pts-timed {
+  background: #57ef7e;
+}
+.tw-text {
+  color: #ebe2cf;
+  font: 800 18px/1.25 var(--font-montserrat), sans-serif;
+  overflow-wrap: anywhere;
+}
+.tw-more {
+  grid-column: 1 / -1;
+  color: rgba(235, 226, 207, 0.6);
+  font: 800 16px/1 var(--font-montserrat), sans-serif;
+}

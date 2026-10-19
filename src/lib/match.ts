@@ -1,0 +1,153 @@
+/* Расчёты по матчу 3 сезона для пульта, главной и страницы матча: стороны A/B, счёт по раундам,
+   подписи стадий и превью карт. */
+
+import { knocksLabel } from "@/lib/format";
+import type { MapInfo, MatchStage, MatchState, Participant, RoundBonusTask, Tournament, VetoStep } from "@/lib/types";
+
+/** Превью карты по коду (картинки лежат в /public/maps). */
+export function mapImage(code?: string | null): string {
+  return code ? `/maps/${code}.jpg` : "";
+}
+
+/** Порядок пиков-банов, как его строит сервер: два раунда - бан A, бан B, бан A, бан B, пик B, пик A;
+    три раунда - бан A, бан B, пик A, пик B, а третью карту выбирает чат. */
+export function vetoOrder(rounds: number): VetoStep[] {
+  if (rounds !== 3) {
+    return [
+      { action: "ban", side: "A" },
+      { action: "ban", side: "B" },
+      { action: "ban", side: "A" },
+      { action: "ban", side: "B" },
+      { action: "pick", side: "B", round: 1 },
+      { action: "pick", side: "A", round: 2 },
+    ];
+  }
+  return [
+    { action: "ban", side: "A" },
+    { action: "ban", side: "B" },
+    { action: "pick", side: "A", round: 1 },
+    { action: "pick", side: "B", round: 2 },
+    { action: "vote", side: "", round: 3 },
+  ];
+}
+
+/** Карты, что были в пуле на момент матча: добавленные позже в его пиках-банах не стояли. */
+export function mapsAt(maps: MapInfo[], at?: string | null): MapInfo[] {
+  const t = at ? Date.parse(at) : NaN;
+  return Number.isNaN(t) ? maps : maps.filter((m) => !m.addedAt || Date.parse(m.addedAt) <= t);
+}
+
+/** Стороны матча по порядку: A - тот, кто банит первым. */
+export function matchSides(st: MatchState): [Participant | null, Participant | null] {
+  const parts = [...(st.tournament.participants ?? [])].sort((a, b) => a.seed - b.seed);
+  return [parts[0] ?? null, parts[1] ?? null];
+}
+
+export function roundScore(st: MatchState, round: number, participantId?: string | null): number {
+  if (!participantId) return 0;
+  return st.scores
+    .filter((s) => s.roundNumber === round && s.participantId === participantId)
+    .reduce((sum, s) => sum + s.points, 0);
+}
+
+export function totalScore(st: MatchState, participantId?: string | null): number {
+  if (!participantId) return 0;
+  return st.scores.filter((s) => s.participantId === participantId).reduce((sum, s) => sum + s.points, 0);
+}
+
+/** Велся ли счёт: у матчей, перенесённых из таблицы, известен только победитель. */
+export function hasScore(st: MatchState): boolean {
+  return st.tasks.length > 0 || st.scores.some((s) => s.points !== 0);
+}
+
+export function manualPoints(st: MatchState, round: number, participantId: string): number {
+  return st.manual.find((s) => s.roundNumber === round && s.participantId === participantId)?.points ?? 0;
+}
+
+export function roundKnocks(st: MatchState, round: number, participantId: string): number {
+  return (st.knocks ?? []).find((k) => k.roundNumber === round && k.participantId === participantId)?.knocks ?? 0;
+}
+
+/** Очки за чужое задание - столько же даёт сервер (ContractCrossPoints). */
+export const CROSS_POINTS = 1;
+
+/** Очки за нок рейдера - столько же даёт сервер (KnockPoints). */
+export const KNOCK_POINTS = 3;
+
+export interface RoundBreakdown {
+  tasks: number;
+  cross: number;
+  knocks: number; // штук, по KNOCK_POINTS очков
+  manual: number; // без очков за ноки
+  legendary: number;
+}
+
+/** Из чего сложились очки стороны в раунде: свои задания, задания соперника, ноки, ручные и легендарки. */
+export function roundBreakdown(st: MatchState, round: number, participantId: string): RoundBreakdown {
+  const knocks = roundKnocks(st, round, participantId);
+  const manual = manualPoints(st, round, participantId) - knocks * KNOCK_POINTS;
+  const out: RoundBreakdown = { tasks: 0, cross: 0, knocks, manual, legendary: 0 };
+  for (const t of st.tasks) {
+    if (t.roundNumber !== round || t.completedBy !== participantId) continue;
+    if (t.participantId === participantId) out.tasks += t.points;
+    else out.cross += CROSS_POINTS;
+  }
+  for (const l of st.legendary) {
+    if (l.roundNumber === round && l.participantId === participantId) out.legendary += l.points ?? 0;
+  }
+  return out;
+}
+
+/** Разбивка очков раунда словами для страницы матча: «задания +4 · 2 нока +6». */
+export function breakdownParts(b: RoundBreakdown): string[] {
+  return [
+    b.tasks ? `задания +${b.tasks}` : "",
+    b.cross ? `задания соперника +${b.cross}` : "",
+    b.knocks ? `${knocksLabel(b.knocks)} +${b.knocks * KNOCK_POINTS}` : "",
+    b.manual ? `ручные ${b.manual > 0 ? "+" : ""}${b.manual}` : "",
+    b.legendary ? `легендарка +${b.legendary}` : "",
+  ].filter(Boolean);
+}
+
+export function stageLabel(stage: MatchStage, round: number, total: number): string {
+  switch (stage) {
+    case "scheduled":
+      return "Запланирован";
+    case "veto":
+      return "Пики-баны";
+    case "ready":
+      return "Карты выбраны";
+    case "round":
+      return total > 1 ? `Раунд ${round} из ${total}` : "Раунд идёт";
+    case "finished":
+      return "Матч завершён";
+  }
+}
+
+export function isShowMatch(t: Pick<Tournament, "format">): boolean {
+  return t.format === "show";
+}
+
+/** «2 раунда», «3 раунда», «1 раунд». */
+export function roundsLabel(n: number): string {
+  return n === 1 ? "1 раунд" : `${n} раунда`;
+}
+
+/** Набор на раунд по правилам 3 сезона: в первом - бесплатный, дальше - свой; в шоу-матче всегда свой. */
+export function loadoutLabel(t: Pick<Tournament, "format">, round: number): string {
+  return round === 1 && !isShowMatch(t) ? "бесплатный набор" : "свой набор";
+}
+
+/** Задание для показа: у задания на карту описание уже начинается с локации. */
+export function taskTitle(t: RoundBonusTask): string {
+  return t.name || t.text;
+}
+
+export function taskDescription(t: RoundBonusTask): string {
+  return t.name ? t.text : "";
+}
+
+export function taskKindLabel(t: RoundBonusTask): string {
+  if (t.category === "protocol") return "Протокол";
+  return t.mapCode ? "На карту" : "Задание";
+}

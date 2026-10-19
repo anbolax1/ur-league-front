@@ -1,0 +1,76 @@
+name: Deploy frontend
+
+# Автодеплой: сборка Next (standalone) на раннере → заливка бандла на VPS → swap + рестарт.
+# NEXT_PUBLIC_API_BASE вшивается из .env.production (в репо). Секреты репозитория:
+#   SSH_HOST  — IP/домен VPS (напр. 155.212.133.147)
+#   SSH_USER  — admin2
+#   SSH_KEY   — приватный deploy-ключ (целиком, с BEGIN/END)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ur-deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint (eslint)
+        run: npm run lint
+
+      - name: Typecheck (tsc)
+        run: npx tsc --noEmit
+
+      - run: npm run build
+
+      # Standalone репо (без родительского monorepo) даёт ПЛОСКИЙ standalone:
+      # server.js в корне .next/standalone. Заворачиваем его в frontend/, чтобы
+      # совпало с прод-юнитом (WorkingDir ~/ur-front, ExecStart node frontend/server.js).
+      - name: Assemble bundle (-> frontend/)
+        run: |
+          rm -rf .deploybuild && mkdir -p .deploybuild/frontend
+          cp -r .next/standalone/. .deploybuild/frontend/
+          mkdir -p .deploybuild/frontend/.next
+          cp -r .next/static .deploybuild/frontend/.next/static
+          cp -r public        .deploybuild/frontend/public
+          test -f .deploybuild/frontend/server.js
+
+      - name: Deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/id
+          chmod 600 ~/.ssh/id
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "deploy key fingerprint: $(ssh-keygen -yf ~/.ssh/id | awk '{print $1" "substr($2,1,24)"..."}')"
+          SSH="ssh -i ~/.ssh/id -o StrictHostKeyChecking=accept-new"
+          $SSH "$SSH_USER@$SSH_HOST" 'rm -rf ~/ur-front_new && mkdir -p ~/ur-front_new'
+          tar -C .deploybuild -czf - . | $SSH "$SSH_USER@$SSH_HOST" 'tar -C ~/ur-front_new -xzf -'
+          $SSH "$SSH_USER@$SSH_HOST" '
+            set -e
+            export XDG_RUNTIME_DIR=/run/user/$(id -u)
+            test -f ~/ur-front_new/frontend/server.js
+            rm -rf ~/ur-front_old
+            mv ~/ur-front ~/ur-front_old
+            mv ~/ur-front_new ~/ur-front
+            systemctl --user restart ur-front
+            sleep 2
+            curl -fsS -o /dev/null -w "front %{http_code}\n" localhost:3010
+          '

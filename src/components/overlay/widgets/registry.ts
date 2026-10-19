@@ -1,0 +1,56 @@
+import type { ComponentType } from "react";
+import type { WidgetType } from "@/lib/types";
+import { ScoreboardWidget } from "./scoreboard-widget";
+import { RoundWidget } from "./round-widget";
+import { ComplicationsWidget } from "./complications-widget";
+import { StandingsWidget } from "./standings-widget";
+import { RoundTasksWidget } from "./round-tasks-widget";
+import { BonusTasksWidget } from "./bonus-tasks-widget";
+import { TasksV2Widget } from "./tasks-v2-widget";
+import { TextWidget } from "./text-widget";
+import { LogoWidget } from "./logo-widget";
+import { VetoWidget } from "./veto-widget";
+import type { WidgetProps } from "./types";
+
+/** Реестр виджетов оверлея: тип → компонент. Единый источник для /overlay,
+    превью в кабинете и редактора макета. */
+export const WIDGET_REGISTRY: Record<WidgetType, ComponentType<WidgetProps>> = {
+  scoreboard: ScoreboardWidget,
+  round: RoundWidget,
+  complications: ComplicationsWidget,
+  standings: StandingsWidget,
+  roundTasks: RoundTasksWidget,
+  bonusTasks: BonusTasksWidget,
+  tasksV2: TasksV2Widget,
+  text: TextWidget,
+  logo: LogoWidget,
+  veto: VetoWidget,
+};
+
+/** Русские названия типов (меню «+ добавить виджет», список «Слои»). */
+export const WIDGET_LABELS: Record<WidgetType, string> = {
+  scoreboard: "Счёт",
+  round: "Раунд",
+  complications: "Протоколы",
+  standings: "Таблица мест",
+  roundTasks: "Основные задания",
+  bonusTasks: "Задания",
+  tasksV2: "Задания V2",
+  text: "Текст",
+  logo: "Логотип",
+  veto: "Пики-баны",
+};
+
+/** Порядок типов в меню добавления. */
+export const WIDGET_ORDER: WidgetType[] = [
+  "scoreboard",
+  "round",
+  "complications",
+  "standings",
+  "roundTasks",
+  "bonusTasks",
+  "tasksV2",
+  "veto",
+  "text",
+  "logo",
+];
