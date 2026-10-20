@@ -17,7 +17,8 @@ export interface HowExample {
   sb: number;
   /** 0 - победила A, 1 - B, -1 - ничья. */
   win: number;
-  maps: Array<{ name: string; code?: string }>;
+  /** Карты заходов по раундам, сторона A первой. */
+  heats: Array<{ name: string; code?: string }>;
   date: string;
   mult: number;
 }
@@ -34,7 +35,7 @@ export interface HowCalc {
 
 const N = 4;
 const AUTO_MS = 8000;
-const SCENE_MS = [4800, 4200, 1700, 0];
+const SCENE_MS = [4800, 5600, 1700, 0];
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
 function useReduced(): boolean {
@@ -95,6 +96,16 @@ function mapStep(p: number): number {
   return Math.floor(ROLL_FLIPS * Math.sqrt(p / ROLL_END));
 }
 
+/* Сцена «Раунды и заходы» по долям: заходы заполняются по очереди, после них - счёт. */
+const HEATS = 4; // два раунда по два захода
+const HEAT_STEP = 0.21;
+const HEAT_FILL = 0.2;
+const SCORE_AT = 0.86;
+
+/** Пример, пока в лиге нет сыгранных матчей: карты заходов - номера в пуле, счёт условный. */
+const DEMO_HEATS = [0, 1, 1, 0];
+const DEMO_SCORE = [14, 11];
+
 const ICON_REPLAY = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden>
     <path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" />
@@ -136,6 +147,14 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
 
   const mapsList = maps.map((m) => m.name).join(" или ");
   const landed = maps.length ? rollTo % maps.length : -1;
+  const rd = example ?? {
+    a: "Сторона A",
+    b: "Сторона B",
+    sa: DEMO_SCORE[0],
+    sb: DEMO_SCORE[1],
+    win: 0,
+    heats: DEMO_HEATS.map((j) => ({ name: maps[j % maps.length]?.name ?? "—", code: maps[j % maps.length]?.code })),
+  };
   // пока игра крутит, карты пула сменяют друг друга, и последняя смена встаёт на выпавшую
   const shownMap = landed < 0 ? -1 : mapT >= ROLL_FLIPS ? landed : (((landed + mapT - ROLL_FLIPS) % maps.length) + maps.length) % maps.length;
 
@@ -144,10 +163,9 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
     (i: number, p: number) => {
       if (i === 0) setMapT(mapStep(p));
       if (i === 1) {
-        const w = [clamp01(p / 0.4), clamp01((p - 0.42) / 0.4)];
-        lineRefs.current.forEach((el, j) => el && (el.style.width = `${(w[j] * 100).toFixed(1)}%`));
-        setRdAct(p < 0.42 ? 0 : p < 0.84 ? 1 : -1);
-        const show = p >= 0.86;
+        lineRefs.current.forEach((el, j) => el && (el.style.width = `${(clamp01((p - j * HEAT_STEP) / HEAT_FILL) * 100).toFixed(1)}%`));
+        setRdAct(p < HEATS * HEAT_STEP ? Math.floor(p / HEAT_STEP) : -1);
+        const show = p >= SCORE_AT;
         if (show !== rdScoreRef.current) {
           rdScoreRef.current = show;
           setRdScore(show);
@@ -460,44 +478,37 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
               <button type="button" className="sf-again" onClick={() => (setAuto(false), play(1))}>
                 {ICON_REPLAY}Ещё раз
               </button>
-              {example ? (
-                <>
-                  <div className={`sf-rd2 ${rdAct >= 0 ? "run" : ""}`}>
-                    {example.maps.slice(0, 2).map((m, j) => (
-                      <figure key={j} className={`sf-rd2-r ${rdAct === j ? "on" : ""}`}>
-                        <div className="sf-duo">
-                          {/* eslint-disable-next-line @next/next/no-img-element -- превью карты */}
-                          {m.code && <img src={mapImage(m.code)} alt="" loading="lazy" />}
-                        </div>
-                        <figcaption>
-                          <small>Раунд {j + 1}</small>
-                          <b>{m.name}</b>
-                        </figcaption>
-                        <span className="sf-rd2-line">
-                          <i
-                            ref={(el) => {
-                              lineRefs.current[j] = el;
-                            }}
-                          />
-                        </span>
-                      </figure>
-                    ))}
-                  </div>
-                  <div className="sf-rd2-score">
-                    <span className={`nm ${example.win === 0 ? "w" : ""}`}>{example.a}</span>
-                    <b className={example.win === 0 ? "w" : ""}>{rdScore ? <Tween value={example.sa} ms={900} replay={rdReplay} /> : 0}</b>
-                    <i>:</i>
-                    <b className={example.win === 1 ? "w" : ""}>{rdScore ? <Tween value={example.sb} ms={900} replay={rdReplay} /> : 0}</b>
-                    <span className={`nm ${example.win === 1 ? "w" : ""}`}>{example.b}</span>
-                  </div>
-                  <p className="sf-rd2-cap">
-                    пример: матч {example.date}
-                    {example.mult > 1 ? ` · рейтинг ×${example.mult}` : ""}
-                  </p>
-                </>
-              ) : (
-                <p className="sf-rd2-cap">Сыгранные матчи появятся здесь после первого эфира.</p>
-              )}
+              <div className={`sf-rd2 ${rdAct >= 0 ? "run" : ""}`}>
+                {rd.heats.slice(0, HEATS).map((h, j) => (
+                  <figure key={j} className={`sf-rd2-h ${j % 2 ? "b" : ""} ${rdAct === j ? "on" : ""}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- превью карты */}
+                    {h.code && <img src={mapImage(h.code)} alt="" loading="lazy" />}
+                    <figcaption>
+                      <small>
+                        Раунд {Math.floor(j / 2) + 1} · заход {j % 2 ? "B" : "A"}
+                      </small>
+                      <b>{h.name}</b>
+                    </figcaption>
+                    <span className="sf-rd2-line">
+                      <i
+                        ref={(el) => {
+                          lineRefs.current[j] = el;
+                        }}
+                      />
+                    </span>
+                  </figure>
+                ))}
+              </div>
+              <div className="sf-rd2-score">
+                <span className={`nm ${rd.win === 0 ? "w" : ""}`}>{rd.a}</span>
+                <b className={rd.win === 0 ? "w" : ""}>{rdScore ? <Tween value={rd.sa} ms={900} replay={rdReplay} /> : 0}</b>
+                <i>:</i>
+                <b className={rd.win === 1 ? "w" : ""}>{rdScore ? <Tween value={rd.sb} ms={900} replay={rdReplay} /> : 0}</b>
+                <span className={`nm ${rd.win === 1 ? "w" : ""}`}>{rd.b}</span>
+              </div>
+              <p className="sf-rd2-cap">
+                {example ? `пример: матч ${example.date}${example.mult > 1 ? ` · рейтинг ×${example.mult}` : ""}` : "пример матча из двух раундов"}
+              </p>
             </div>
 
             {/* 3. задания и очки */}

@@ -11,9 +11,6 @@ function pickExample(finished: Tournament[], maps: MapInfo[]): HowExample | null
   const m = finished.find((t) => (t.roundMaps?.length ?? 0) === 4 && (t.score?.length ?? 0) === 2 && t.score!.some((s) => s.points > 0));
   if (!m) return null;
   const [x, y] = m.score!;
-  // Карты заходов идут по раундам, сторона A первой: у раунда две карты или одна, если они совпали.
-  const heats = m.roundMaps!;
-  const rounds = [0, 2].map((i) => ({ name: heats[i] === heats[i + 1] ? heats[i] : `${heats[i]} · ${heats[i + 1]}`, code: code(heats[i]) }));
   return {
     id: m.id,
     a: x.name,
@@ -21,7 +18,7 @@ function pickExample(finished: Tournament[], maps: MapInfo[]): HowExample | null
     sa: x.points,
     sb: y.points,
     win: x.winner ? 0 : y.winner ? 1 : -1,
-    maps: rounds,
+    heats: m.roundMaps!.map((name) => ({ name, code: code(name) })),
     date: dayMonth(m.startsAt),
     mult: m.ratingMultiplier,
   };
