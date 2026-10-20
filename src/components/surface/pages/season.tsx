@@ -783,7 +783,7 @@ function TasksSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
       tone={tone}
       eyebrow="Задания, задания на карту и протоколы"
       title="задания"
-      lead="В каждом раунде у стороны общее задание, задание на карту раунда и протокол, который нужно успеть до 15-й минуты."
+      lead="В каждом раунде у стороны общее задание, задание на карту захода и протокол на время."
     >
       <div className="sn-tasks-top">
         <div>
@@ -795,9 +795,9 @@ function TasksSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
         <div className="sn-meters">
           {(
             [
-              ["Задания на карту", "уничтожить роботов в здании или на крыше", T.mapTasks],
+              ["Задания на карту", "высадиться в Пекадо и выжить 5 минут", T.mapTasks],
               ["Общие задания", "на любой карте", T.general],
-              ["Протоколы", "до 15-й минуты", T.protocols],
+              ["Протоколы", "на время", T.protocols],
             ] as const
           ).map(([name, hint, v]) => (
             <div key={name} className="sn-mrow">

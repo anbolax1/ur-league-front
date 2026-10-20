@@ -39,7 +39,7 @@ function draftPoints(v: string): number | null {
 const emptyDraft = (category: TaskCategory, mapCode: string): Draft => ({
   name: "",
   text: "",
-  // протокол выполняют до 15-й минуты, он на время
+  // протокол - задание на время
   tag: category === "protocol" ? "timed" : "normal",
   mapCodes: mapCode ? [mapCode] : [],
   points: category === "protocol" ? "1" : "2",

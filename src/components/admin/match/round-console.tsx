@@ -119,7 +119,7 @@ function TaskRow({
         <span className={`badge ${KIND_STYLE[kind]}`}>
           <span>
             {kind} · {t.points}
-            {t.category === "protocol" ? " · до 15:00" : ""}
+            {t.category === "protocol" ? " · на время" : ""}
           </span>
         </span>
         <div className="min-w-[200px] flex-1">

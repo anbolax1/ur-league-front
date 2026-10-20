@@ -82,7 +82,7 @@ function UploadForm({ tournaments, onSent }: { tournaments: { id: string; title:
           <label className="sf-field-label" htmlFor="hlp-title">
             Заголовок
           </label>
-          <input id="hlp-title" className="sf-input" placeholder="Например: клатч 1v3 на эваке" value={up.title} onChange={(e) => up.setTitle(e.target.value)} />
+          <input id="hlp-title" className="sf-input" placeholder="Например: клатч 1v4 в последней зоне" value={up.title} onChange={(e) => up.setTitle(e.target.value)} />
         </div>
         {tournaments.length > 0 && (
           <div className="sf-field">
