@@ -31,6 +31,7 @@ const LOOK: Record<PatchCode, Colors & { shape: Shape }> = {
   topknock: { shape: "hex", base: "#8f1d14", rim: "#f1aa1c", ink: "#ece2d0", acc: "#f1aa1c" },
   pacifist: { shape: "hex", base: "#ece2d0", rim: "#2bef83", ink: "#0f7a43", acc: "#0f7a43" },
   king: { shape: "hex", base: "#1440a8", rim: "#7fede6", ink: "#ece2d0", acc: "#f1aa1c" },
+  chicken: { shape: "hex", base: "#3a1d0e", rim: "#f1aa1c", ink: "#f1aa1c", acc: "#ece2d0" },
   first: { shape: "square", base: "#2bef83", rim: "#1a0e1e", ink: "#1a0e1e", acc: "#1a0e1e" },
   final: { shape: "square", base: "#1c0f22", rim: "#ff5a47", ink: "#ff5a47", acc: "#ff5a47" },
   marathon: { shape: "square", base: "#5b4a57", rim: "#ece2d0", ink: "#ece2d0", acc: "#f1aa1c" },
@@ -198,6 +199,13 @@ const ICON: Record<PatchCode, (c: Ink, id: string, tier: number) => string> = {
   king: (c) =>
     `<path fill-rule="evenodd" fill="${c.ink}" d="M60 92 C52 81 37 67 37 52 A23 23 0 0 1 83 52 C83 67 68 81 60 92 Z M60 38 A14 14 0 1 0 60.01 38 Z"/>` +
     crown(50.5, 43, 19, 13, c.acc),
+  chicken: (c) =>
+    // окорочок наискось: мясо к верхнему левому углу, кость с двумя головками - к нижнему правому
+    `<g transform="translate(60 61) rotate(45)">` +
+    `<path d="M9 -7 C3 -17 -13 -21 -24 -16 C-35 -10 -36 8 -25 15 C-14 21 3 17 9 7 Z" fill="${c.ink}"/>` +
+    `<path d="M-20 -7 C-14 -12 -6 -12 0 -8" fill="none" stroke="${c.cut}" stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round"/>` +
+    `<rect x="5" y="-4" width="22" height="8" rx="3" fill="${c.acc}"/>` +
+    `<circle cx="28" cy="-5" r="5.5" fill="${c.acc}"/><circle cx="28" cy="5" r="5.5" fill="${c.acc}"/></g>`,
   first: (c) => {
     const rays = [-90, -130, -50, -165, -15]
       .map((a) => {

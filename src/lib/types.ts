@@ -249,7 +249,7 @@ export interface KnockStats {
 export type PatchCode =
   | "top1" | "belt" | "regicide"
   | "streak" | "flawless" | "david" | "comeback" | "double" | "photo" | "shutout" | "revenge"
-  | "hunter" | "clear" | "topknock" | "pacifist" | "king"
+  | "hunter" | "clear" | "topknock" | "pacifist" | "king" | "chicken"
   | "first" | "final" | "marathon" | "veteran";
 
 /** Подробности нашивки для подписи; набор полей свой у каждой. */

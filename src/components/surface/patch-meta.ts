@@ -7,7 +7,7 @@ import { pluralKnocks } from "@/lib/format";
 export const PATCH_GROUPS: Array<{ name: string; codes: PatchCode[] }> = [
   { name: "Рейтинг", codes: ["top1", "belt", "regicide"] },
   { name: "Матчи", codes: ["streak", "flawless", "david", "comeback", "double", "photo", "shutout", "revenge"] },
-  { name: "Киллы и карты", codes: ["hunter", "clear", "topknock", "pacifist", "king"] },
+  { name: "Киллы и карты", codes: ["hunter", "clear", "topknock", "pacifist", "king", "chicken"] },
   { name: "Сезон", codes: ["first", "final", "marathon", "veteran"] },
 ];
 
@@ -47,7 +47,8 @@ export const PATCH_INFO: Record<PatchCode, PatchInfo> = {
   clear: { name: "Зачистка", rule: "8 киллов за один заход", about: "Восемь киллов или больше за один заход." },
   topknock: { name: "Главный охотник", rule: "больше всех киллов за сезон", about: "Больше всех киллов за сезон.", seasonEnd: true },
   pacifist: { name: "Пацифист", rule: "победа без единого килла", about: "Киллы в матче были, но у победителя - ни одного." },
-  king: { name: "Король карты", rule: "больше всех побед на карте", about: "Больше всех побед в матчах на карте, минимум три.", seasonEnd: true },
+  king: { name: "Король карты", rule: "больше всех киллов на карте", about: "Больше всех киллов на карте за сезон; в зачёт - от трёх заходов на ней.", seasonEnd: true },
+  chicken: { name: "Чикен", rule: "1-е место в заходе", about: "Первое место в заходе: один против всех сквадов." },
   first: { name: "Первая высадка", rule: "играл в первый день сезона", about: "Матч в первый игровой день сезона. Шоу-матчи не в счёт." },
   final: { name: "Последний аккорд", rule: "победа в последний день сезона", about: "Победа в последний игровой день сезона. Шоу-матчи не в счёт." },
   marathon: { name: "Марафонец", rule: "20 матчей за сезон", about: "Двадцать матчей за сезон; матч ×2 прошлых сезонов идёт за два." },
@@ -101,9 +102,11 @@ export function patchResult(p: Pick<PlayerPatch, "code" | "tier" | "detail" | "e
     case "topknock":
       return `${d.knocks ?? 0} ${pluralKnocks(d.knocks ?? 0)}`;
     case "clear":
-      return `${d.knocks ?? 0} за заход против ${d.opp ?? "—"}`;
+      return `${d.knocks ?? 0} за заход против ${d.opp ?? "—"}${d.map ? `, ${mapName(d.map)}` : ""}`;
     case "king":
-      return (d.maps ?? []).map(mapName).join(", ");
+      return (d.maps ?? []).map(mapName).join(", ") + (d.knocks ? ` · ${d.knocks} ${pluralKnocks(d.knocks)}` : "");
+    case "chicken":
+      return (d.n ?? 1) > 1 ? `${d.n} ${times(d.n ?? 1)}` : `${d.map ? `${mapName(d.map)}, ` : ""}против ${d.opp ?? "—"}`;
     case "first":
     case "final":
       return dayMonth(p.earnedAt);
