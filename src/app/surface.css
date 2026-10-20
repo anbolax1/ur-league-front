@@ -3793,10 +3793,21 @@ a.sf-tr:hover,
   display: block;
   margin-bottom: 6px;
 }
+.sf-maps-list li small {
+  display: block;
+  font: 500 13px/1.35 var(--sf-ff-c);
+  letter-spacing: 0.02em;
+  color: var(--sf-ink-2);
+}
 .sf-maps-list .sc {
-  font: 600 15px/1 var(--sf-ff-c);
+  font: 600 18px/1 var(--sf-ff-c);
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+.sf-maps-list .sc small {
+  margin-top: 3px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
 }
 .sf-hist {
   list-style: none;

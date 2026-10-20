@@ -143,21 +143,6 @@
   touch-action: pan-y;
 }
 
-.pf-segs {
-  display: flex;
-  gap: 2px;
-  height: 8px;
-}
-.pf-segs i {
-  flex: 1 1 0;
-  min-width: 2px;
-}
-.pf-segs i.w {
-  background: var(--sf-win-ink);
-}
-.pf-segs i.l {
-  background: var(--sf-loss-ink);
-}
 .pf-noimg {
   width: 64px;
   height: 40px;

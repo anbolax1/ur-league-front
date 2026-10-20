@@ -4,53 +4,33 @@ import * as React from "react";
 import Link from "next/link";
 import { seasonStats } from "@/lib/mmr-stats";
 import { mapImage } from "@/lib/match";
-import { fmtAverage } from "@/lib/format";
+import { fmtAverage, pluralKnocks } from "@/lib/format";
 import type { KnockStats, MapStat, MmrPoint, MmrStats, OpponentStat, PatchCode, PlayerPatch, PlayerProfile, Season, SeasonAnalytics } from "@/lib/types";
 import { ProfileChart, type ChartSegment } from "@/components/surface/profile-chart";
 import { ProfilePatches } from "@/components/surface/profile-patches";
 import { firstProfileSeason } from "@/components/surface/profile-season";
-import { fullDate, matchesWord } from "@/components/surface/fmt";
+import { fullDate, heatsWord, matchesWord } from "@/components/surface/fmt";
 
 /** Вкладка «все сезоны»: id сезона таким не бывает. */
 const ALL = "*";
 
 const norm = (s: string) => s.toLowerCase().replace(/ё/g, "е").trim();
 
-/** Победы и поражения по одной плашке на матч; когда матчей много - пропорционально. */
-function Segs({ wins, losses }: { wins: number; losses: number }) {
-  const total = wins + losses;
-  if (total === 0) return <span className="pf-segs" aria-hidden />;
-  if (total > 24) {
-    return (
-      <span className="pf-segs" aria-hidden>
-        <i className="w" style={{ flexGrow: wins }} />
-        <i className="l" style={{ flexGrow: losses }} />
-      </span>
-    );
-  }
-  return (
-    <span className="pf-segs" aria-hidden>
-      {Array.from({ length: total }, (_, i) => (
-        <i key={i} className={i < wins ? "w" : "l"} />
-      ))}
-    </span>
-  );
-}
-
 /** Сводка по картам, соперникам и киллам за несколько сезонов: одинаковые записи складываются. */
 export function mergeAnalytics(list: SeasonAnalytics[]): SeasonAnalytics {
   const maps = new Map<string, MapStat>();
   const opps = new Map<string, OpponentStat>();
-  const knocks: KnockStats = { matches: 0, knocks: 0, best: 0 };
+  const knocks: KnockStats = { heats: 0, knocks: 0, best: 0 };
   for (const a of list) {
     if (a.knocks) {
-      knocks.matches += a.knocks.matches;
+      knocks.heats += a.knocks.heats;
       knocks.knocks += a.knocks.knocks;
       // сезоны идут по порядку: при равенстве рекордом остаётся первый
       if (a.knocks.best > knocks.best) {
         knocks.best = a.knocks.best;
         knocks.bestMatch = a.knocks.bestMatch;
         knocks.bestOpponent = a.knocks.bestOpponent;
+        knocks.bestMap = a.knocks.bestMap;
       }
     }
     for (const m of a.maps) {
@@ -58,11 +38,13 @@ export function mergeAnalytics(list: SeasonAnalytics[]): SeasonAnalytics {
       const cur = maps.get(k);
       if (!cur) maps.set(k, { ...m });
       else {
-        cur.games += m.games;
-        cur.wins += m.wins;
-        cur.losses += m.losses;
-        // в старых сезонах названия капсом - показываем обычное написание
-        if (/[а-яё]/.test(m.map)) cur.map = m.map;
+        // среднее место - по всем заходам с местом
+        const placed = cur.placed + m.placed;
+        cur.avgPlace = placed ? (cur.avgPlace * cur.placed + m.avgPlace * m.placed) / placed : 0;
+        cur.placed = placed;
+        cur.heats += m.heats;
+        cur.knocks += m.knocks;
+        cur.chickens += m.chickens;
       }
     }
     for (const o of a.opponents) {
@@ -76,11 +58,14 @@ export function mergeAnalytics(list: SeasonAnalytics[]): SeasonAnalytics {
       }
     }
   }
-  const byGames = <T extends { games: number }>(x: T, y: T) => y.games - x.games;
-  return { maps: [...maps.values()].sort(byGames), opponents: [...opps.values()].sort(byGames), knocks };
+  return {
+    maps: [...maps.values()].sort((x, y) => y.heats - x.heats),
+    opponents: [...opps.values()].sort((x, y) => y.games - x.games),
+    knocks,
+  };
 }
 
-/** Киллы игрока: среднее - только по матчам, где киллы записаны, иначе нули занизили бы его. */
+/** Киллы игрока по сыгранным заходам. */
 function Knocks({ k, all }: { k: KnockStats; all: boolean }) {
   return (
     <div className="pf-knocks">
@@ -92,21 +77,26 @@ function Knocks({ k, all }: { k: KnockStats; all: boolean }) {
           <dd className="pf-sub">{all ? "за все сезоны" : "за сезон"}</dd>
         </div>
         <div>
-          <dt>В среднем за матч</dt>
-          <dd>{fmtAverage(k.knocks, k.matches)}</dd>
+          <dt>В среднем за заход</dt>
+          <dd>{fmtAverage(k.knocks, k.heats)}</dd>
           <dd className="pf-sub">
-            {k.matches} {matchesWord(k.matches)} с киллами
+            {k.heats} {heatsWord(k.heats)}
           </dd>
         </div>
         <div>
-          <dt>Рекорд за матч</dt>
+          <dt>Рекорд за заход</dt>
           <dd>{k.best}</dd>
           <dd className="pf-sub">
-            {k.bestMatch ? <Link href={`/tournament/${k.bestMatch}`}>против {k.bestOpponent}</Link> : "киллов пока не было"}
+            {k.bestMatch ? (
+              <Link href={`/tournament/${k.bestMatch}`}>
+                {k.bestMap ? `${k.bestMap}, ` : ""}против {k.bestOpponent}
+              </Link>
+            ) : (
+              "киллов пока не было"
+            )}
           </dd>
         </div>
       </dl>
-      <p className="pf-hint">Считаются матчи, где киллы записаны хотя бы одному игроку.</p>
     </div>
   );
 }
@@ -199,7 +189,10 @@ export function ProfileSeasons({
     patchItems = patchSeasons[sel]?.items ?? [];
     patchPlayers = patchSeasons[sel]?.players ?? 0;
   }
-  const bestMap = [...(analytics?.maps ?? [])].filter((m) => m.wins > 0).sort((a, b) => b.wins - a.wins || a.losses - b.losses)[0];
+  // лучшая карта - где больше киллов за заход, при равных - где больше заходов
+  const bestMap = [...(analytics?.maps ?? [])]
+    .filter((m) => m.knocks > 0)
+    .sort((a, b) => b.knocks / b.heats - a.knocks / a.heats || b.heats - a.heats)[0];
   const cardSeason = sel === ALL ? active : seasonOf(sel);
 
   const streak =
@@ -261,7 +254,7 @@ export function ProfileSeasons({
       <ChartLegend corrections={segments.some((s) => s.points.some((p) => p.correction))} />
       <ProfileChart key={sel} segments={segments} />
 
-      {analytics?.knocks?.matches ? <Knocks k={analytics.knocks} all={sel === ALL} /> : null}
+      {analytics?.knocks?.heats ? <Knocks k={analytics.knocks} all={sel === ALL} /> : null}
 
       {sel !== "" && (
         <ProfilePatches
@@ -315,7 +308,7 @@ export function ChartLegend({ corrections }: { corrections: boolean }) {
   );
 }
 
-/** Карты и соперники: победы и поражения на каждой карте и против каждого соперника. */
+/** Карты и соперники: заходы, киллы и места на каждой карте, победы и поражения против каждого соперника. */
 export function MapsAndRivals({
   mapStats,
   opponents,
@@ -344,10 +337,15 @@ export function MapsAndRivals({
                   )}
                   <div>
                     <b>{info?.name ?? m.map}</b>
-                    <Segs wins={m.wins} losses={m.losses} />
+                    <small>
+                      {m.heats} {heatsWord(m.heats)} · {m.knocks} {pluralKnocks(m.knocks)}
+                      {m.placed ? ` · место ${fmtAverage(m.avgPlace * m.placed, m.placed)}` : ""}
+                      {m.chickens ? ` · чикенов ${m.chickens}` : ""}
+                    </small>
                   </div>
                   <span className="sc">
-                    {m.wins}–{m.losses}
+                    {fmtAverage(m.knocks, m.heats)}
+                    <small>за заход</small>
                   </span>
                 </li>
               );
@@ -356,7 +354,7 @@ export function MapsAndRivals({
         ) : (
           <p className="sf-note">Нет данных по картам.</p>
         )}
-        <p className="pf-hint">Матч на нескольких картах засчитан на каждую.</p>
+        <p className="pf-hint">У каждого захода своя карта. Справа - киллов за заход, место - среднее по экрану итогов.</p>
       </div>
       <div>
         <h3 className="sf-h-mid">соперники</h3>

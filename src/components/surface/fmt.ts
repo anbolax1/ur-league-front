@@ -55,6 +55,15 @@ export function matchesWord(n: number): string {
   return "матчей";
 }
 
+/** «1 заход», «3 захода», «5 заходов». */
+export function heatsWord(n: number): string {
+  const a = Math.abs(n) % 100, b = a % 10;
+  if (a > 10 && a < 20) return "заходов";
+  if (b === 1) return "заход";
+  if (b >= 2 && b <= 4) return "захода";
+  return "заходов";
+}
+
 /** Винрейт в процентах; без матчей - 0. */
 export function winrate(wins: number, losses: number): number {
   return wins + losses > 0 ? Math.round((wins * 100) / (wins + losses)) : 0;

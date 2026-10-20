@@ -205,12 +205,16 @@ export interface MmrStats {
   place: number; // место в таблице (0 — вне рейтинга)
 }
 
-/** Разбивка матчей по карте. */
+/** Заходы стороны на одной карте: сколько их, киллы и места по экрану итогов. */
 export interface MapStat {
   map: string;
-  games: number;
-  wins: number;
-  losses: number;
+  heats: number;
+  knocks: number;
+  /** Заходов с записанным местом. */
+  placed: number;
+  /** Среднее место; 0 - мест не записано. */
+  avgPlace: number;
+  chickens: number;
 }
 
 /** Head-to-head против соперника (игрока или команды). */
@@ -230,13 +234,14 @@ export interface SeasonAnalytics {
   knocks: KnockStats;
 }
 
-/** Киллы игрока за сезон - только по матчам, где киллы записаны хотя бы одной стороне. */
+/** Киллы игрока за сезон по сыгранным заходам. */
 export interface KnockStats {
-  matches: number;
+  heats: number;
   knocks: number;
-  best: number; // больше всего киллов за один матч
+  best: number; // больше всего киллов за один заход
   bestMatch?: string;
   bestOpponent?: string;
+  bestMap?: string;
 }
 
 /* ---------- нашивки: выдаются сами по матчам 1×1 ---------- */
@@ -607,6 +612,12 @@ export interface PlayerStats {
   bestPlace: number;
   avgPlace: number;
   chickens: number;
+  top5: number;
+  /** Задания стороны игрока: выданные, выполненные свои и чужие; легендарки. */
+  tasksOffered: number;
+  tasksDone: number;
+  tasksCross: number;
+  legendaries: number;
 }
 
 /** Публичный профиль игрока: GET /api/players/{login} (B6). */
