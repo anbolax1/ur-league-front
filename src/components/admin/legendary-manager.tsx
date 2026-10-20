@@ -351,7 +351,7 @@ export function LegendaryManager({
             </div>
             <div className="space-y-1.5">
               <label className="field-label" htmlFor="lc-map">Карта</label>
-              <input id="lc-map" className="input" value={cMap} onChange={(e) => setCMap(e.target.value)} placeholder="напр. Космопорт" />
+              <input id="lc-map" className="input" value={cMap} onChange={(e) => setCMap(e.target.value)} placeholder="напр. Эрангель" />
             </div>
           </div>
           <div className="space-y-1.5">

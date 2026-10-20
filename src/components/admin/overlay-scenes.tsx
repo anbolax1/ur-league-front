@@ -33,7 +33,7 @@ const SAMPLE_STATE: LiveState = {
   currentParticipantId: "sample-a",
   currentName: "Игрок A",
   currentPoints: 5,
-  currentMap: "Поле битвы у Дамбы",
+  currentMap: "Эрангель",
   tasks: [],
   standings: [
     { participantId: "sample-a", name: "Игрок A", points: 5, roundPoints: 2, mmr: 1047, place: 2 },

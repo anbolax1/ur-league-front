@@ -35,7 +35,7 @@ export function Odds({ a, b, nameA, nameB, label }: { a: number; b: number; name
 export function Hero({ season, show, showMatchup }: { season?: Season; show?: Tournament; showMatchup: Matchup | null }) {
   return (
     <Parallax className="sf-hero sf-night">
-      <div className="sf-hero-bg" style={{ backgroundImage: `url(${mapImage("dam")})` }} aria-hidden />
+      <div className="sf-hero-bg" style={{ backgroundImage: `url(${mapImage("erangel")})` }} aria-hidden />
       <Stripes shape="hero" draw />
       <div className="sf-wrap sf-hero-grid">
         <div>

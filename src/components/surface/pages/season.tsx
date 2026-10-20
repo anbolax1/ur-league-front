@@ -82,7 +82,7 @@ function Hero({ recap, no, nav }: { recap: SeasonRecap; no: string; nav: Array<[
   const titles = champ ? champ.tags.filter((t) => /чемпион/i.test(t)) : [];
   return (
     <section className="sf-hero sf-night sn-hero" id="top">
-      <div className="sf-hero-bg" style={{ backgroundImage: `url(${mapImage("dam")})` }} aria-hidden />
+      <div className="sf-hero-bg" style={{ backgroundImage: `url(${mapImage("erangel")})` }} aria-hidden />
       <Stripes shape="hero" draw />
       <div className="sf-wrap sf-hero-grid">
         <div>

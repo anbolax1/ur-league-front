@@ -96,7 +96,7 @@ export default function Kitchen() {
               <div className="font-display text-lg uppercase">
                 RaZor_Vortex vs Nyx_Striker
               </div>
-              <div className="text-sm text-muted">Космопорт · 1×1 · 3 раунда</div>
+              <div className="text-sm text-muted">Эрангель · 1×1 · 3 раунда</div>
             </div>
             <StatusPill status="live">В эфире</StatusPill>
           </div>
