@@ -16,14 +16,6 @@ const LINKS = [
   { href: "/admin/highlights", label: "Хайлайты" },
 ];
 
-/* Разделы старого пульта (один раунд, протоколы-штрафы) - для правок прошлых матчей. */
-const LEGACY = [
-  { href: "/admin/schedule", label: "Расписание" },
-  { href: "/admin/live", label: "Эфир" },
-  { href: "/admin/starter-tasks", label: "Основные задания" },
-  { href: "/admin/complications", label: "Протоколы 2 сезона" },
-];
-
 const SOON: string[] = [];
 
 export function AdminSidebar() {
@@ -38,17 +30,6 @@ export function AdminSidebar() {
             key={l.href}
             href={l.href}
             className="side-link"
-            aria-current={isActive(l.href) ? "page" : undefined}
-          >
-            {l.label}
-          </Link>
-        ))}
-        <div className="hidden px-3 pt-4 text-[0.62rem] uppercase tracking-wide text-muted lg:block">Старый пульт</div>
-        {LEGACY.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            className="side-link opacity-70"
             aria-current={isActive(l.href) ? "page" : undefined}
           >
             {l.label}

@@ -23,7 +23,6 @@ import type {
   RulesResponse,
   Season,
   SeasonRecap,
-  StarterTask,
   Tournament,
   TournamentMode,
   TournamentStatus,
@@ -90,11 +89,10 @@ export function getSeasons(): Promise<Season[]> {
   return safe("seasons", serverFetch<Season[]>(`/seasons`), []);
 }
 
-/** Каталог правил: контракты + протоколы + легендарные (ответ обёрнут в {tasks,complications,legendary}). */
+/** Каталог правил: задания с протоколами и легендарки (ответ обёрнут в {tasks,legendary}). */
 export function getRules(): Promise<RulesResponse> {
   return safe("rules", serverFetch<RulesResponse>("/rules"), {
     tasks: [],
-    complications: [],
     legendary: [],
   });
 }
@@ -160,11 +158,6 @@ export function getMe(): Promise<User | null> {
   return safe("auth/me", serverGetOptional<User>("/auth/me", { auth: true }), null);
 }
 
-/** Список пользователей для кабинета (выбор участников). Organizer-only. */
-export function getUsers(): Promise<User[]> {
-  return safe("users", serverFetch<User[]>("/users", { auth: true }), []);
-}
-
 /** Публичные (одобренные) хайлайты с пагинацией и фильтрами по турниру/игроку. */
 export function getHighlights(
   params: { tournamentId?: string; userId?: string; limit?: number; offset?: number; random?: boolean } = {},
@@ -201,11 +194,6 @@ export function getUsersOverview(params: {
     serverFetch<{ items: UserOverview[]; total: number }>(`/users/overview${suffix}`, { auth: true }),
     { items: [], total: 0 },
   );
-}
-
-/** Пул стартовых заданий (скрыт от публики). Organizer-only. */
-export function getStarterTasks(): Promise<StarterTask[]> {
-  return safe("starter-tasks", serverFetch<StarterTask[]>("/starter-tasks", { auth: true }), []);
 }
 
 /** Мои заявки (требует входа). [] — аноним/ошибка. */

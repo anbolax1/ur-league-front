@@ -368,40 +368,6 @@ export interface CatalogTask {
   active: boolean;
 }
 
-export interface CatalogComplication {
-  id: string;
-  text: string;
-  penalty: number;
-  valueType: ValueType;
-  source: CatalogSource;
-  author?: string;
-  title?: string;
-}
-
-/** Основное задание из пула (скрыто от публики/правил; видит организатор). */
-export interface StarterTask {
-  id: string;
-  text: string;
-  points: number;
-  kind: TaskKind;
-}
-
-/** Зачёт основного задания конкретной стороной. */
-export interface RoundTaskDone {
-  participantId: string;
-  times: number;
-}
-
-/** Основное задание раунда (одинаково у обеих сторон). Зачёт раздельный по сторонам (done). */
-export interface RoundStarterTask {
-  id: string;
-  roundId: string;
-  starterTaskId: string;
-  text: string;
-  points: number;
-  done: RoundTaskDone[];
-}
-
 /** Контракт участника в раунде. participantId — владелец; completedBy — кто выполнил
     (владелец → +2, противник → +1, пусто → не выполнен). */
 export interface RoundBonusTask {
@@ -419,18 +385,6 @@ export interface RoundBonusTask {
   name?: string;
   category: TaskCategory;
   mapCode?: string;
-}
-
-/** Протокол стороны в раунде. times — число нарушений (= минут штрафа в рейде; на очки НЕ влияет). */
-export interface RoundPenalty {
-  id: string;
-  roundId: string;
-  participantId: string;
-  complicationId: string;
-  text: string;
-  penalty: number;
-  valueType: ValueType;
-  times: number;
 }
 
 /** Легендарный контракт (глобальный пул, 10 баллов, выполним один раз навсегда). */
@@ -666,10 +620,9 @@ export interface PlayerStats {
   duoPlayed: number;
   streakKind: "win" | "loss" | "";
   streakLen: number;
-  basePoints: number; // ручная корректировка раунда
-  mainPoints: number; // основные задания раунда
-  contractPoints: number; // контракты (свои 2 + чужие 1)
-  legendaryPoints: number; // легендарные контракты (10 каждый)
+  basePoints: number; // ручные очки раунда вместе с ноками
+  contractPoints: number; // задания и протоколы: свои по очкам каталога, чужие по 1
+  legendaryPoints: number; // легендарки (10 каждая)
   favoriteMap: string;
   favoriteMapRounds: number;
 }
@@ -1055,10 +1008,9 @@ export interface MatchPlayer {
   prevGames: number;
 }
 
-/** Ответ GET /api/rules — ОБЁРНУТ в { tasks (контракты), complications (протоколы), legendary }. */
+/** Ответ GET /api/rules — ОБЁРНУТ в { tasks (задания и протоколы), legendary }. */
 export interface RulesResponse {
   tasks: CatalogTask[];
-  complications: CatalogComplication[];
   legendary?: CatalogLegendary[];
 }
 
