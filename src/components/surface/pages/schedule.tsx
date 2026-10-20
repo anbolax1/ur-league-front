@@ -2,9 +2,7 @@ import Link from "next/link";
 import "./schedule.css";
 import { getCurrentMatch, getTournaments } from "@/lib/queries";
 import { isShowMatch, roundsLabel } from "@/lib/match";
-import { TELEGRAM_URL } from "@/lib/links";
 import type { Tournament } from "@/lib/types";
-import { TelegramIcon } from "@/components/icons";
 import { Arrow, SecHead } from "@/components/surface/ui";
 import { ScheduleRows } from "@/components/surface/home-parts";
 import { byStartAsc } from "@/components/surface/shell";
@@ -67,14 +65,10 @@ export async function SurfaceSchedule() {
             <Link className="sf-btn sf-btn-amber" href="/join">
               Участвовать в лиге
             </Link>
-            <a className="sf-btn sf-btn-line" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
-              <TelegramIcon />
-              Анонсы в Telegram
-            </a>
           </div>
           <div className="sch-list">
             <ScheduleRows live={match.current} upcoming={upcoming} />
-            {!upcoming.some(isShowMatch) && <p className="sch-none">Шоу-матч пока не назначен — анонс появится здесь и в Telegram.</p>}
+            {!upcoming.some(isShowMatch) && <p className="sch-none">Шоу-матч пока не назначен — анонс появится здесь.</p>}
           </div>
         </div>
       </section>

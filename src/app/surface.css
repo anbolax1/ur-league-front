@@ -2800,7 +2800,7 @@ a.sf-side-name:hover {
 }
 .sf-foot-in {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
   gap: 40px;
 }
 .sf-foot-in p {
@@ -2824,7 +2824,6 @@ a.sf-side-name:hover {
 .sf-foot nav a {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
   min-height: 36px;
   font: 500 15px/1 var(--sf-ff-c);
   letter-spacing: 0.08em;
@@ -2835,11 +2834,6 @@ a.sf-side-name:hover {
 }
 .sf-foot nav a:hover {
   color: var(--sf-amber);
-}
-.sf-foot nav svg {
-  width: 16px;
-  height: 16px;
-  flex: none;
 }
 .sf-legal {
   display: flex;

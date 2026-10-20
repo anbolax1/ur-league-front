@@ -1,8 +1,6 @@
 import "./match.css";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TwitchIcon, YouTubeIcon } from "@/components/icons";
-import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
 import { getBelt, getHighlights, getMatch, getMatchup } from "@/lib/queries";
 import {
   breakdownParts,
@@ -379,19 +377,6 @@ export async function SurfaceMatch({ id }: { id: string }) {
   const beltBlock = belt && beltData ? <BeltMatch mark={belt} belt={beltData} id={id} other={beltOther} /> : null;
   const paper = showRounds || showElo || hasH2h || patches.length > 0 || !!beltBlock;
 
-  const streams = (
-    <>
-      <a className="sf-btn sf-btn-amber" href={STREAM_URL} target="_blank" rel="noopener noreferrer">
-        <TwitchIcon />
-        Twitch
-      </a>
-      <a className="sf-btn sf-btn-line" href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-        <YouTubeIcon />
-        YouTube
-      </a>
-    </>
-  );
-
   return (
     <>
       <section className="sf-page-head sf-night">
@@ -428,7 +413,6 @@ export async function SurfaceMatch({ id }: { id: string }) {
                   </span>
                 )}
               </div>
-              {(live || (upcoming && show)) && <div className="sf-mh-actions">{streams}</div>}
               {upcoming && !show && (
                 <div className="sf-mh-actions">
                   <Link className="sf-btn sf-btn-amber" href="/join">

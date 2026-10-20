@@ -1,7 +1,5 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
-import { TwitchIcon, YouTubeIcon } from "@/components/icons";
-import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
 import { isShowMatch, matchSides, roundsLabel, stageLabel } from "@/lib/match";
 import type { LeaderboardRow, MatchState, Matchup, MatchupSide, Season, Tournament } from "@/lib/types";
 import { Arrow, ScheduleIcon, SecHead, TagStamps, signed } from "@/components/surface/ui";
@@ -248,15 +246,7 @@ export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | 
             </div>
             {chance && <Odds a={chance[0]} b={chance[1]} nameA={a} nameB={b} label="шансы по MMR" />}
             <div className="sf-btn-row">
-              <a className="sf-btn sf-btn-amber" href={STREAM_URL} target="_blank" rel="noopener noreferrer">
-                <TwitchIcon />
-                Twitch
-              </a>
-              <a className="sf-btn sf-btn-line" href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-                <YouTubeIcon />
-                YouTube
-              </a>
-              <Link className="sf-btn sf-btn-line" href={`/tournament/${t.id}`}>
+              <Link className="sf-btn sf-btn-amber" href={`/tournament/${t.id}`}>
                 Страница матча
               </Link>
             </div>

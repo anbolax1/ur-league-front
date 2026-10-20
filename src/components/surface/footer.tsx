@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { BoostyIcon, DiscordIcon, TelegramIcon, TwitchIcon, YouTubeIcon } from "@/components/icons";
-import { BOOSTY_URL, STREAM_URL, TELEGRAM_URL, YOUTUBE_URL } from "@/lib/links";
 import { Mark, Wordmark } from "@/components/surface/brand";
 
 /** Сезон для ссылки на его итоги: идущий, а между сезонами - последний. */
@@ -25,14 +23,6 @@ function more(season?: FooterSeason | null) {
     ...(season ? [{ href: `/season/${season.number}`, label: season.active ? "Сезон в цифрах" : "Итоги сезона" }] : []),
   ];
 }
-
-const SOCIALS = [
-  { label: "Twitch", href: STREAM_URL, Icon: TwitchIcon },
-  { label: "YouTube", href: YOUTUBE_URL, Icon: YouTubeIcon },
-  { label: "Telegram", href: TELEGRAM_URL, Icon: TelegramIcon },
-  { label: "Discord", href: "https://discord.gg/p5NsqPQMJr", Icon: DiscordIcon },
-  { label: "Boosty", href: BOOSTY_URL, Icon: BoostyIcon },
-];
 
 export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {
   return (
@@ -63,17 +53,6 @@ export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {
                 <Link key={l.href} href={l.href}>
                   {l.label}
                 </Link>
-              ))}
-            </nav>
-          </div>
-          <div>
-            <h3>Соцсети</h3>
-            <nav aria-label="Соцсети">
-              {SOCIALS.map(({ label, href, Icon }) => (
-                <a key={label} href={href} target="_blank" rel="noopener noreferrer">
-                  <Icon />
-                  {label}
-                </a>
               ))}
             </nav>
           </div>

@@ -1,7 +1,5 @@
 import "./news.css";
 import Link from "next/link";
-import { TelegramIcon } from "@/components/icons";
-import { TELEGRAM_URL } from "@/lib/links";
 import { getNews } from "@/lib/queries";
 import type { News } from "@/lib/types";
 import { Arrow, ArrowBack } from "@/components/surface/ui";
@@ -61,13 +59,7 @@ export async function SurfaceNews({ page }: { page: number }) {
           <h1 className="sf-h-big">
             новости
           </h1>
-          <p className="sf-lead nw-lead">Сезоны, шоу-матчи и всё, что происходит в лиге. Анонсы эфиров — ещё и в Telegram.</p>
-          <div className="sf-controls">
-            <a className="sf-btn sf-btn-line" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
-              <TelegramIcon />
-              Анонсы в Telegram
-            </a>
-          </div>
+          <p className="sf-lead nw-lead">Сезоны, шоу-матчи и всё, что происходит в лиге.</p>
         </div>
       </section>
 

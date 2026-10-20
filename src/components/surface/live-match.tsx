@@ -1,7 +1,5 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { TwitchIcon, YouTubeIcon } from "@/components/icons";
-import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
 import { hasScore, isShowMatch, mapImage, matchSides, roundMapCode, roundMapsLabel, roundScore, roundsLabel, stageLabel, totalScore } from "@/lib/match";
 import type { Belt, MatchState, Matchup, MatchupSide } from "@/lib/types";
 import { CountUp, FitBoard } from "@/components/surface/motion";
@@ -124,15 +122,7 @@ export function LiveMatch({ st, matchup, organizer, belt = null }: { st: MatchSt
                   Открыть пульт
                 </Link>
               )}
-              <a className={`sf-btn ${organizer ? "sf-btn-line" : "sf-btn-amber"}`} href={STREAM_URL} target="_blank" rel="noopener noreferrer">
-                <TwitchIcon />
-                Twitch
-              </a>
-              <a className="sf-btn sf-btn-line" href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-                <YouTubeIcon />
-                YouTube
-              </a>
-              <Link className="sf-btn sf-btn-line" href={`/tournament/${t.id}`}>
+              <Link className={`sf-btn ${organizer ? "sf-btn-line" : "sf-btn-amber"}`} href={`/tournament/${t.id}`}>
                 Страница матча
               </Link>
             </div>
