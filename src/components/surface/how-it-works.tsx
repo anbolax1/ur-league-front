@@ -74,24 +74,26 @@ function Tween({ value, format = String, ms = 380, replay = 0 }: { value: number
   return <>{format(shown)}</>;
 }
 
-interface HeatStep {
-  round: number;
-  side: "A" | "B";
-  code: string;
+/* Сцена «Карта захода» по долям: до ROLL_END карты мелькают всё реже, потом выпавшую отмечают и выдают задание. */
+const ROLL_FLIPS = 11;
+const ROLL_END = 0.5;
+const MARK_AT = 0.66;
+const TASK_AT = 0.82;
+const MAP_DONE = ROLL_FLIPS + 2;
+
+/** Задания на карту для примера: настоящие организатор пишет в кабинете. */
+const MAP_TASK: Record<string, string> = {
+  erangel: "Высадиться у школы и сделать килл в здании",
+  miramar: "Высадиться в Пекадо и выжить 5 минут",
+};
+
+/** Шаг сцены карты в положении p: смены карты, затем «выпала», «отмечена», «задание выдано». */
+function mapStep(p: number): number {
+  if (p >= TASK_AT) return ROLL_FLIPS + 2;
+  if (p >= MARK_AT) return ROLL_FLIPS + 1;
+  if (p >= ROLL_END) return ROLL_FLIPS;
+  return Math.floor(ROLL_FLIPS * Math.sqrt(p / ROLL_END));
 }
-
-/** Пример - обычный матч на два раунда: четыре захода, в каждом раунде сначала A, потом B. */
-const HEATS: Array<Omit<HeatStep, "code">> = [
-  { round: 1, side: "A" },
-  { round: 1, side: "B" },
-  { round: 2, side: "A" },
-  { round: 2, side: "B" },
-];
-
-/** Какие карты пула выпадают в примере по заходам: вразнобой, как в игре. */
-const HEAT_PICK = [0, 1, 1, 0];
-
-const heatLabel = (s: HeatStep) => `Р${s.round} · ${s.side}`;
 
 const ICON_REPLAY = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden>
@@ -122,8 +124,9 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
   const [cycle, setCycle] = React.useState(0);
   const stepRef = React.useRef(0);
 
-  // состояние сцен: сколько заходов показано, какой раунд идёт, видно ли счёт, сколько карточек
-  const [hN, setHN] = React.useState(HEATS.length);
+  // состояние сцен: шаг выпадения карты, какой раунд идёт, видно ли счёт, сколько карточек
+  const [mapT, setMapT] = React.useState(MAP_DONE);
+  const [rollTo, setRollTo] = React.useState(1);
   const [rdAct, setRdAct] = React.useState(-1);
   const [rdScore, setRdScore] = React.useState(true);
   const [rdReplay, setRdReplay] = React.useState(0);
@@ -131,17 +134,15 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
   const [t3N, setT3N] = React.useState(TASKS.length);
   const [calcReplay, setCalcReplay] = React.useState(0);
 
-  const heats = React.useMemo<HeatStep[]>(
-    () => (maps.length ? HEATS.map((h, k) => ({ ...h, code: maps[HEAT_PICK[k] % maps.length].code })) : []),
-    [maps],
-  );
-  const mapName = (code: string) => maps.find((x) => x.code === code)?.name ?? code;
   const mapsList = maps.map((m) => m.name).join(" или ");
+  const landed = maps.length ? rollTo % maps.length : -1;
+  // пока игра крутит, карты пула сменяют друг друга, и последняя смена встаёт на выпавшую
+  const shownMap = landed < 0 ? -1 : mapT >= ROLL_FLIPS ? landed : (((landed + mapT - ROLL_FLIPS) % maps.length) + maps.length) % maps.length;
 
   /** Сцена этапа i в положении p (0..1): дискретное - через состояние, плавное - прямо в стили. */
   const render = React.useCallback(
     (i: number, p: number) => {
-      if (i === 0) setHN(Math.min(heats.length, Math.floor(p * (heats.length + 1))));
+      if (i === 0) setMapT(mapStep(p));
       if (i === 1) {
         const w = [clamp01(p / 0.4), clamp01((p - 0.42) / 0.4)];
         lineRefs.current.forEach((el, j) => el && (el.style.width = `${(w[j] * 100).toFixed(1)}%`));
@@ -155,7 +156,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
       }
       if (i === 2) setT3N(Math.min(TASKS.length, Math.floor(p * (TASKS.length + 1))));
     },
-    [heats.length],
+    [],
   );
 
   const activate = React.useCallback(
@@ -187,7 +188,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
       track.style.height = "";
       if (scrollyRef.current) {
         // вне режима прокрутки сцены видны целиком
-        setHN(heats.length);
+        setMapT(MAP_DONE);
         setT3N(TASKS.length);
         lineRefs.current.forEach((el) => el && (el.style.width = "100%"));
         setRdAct(-1);
@@ -197,7 +198,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
     }
     scrollyRef.current = want;
     setScrolly(want);
-  }, [reduce, heats.length]);
+  }, [reduce]);
 
   React.useEffect(() => {
     layout();
@@ -239,7 +240,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
     onScroll();
     addEventListener("scroll", onScroll, { passive: true });
     return () => removeEventListener("scroll", onScroll);
-  }, [scrolly, render, activate, heats.length]);
+  }, [scrolly, render, activate]);
 
   const scrollToStep = (i: number) => {
     const track = trackRef.current, sticky = stickyRef.current;
@@ -255,6 +256,8 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
   const play = React.useCallback(
     (i: number) => {
       cancelAnimationFrame(playRaf.current);
+      // при каждом показе карта выпадает заново, как в игре
+      if (i === 0 && maps.length) setRollTo(Math.floor(Math.random() * maps.length));
       const dur = SCENE_MS[i];
       if (!dur || reduce) {
         render(i, 1);
@@ -270,7 +273,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
       };
       playRaf.current = requestAnimationFrame(f);
     },
-    [reduce, render],
+    [reduce, render, maps.length],
   );
   React.useEffect(() => () => cancelAnimationFrame(playRaf.current), []);
 
@@ -384,9 +387,9 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
             <div className="sf-how-texts">
               <Panel i={0} step={step} title="карта захода">
                 <p>
-                  Ведущий собирает группу с игроком и запускает <b>Ultimate Royale</b>, карту выбирает игра{mapsList ? ` — ${mapsList}` : ""}. Ведущий
-                  выбывает в первые минуты и наблюдает, а игрок один бьётся против сквадов. Выпавшую карту ведущий отмечает в пульте, и игрок сразу
-                  получает задание на неё.
+                  Ведущий собирает группу с игроком и запускает <b>Ultimate Royale</b>. Карту выбрать нельзя: игра выбирает её сама, случайно
+                  {mapsList ? ` — ${mapsList}` : ""}, и в каждом заходе заново. Ведущий выбывает в первые минуты и наблюдает, а игрок один бьётся
+                  против сквадов. Выпавшую карту ведущий отмечает в пульте, и игрок сразу получает задание на неё.
                 </p>
                 <Link className="sf-more" href={example ? `/tournament/${example.id}` : "/archive"}>
                   Заходы сыгранного матча <Arr />
@@ -424,51 +427,28 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
           </div>
 
           <div className="sf-how-arts">
-            {/* 1. карта захода */}
-            <div className={`sf-how-art ${step === 0 ? "is-on" : ""} ${hN >= heats.length ? "is-done" : ""}`} inert={step !== 0} role="group" aria-label="Пример: карты заходов">
-              <div className="sf-pb-grid" style={{ "--cols": 2 } as React.CSSProperties}>
-                {heats.map((s, k) => {
-                  const shown = k < hN;
-                  const now = shown && k === hN - 1 && hN < heats.length;
-                  return (
-                    <div key={k} className={`sf-pb-t ${shown ? "pick" : "left"} ${now ? "now" : ""}`}>
-                      {/* eslint-disable-next-line @next/next/no-img-element -- превью карты */}
-                      {shown && <img src={mapImage(s.code)} alt="" loading="lazy" />}
-                      <span className="sf-pb-tag" style={{ "--sd": `var(--sf-${s.side.toLowerCase()})` } as React.CSSProperties}>
-                        {heatLabel(s)}
-                      </span>
-                      <span className="sf-pb-nm">{shown ? mapName(s.code) : "карту выберет игра"}</span>
-                    </div>
-                  );
-                })}
+            {/* 1. карта захода: выбрать её нельзя, игра выбирает сама */}
+            <div className={`sf-how-art ${step === 0 ? "is-on" : ""} ${mapT >= MAP_DONE ? "is-done" : ""}`} inert={step !== 0} role="group" aria-label="Пример: карта захода выпадает случайно">
+              <div className={`sf-roll ${mapT < ROLL_FLIPS ? "spin" : ""}`}>
+                <div className="sf-roll-card">
+                  {maps.map((m, j) => (
+                    // eslint-disable-next-line @next/next/no-img-element -- превью карты
+                    <img key={m.code} src={mapImage(m.code)} alt="" className={j === shownMap ? "on" : ""} />
+                  ))}
+                  <span className="sf-roll-q">{mapT < ROLL_FLIPS ? "Игра выбирает карту" : "Выпала карта"}</span>
+                  <b className="sf-roll-nm">{maps[shownMap]?.name ?? "—"}</b>
+                </div>
+                <ol className="sf-roll-steps">
+                  <li className={mapT >= ROLL_FLIPS ? "on" : ""}>Карту выбрала игра — случайно, выбрать её нельзя</li>
+                  <li className={mapT >= ROLL_FLIPS + 1 ? "on" : ""}>Ведущий отметил выпавшую карту в пульте</li>
+                  <li className={mapT >= ROLL_FLIPS + 2 ? "on" : ""}>
+                    Игрок получил задание на эту карту
+                    {mapT >= MAP_DONE && MAP_TASK[maps[landed]?.code ?? ""] && <b>«{MAP_TASK[maps[landed].code]}» · +2</b>}
+                  </li>
+                </ol>
               </div>
-              <div className="sf-pb-cap">
-                <span>
-                  {hN >= heats.length && heats.length ? (
-                    <>
-                      Итог:{" "}
-                      {[1, 2].map((r, j) => (
-                        <React.Fragment key={r}>
-                          {j ? ", " : ""}раунд {r} — <b>{heats.filter((s) => s.round === r).map((s) => mapName(s.code)).join(" и ")}</b>
-                        </React.Fragment>
-                      ))}
-                    </>
-                  ) : hN === 0 || !heats[hN - 1] ? (
-                    "Пример: обычный матч, два раунда — четыре захода"
-                  ) : (
-                    <>
-                      Заход {hN} из {heats.length}: <b>{heatLabel(heats[hN - 1])} — {mapName(heats[hN - 1].code)}</b>
-                    </>
-                  )}
-                </span>
-                <span className="sf-pb-sides">
-                  <span>
-                    <i style={{ background: "var(--sf-a)" }} />A
-                  </span>
-                  <span>
-                    <i style={{ background: "var(--sf-b)" }} />B
-                  </span>
-                </span>
+              <div className="sf-art-cap">
+                <span>В каждом заходе карта выпадает заново{mapsList ? `: ${mapsList}` : ""}</span>
                 <button type="button" className="sf-again in-cap" onClick={() => (setAuto(false), play(0))}>
                   {ICON_REPLAY}Ещё раз
                 </button>
