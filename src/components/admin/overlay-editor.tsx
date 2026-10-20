@@ -5,8 +5,8 @@ import type { CSSProperties, PointerEvent as RPointerEvent } from "react";
 import type { LiveState, OverlayBg, OverlayLayout, WidgetInstance, WidgetType } from "@/lib/types";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { STAGE_W, STAGE_H } from "@/components/overlay/overlay-stage";
-import { DEFAULT_LAYOUT, makeWidget } from "@/components/overlay/default-layout";
-import { PreviewBgLayer, PreviewBgSwitch, type PreviewBg } from "@/components/overlay/preview-bg";
+import { DEFAULT_LAYOUT, makeWidget, WIDGET_SPOTS } from "@/components/overlay/default-layout";
+import { GameZonesLayer, PreviewBgLayer, PreviewBgSwitch, type PreviewBg } from "@/components/overlay/preview-bg";
 import { accentVars } from "@/components/overlay/accent";
 import { WIDGET_LABELS, WIDGET_ORDER, WIDGET_REGISTRY } from "@/components/overlay/widgets/registry";
 
@@ -72,7 +72,7 @@ function ResizeHandles({ scaleFactor, onStart }: { scaleFactor: number; onStart:
 }
 
 /** Типы виджетов, у которых есть заголовок/подпись (для тумблера «Заголовок»). */
-const HAS_TITLE = new Set<string>(["roundTasks", "bonusTasks", "standings", "complications", "round"]);
+const HAS_TITLE = new Set<string>(["standings", "round", "kills", "inFrame"]);
 
 /** Слои снизу вверх, как их рисует сцена: по z, а при равном z выше тот, кто позже в раскладке. */
 function bottomUp(widgets: WidgetInstance[]): WidgetInstance[] {
@@ -138,14 +138,8 @@ function showOptions(w: WidgetInstance): ShowOption[] {
       { key: "belt", label: "Пояс", title: "значок пояса под ником носителя и «за пояс» по центру табло", on: !!w.showBelt, patch: (on) => ({ showBelt: on }) },
     );
   }
-  if (w.type === "bonusTasks") {
-    out.push(
-      { key: "opp", label: "Задания противника", title: "задания противника, которые сторона в рейде может украсть за +1", on: !!w.showOpponentContracts, patch: (on) => ({ showOpponentContracts: on }) },
-      { key: "tags", label: "Тег «карта»", title: "плашка «карта» у заданий на карту раунда", on: !!w.showTags, patch: (on) => ({ showTags: on }) },
-    );
-  }
   if (w.type === "tasksV2") {
-    out.push({ key: "opp", label: "Задания противника", title: "задания противника, которые сторона в рейде может украсть за +1", on: !!w.showOpponentContracts, patch: (on) => ({ showOpponentContracts: on }) });
+    out.push({ key: "opp", label: "Задания противника", title: "задания противника, которые сторона в кадре может украсть за +1", on: !!w.showOpponentContracts, patch: (on) => ({ showOpponentContracts: on }) });
   }
   return out;
 }
@@ -196,7 +190,8 @@ export function OverlayEditor({
   const [guides, setGuides] = React.useState<Guide[]>([]);
   const [addOpen, setAddOpen] = React.useState(false);
   const [fs, setFs] = React.useState(false); // полноэкранный режим редактора
-  const [bg, setBg] = React.useState<PreviewBg>("day");
+  const [bg, setBg] = React.useState<PreviewBg>("field");
+  const [zones, setZones] = React.useState(false); // рамки интерфейса игры поверх превью
   const [posOpen, setPosOpen] = React.useState(false); // раскрыта ли группа «Положение»
   const [confirm, setConfirm] = React.useState<{ kind: "widget"; id: string } | { kind: "reset" } | null>(null);
 
@@ -270,8 +265,8 @@ export function OverlayEditor({
   }
   function add(type: WidgetType) {
     const id = uid(type, layout.widgets);
-    const wide = type === "scoreboard" || type === "complications" || type === "standings";
-    const w = makeWidget(id, type, { x: 0.4, y: 0.4, z: maxZ + 1, ...(wide ? { w: 0.3 } : {}) });
+    const spot = WIDGET_SPOTS[type] ?? { x: 0.4, y: 0.4, ...(type === "standings" ? { w: 0.3 } : {}) };
+    const w = makeWidget(id, type, { ...spot, z: maxZ + 1 });
     onChange({ ...layout, widgets: [...layout.widgets, w] });
     setSelId(id);
     setAddOpen(false);
@@ -534,6 +529,7 @@ export function OverlayEditor({
           }}
         >
           <PreviewBgLayer bg={bg} />
+          {zones && <GameZonesLayer />}
           {layout.stageBg?.on && (
             <div className="absolute inset-0" style={{ background: `rgba(0,0,0,${layout.stageBg.opacity})` }} aria-hidden />
           )}
@@ -657,7 +653,13 @@ export function OverlayEditor({
           </>
         )}
       </div>
-      <PreviewBgSwitch value={bg} onChange={setBg} />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <PreviewBgSwitch value={bg} onChange={setBg} />
+        <label className="inline-flex items-center gap-2 text-xs text-muted">
+          <Switch on={zones} onChange={setZones} title="рамки, где на экране наблюдения стоит интерфейс игры" />
+          Зоны интерфейса игры
+        </label>
+      </div>
 
       {sel ? (
         <div className="space-y-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3">

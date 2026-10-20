@@ -39,25 +39,21 @@ const SAMPLE_STATE: LiveState = {
     { participantId: "sample-a", name: "Игрок A", points: 5, roundPoints: 2, mmr: 1047, place: 2 },
     { participantId: "sample-b", name: "Игрок B", points: 3, roundPoints: 1, mmr: 1012, place: 4 },
   ],
-  roundTasks: [
-    { id: "sample-r1", text: "Эвакуироваться с добычей", points: 3, completed: true },
-    { id: "sample-r2", text: "Уничтожить ARC-разведчика", points: 2, completed: false },
-  ],
   bonusTasks: [
-    { text: "Осиное Гнездо: Найдите и уничтожьте 5 Ос.", points: 2, valueType: "fixed", times: 1, category: "task" },
-    { text: "Комплекс Гидропонного Купола: Уничтожьте 4 роботов в здании.", points: 2, valueType: "fixed", times: 0, category: "map" },
-    { text: "Сапёр: Найдите и уничтожьте 5 Взрывоботов.", points: 1, valueType: "fixed", times: 0, category: "task", opponent: true },
+    { text: "Килл из дробовика", points: 2, valueType: "fixed", times: 1, category: "task" },
+    { text: "Высадиться в Пекадо и продержаться 5 минут", points: 2, valueType: "fixed", times: 0, category: "map" },
+    { text: "Забрать аирдроп", points: 1, valueType: "fixed", times: 0, category: "task", opponent: true },
   ],
-  complications: [{ text: "S.O.S: Первые 3 минуты рейда: Вызовите Эвакуацию.", penalty: 0, valueType: "fixed", reward: 1, tag: "timed" }],
+  complications: [{ text: "Килл до первого сужения зоны", reward: 1, tag: "timed" }],
+  heatKills: 3,
+  inFrame: [{ name: "Игрок A", gameNick: "PlayerA_UR" }],
 };
 
-/** Данные, которых в идущем матче может не быть: задания и протоколы сервер выдаёт с началом раунда,
-    основные задания есть только в старом пульте, поэтому «Заданиям V2» их из примера не подставляем. */
+/** Данные, которых в идущем матче может не быть: задания и протоколы сервер выдаёт с началом раунда. */
 const SAMPLE_PARTS: { types: WidgetType[]; missing: string; has: (s: LiveState) => boolean; part: Partial<LiveState> }[] = [
-  { types: ["bonusTasks", "tasksV2"], missing: "заданий", has: (s) => !!s.bonusTasks?.length, part: { bonusTasks: SAMPLE_STATE.bonusTasks } },
-  { types: ["roundTasks"], missing: "основных заданий", has: (s) => !!s.roundTasks?.length, part: { roundTasks: SAMPLE_STATE.roundTasks } },
+  { types: ["tasksV2"], missing: "заданий", has: (s) => !!s.bonusTasks?.length, part: { bonusTasks: SAMPLE_STATE.bonusTasks } },
   {
-    types: ["complications", "tasksV2"],
+    types: ["tasksV2"],
     missing: "протоколов",
     has: (s) => !!s.complications?.length || !!s.complication,
     part: { complications: SAMPLE_STATE.complications },

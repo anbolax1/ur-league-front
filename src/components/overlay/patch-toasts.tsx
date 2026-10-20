@@ -14,7 +14,7 @@ const GAP_MS = 400;
 
 function line(f: PatchFlash): string {
   const k = f.detail?.knocks ?? 0;
-  if (f.code === "clear") return `${f.name} · ${knocksLabel(k)} за рейд`;
+  if (f.code === "clear") return `${f.name} · ${knocksLabel(k)} за заход`;
   if (f.code === "hunter") return `${f.name} · ${knocksLabel(k)} за сезон`;
   return `${f.name} · ${PATCH_INFO[f.code].rule}`;
 }

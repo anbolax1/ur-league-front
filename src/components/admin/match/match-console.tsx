@@ -31,7 +31,7 @@ function stepIndex(stage: MatchState["stage"], show: boolean): number {
 
 /** Что сейчас видят зрители; во время раунда связь с оверлеем показана на табло, здесь не повторяем. */
 function OverlayPeek({ state, matchId, status, pageLink }: { state: LiveState | null; matchId: string; status: boolean; pageLink: boolean }) {
-  const [bg, setBg] = React.useState<PreviewBg>("day");
+  const [bg, setBg] = React.useState<PreviewBg>("field");
   return (
     <Panel className="space-y-3 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">

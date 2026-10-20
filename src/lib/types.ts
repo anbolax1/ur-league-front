@@ -422,19 +422,11 @@ export interface LiveTask {
   completed: boolean;
 }
 
-/** Протокол стороны в оверлее. Штраф — минуты в рейде (на очки не влияет). */
+/** Протокол стороны в кадре для оверлея: задание на время за +1. */
 export interface LiveComplication {
   who?: string;
   text: string;
-  penalty: number;
-  valueType: ValueType;
-  /** Сколько раз нарушено (= минут штрафа; 0 — не нарушено). */
-  times?: number;
-  /** Минуты штрафа (= times). Дублируется для явности в оверлее. */
-  minutes?: number;
-  /** Протокол 3 сезона: награда за выполнение (+1); у старого протокола-штрафа нет. */
   reward?: number;
-  /** Протокол 3 сезона выполнен. */
   done?: boolean;
   tag?: TaskTag;
 }
@@ -473,10 +465,13 @@ export interface LiveState {
   /** Все стороны матча с суммарными очками (для VS-табло в оверлее). */
   standings?: LiveStanding[];
   showStandings?: boolean;
-  /** Богатые данные для модульных виджетов (Фаза 3). */
-  roundTasks?: LiveTask[]; // стартовые задания текущего раунда
-  bonusTasks?: LiveBonus[]; // бонусные фокусной стороны
-  complications?: LiveComplication[]; // протоколы: в матче - стороны в рейде, в старом пульте - обеих сторон
+  /** Задания и протокол стороны в кадре для виджета «Задания V2». */
+  bonusTasks?: LiveBonus[];
+  complications?: LiveComplication[];
+  /** Киллы стороны в кадре за этот заход - виджет «Киллы захода». */
+  heatKills?: number;
+  /** Игроки стороны в кадре: ник на сайте и в игре - виджет «В кадре». */
+  inFrame?: Array<{ name: string; gameNick?: string }>;
   /** Кастомизируемая раскладка модульного оверлея. Если нет — рендерится DEFAULT_LAYOUT. */
   layout?: OverlayLayout | null;
   /** Карта захода стороны в кадре. */
@@ -497,7 +492,7 @@ export interface LiveBelt {
   result?: "defense" | "take" | "pick";
 }
 
-/** Контракт стороны в оверлее (виджет «Контракты»). */
+/** Задание стороны в оверлее (виджет «Задания V2»). */
 export interface LiveBonus {
   text: string;
   points: number;
@@ -510,16 +505,7 @@ export interface LiveBonus {
 }
 
 /** Типы виджетов модульного оверлея. */
-export type WidgetType =
-  | "scoreboard"
-  | "round"
-  | "complications"
-  | "standings"
-  | "roundTasks"
-  | "bonusTasks"
-  | "tasksV2"
-  | "text"
-  | "logo";
+export type WidgetType = "scoreboard" | "round" | "standings" | "tasksV2" | "kills" | "inFrame" | "text" | "logo";
 
 /** Фон (вкл/выкл + прозрачность 0..1) — для виджета и для сцены целиком. */
 export interface OverlayBg {

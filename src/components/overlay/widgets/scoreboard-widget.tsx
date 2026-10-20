@@ -107,7 +107,7 @@ function Side({
               </span>
             )}
             {fresh && <span className="whitespace-nowrap text-[0.7rem]">новичок сезона</span>}
-            {focused && <span className={`whitespace-nowrap text-[0.7rem] ${t.text}`}>● в рейде</span>}
+            {focused && <span className={`whitespace-nowrap text-[0.7rem] ${t.text}`}>● в кадре</span>}
           </div>
         )}
       </div>

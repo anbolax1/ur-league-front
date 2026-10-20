@@ -28,17 +28,14 @@ function Mark({ done }: { done: boolean }) {
   );
 }
 
-/** Виджет «Задания V2»: протоколы, задания и основные задания стороны в рейде одним блоком, у каждого свой тег.
+/** Виджет «Задания V2»: протокол и задания стороны в кадре одним блоком, у каждого свой тег.
     По опции показываются и задания соперника за +1. */
 export function TasksV2Widget({ state, instance }: WidgetProps) {
   const bonus = (b: LiveBonus) => toRow({ tag: b.tag, label: b.opponent ? "Чужое" : undefined, points: b.points, done: b.times > 0, text: b.text });
   const all: Row[] = [
-    ...(state.complications ?? [])
-      .filter((c) => c.reward) // протокол-штраф старого пульта остаётся в виджете «Протоколы»
-      .map((c) => toRow({ tag: c.tag, points: c.reward ?? 0, done: !!c.done, text: c.text })),
+    ...(state.complications ?? []).map((c) => toRow({ tag: c.tag, points: c.reward ?? 0, done: !!c.done, text: c.text })),
     ...(state.bonusTasks ?? []).filter((b) => !b.opponent).map(bonus),
-    ...(state.roundTasks ?? []).map((t) => toRow({ points: t.points, done: t.completed, text: t.text })),
-    // задания соперника - после всего, что выполняет сторона в рейде
+    // задания соперника - после всего, что выполняет сторона в кадре
     ...(instance.showOpponentContracts ? (state.bonusTasks ?? []).filter((b) => b.opponent).map(bonus) : []),
   ];
   if (!all.length) return null;

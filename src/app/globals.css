@@ -485,6 +485,25 @@
       filter: drop-shadow(0 0 6px rgba(241, 170, 28, 0.95));
     }
   }
+  /* Число киллов вспыхивает на каждый новый килл: виджет пересоздаёт его с новым ключом. */
+  .ov-kill-n {
+    animation: ov-kill 1.4s ease-out;
+  }
+  @keyframes ov-kill {
+    0% {
+      text-shadow: 0 0 36px var(--primary-glow);
+      transform: scale(1.12);
+    }
+    100% {
+      text-shadow: none;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ov-kill-n {
+      animation: none;
+    }
+  }
   /* Когда фон выключен — текст читается поверх захвата игры. */
   .ov-legible,
   .ov-legible * {
