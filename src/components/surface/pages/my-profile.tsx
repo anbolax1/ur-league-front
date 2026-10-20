@@ -2,7 +2,6 @@ import Link from "next/link";
 import "./profile.css";
 import { getMe, getMyRegistrations, getMyTags, getPlayer } from "@/lib/queries";
 import type { Registration } from "@/lib/types";
-import { Stripes } from "@/components/surface/stripes";
 import { Arrow } from "@/components/surface/ui";
 import { ProfileSettings } from "@/components/surface/profile-settings";
 import { fullDate } from "@/components/surface/fmt";
@@ -10,12 +9,11 @@ import { ProfileView } from "@/components/surface/pages/profile";
 
 function SignIn() {
   return (
-    <section className="sf-page-head sf-night sf-grain">
-      <Stripes shape="corner" className="corner" draw />
+    <section className="sf-page-head sf-night">
       <div className="sf-wrap">
         <p className="sf-eyebrow">Личный кабинет</p>
         <h1 className="sf-h-big">
-          нужно войти<span className="sf-dot">.</span>
+          нужно войти
         </h1>
         <p className="sf-lead pf-lead">Профиль, заявки, игровой ID и ник доступны после входа по логину и паролю.</p>
         <div className="sf-controls">
@@ -38,7 +36,7 @@ function MyRegistrations({ items }: { items: Registration[] }) {
   return (
     <div className="sf-block">
       <h2 className="sf-h-mid">
-        мои заявки<span className="sf-dot">.</span>
+        мои заявки
       </h2>
       {items.length ? (
         <ul className="sf-hist pf-regs">
@@ -73,7 +71,7 @@ function MyRegistrations({ items }: { items: Registration[] }) {
   );
 }
 
-/** Свой профиль в новом дизайне: тот же пропуск и рейтинг, что видят другие, плюс игровой ID и ник, теги и заявки. */
+/** Свой профиль: та же карточка и рейтинг, что видят другие, плюс игровой ID и ник, теги и заявки. */
 export async function SurfaceMyProfile() {
   const user = await getMe();
   if (!user) return <SignIn />;
@@ -85,17 +83,16 @@ export async function SurfaceMyProfile() {
   if (!profile) {
     return (
       <>
-        <section className="sf-page-head sf-night sf-grain pf-top">
-          <Stripes shape="head" draw />
+        <section className="sf-page-head sf-night pf-top">
           <div className="sf-wrap">
             <p className="sf-eyebrow">Личный кабинет</p>
             <h1 className="sf-h-big">
-              профиль<span className="sf-dot">.</span>
+              профиль
             </h1>
             {settings}
           </div>
         </section>
-        <section className="sf-sec sf-paper sf-grain pf-main">
+        <section className="sf-sec sf-paper pf-main">
           <div className="sf-wrap">{registrations}</div>
         </section>
       </>

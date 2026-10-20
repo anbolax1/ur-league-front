@@ -158,14 +158,14 @@ function TagToggles({ initial }: { initial: UserTag[] }) {
       {tags.length > 0 && (
         <p className={`sf-field-note ${error ? "bad" : ""}`} aria-live="polite">
           {error ||
-            `Нажми на тег, чтобы убрать его с пропуска или вернуть.${tags.some((t) => !t.visible) ? " Бледные скрыл организатор." : ""}`}
+            `Нажми на тег, чтобы убрать его с карточки или вернуть.${tags.some((t) => !t.visible) ? " Бледные скрыл организатор." : ""}`}
         </p>
       )}
     </div>
   );
 }
 
-/** Настройки своего профиля под пропуском рейдера. */
+/** Настройки своего профиля под карточкой игрока. */
 export function ProfileSettings({ gameId, gameNick, tags }: { gameId: string; gameNick: string; tags: UserTag[] }) {
   return (
     <section className="pf-desk" aria-label="Настройки профиля">

@@ -64,7 +64,7 @@ export function TeamSeasons({ team, seasons, maps }: { team: TeamProfile; season
         <div>
           <p className="sf-eyebrow">Рейтинг 2×2 · MMR команды начинается заново каждый сезон</p>
           <h2 className="sf-h-mid">
-            рейтинг команды<span className="sf-dot">.</span>
+            рейтинг команды
           </h2>
         </div>
         {tabs.length > 1 && (

@@ -1,4 +1,4 @@
-/* Новости в новом дизайне: лента карточек на бумаге и страница новости. Классы с префиксом nw-. */
+/* Новости: лента карточек и страница новости. Классы с префиксом nw-. */
 
 .nw-top {
   padding-bottom: clamp(44px, 6vw, 72px);
@@ -26,7 +26,6 @@
   display: grid;
   height: 100%;
   grid-template-rows: auto 1fr;
-  border-radius: 6px;
   overflow: hidden;
   background: var(--sf-paper-2);
   box-shadow: 0 0 0 1px var(--sf-ink-line);
@@ -36,7 +35,7 @@
 }
 .nw-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0 0 1px var(--sf-ink-line), 0 18px 32px -20px rgba(26, 14, 30, 0.55);
+  box-shadow: 0 0 0 1px var(--sf-ink-line), 0 18px 32px -20px rgba(0, 0, 0, 0.88);
 }
 /* без картинки сверху идут фирменные полосы, чтобы карточка не была пустым листом */
 .nw-card.no-art::before {
@@ -66,7 +65,7 @@
   display: grid;
   place-items: center;
   padding: 6% 9%;
-  background: radial-gradient(closest-side, rgba(241, 170, 28, 0.2), rgba(241, 170, 28, 0)), var(--sf-night);
+  background: radial-gradient(closest-side, rgba(242, 169, 0, 0.2), rgba(242, 169, 0, 0)), var(--sf-night);
 }
 .nw-belt svg,
 .nw-article-belt svg {
@@ -83,14 +82,14 @@
   padding: 18px 20px 20px;
 }
 .nw-card-body time {
-  font: 600 10px/1.4 var(--sf-ff-m);
+  font: 500 12px/1.4 var(--sf-ff-c);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
 }
 .nw-card-body b {
-  font: 800 22px/1.15 var(--sf-ff-d);
-  letter-spacing: -0.01em;
+  font: 500 24px/1.15 var(--sf-ff-c);
+  letter-spacing: 0.01em;
   overflow-wrap: anywhere;
   text-wrap: balance;
 }
@@ -144,7 +143,7 @@
   margin-top: clamp(28px, 4vw, 44px);
 }
 .nw-pager-n {
-  font: 600 11px/1 var(--sf-ff-m);
+  font: 500 13px/1 var(--sf-ff-c);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -154,9 +153,9 @@
 .nw-title {
   margin: 0;
   max-width: 24ch;
-  font: 900 clamp(34px, 4.8vw, 66px) / 1 var(--sf-ff-d);
+  font: 700 clamp(34px, 4.8vw, 66px) / 1 var(--sf-ff-c);
   text-transform: none;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.01em;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
@@ -169,15 +168,13 @@
 .nw-article-belt {
   margin-bottom: clamp(24px, 3vw, 36px);
   padding: clamp(20px, 4vw, 44px) clamp(24px, 8vw, 96px);
-  border-radius: 6px;
-  background: radial-gradient(closest-side, rgba(241, 170, 28, 0.2), rgba(241, 170, 28, 0)), var(--sf-night);
+  background: radial-gradient(closest-side, rgba(242, 169, 0, 0.2), rgba(242, 169, 0, 0)), var(--sf-night);
 }
 .nw-article-img {
   display: block;
   width: 100%;
   height: auto;
   margin-bottom: clamp(24px, 3vw, 36px);
-  border-radius: 6px;
   box-shadow: 0 0 0 1px var(--sf-ink-line);
 }
 .nw-body p {
@@ -204,18 +201,17 @@
   text-underline-offset: 3px;
 }
 .nw-body code {
-  font-family: var(--sf-ff-m);
+  font-family: var(--sf-ff-c);
   font-size: 0.84em;
   padding: 0.12em 0.4em;
-  border-radius: 3px;
-  background: rgba(26, 14, 30, 0.08);
+  background: rgba(238, 241, 246, 0.08);
 }
 .nw-body blockquote {
   margin: 0 0 1em;
   padding: 12px 18px;
   border-left: 4px solid var(--sf-deep);
   border-radius: 0 6px 6px 0;
-  background: rgba(20, 64, 168, 0.07);
+  background: rgba(91, 149, 255, 0.07);
 }
 .nw-body blockquote:last-child {
   margin-bottom: 0;
@@ -229,7 +225,6 @@
 /* спойлер как в Телеграме: текст под бегущей рябью, нажатие открывает */
 .nw-body .tg-spoiler:not(.is-open) {
   color: transparent;
-  border-radius: 4px;
   background: var(--sf-ink-2) var(--sf-noise);
   background-size: 90px;
   cursor: pointer;
@@ -244,8 +239,7 @@
   pointer-events: none;
 }
 .nw-body .tg-spoiler.is-open {
-  border-radius: 4px;
-  background: rgba(26, 14, 30, 0.07);
+  background: rgba(238, 241, 246, 0.07);
   transition: background-color 0.4s;
 }
 @keyframes nw-dust {

@@ -40,7 +40,7 @@ export function LastMatch({ st }: { st: MatchState }) {
   const eyebrow = ["Последний матч", dayMonth(t.startsAt), t.ratingMultiplier > 1 ? `рейтинг ×${t.ratingMultiplier}` : ""].filter(Boolean).join(" · ");
 
   return (
-    <section className="sf-sec sf-paper sf-grain" aria-labelledby="last-t">
+    <section className="sf-sec sf-paper" aria-labelledby="last-t">
       <div className="sf-wrap">
         <SecHead
           id="last-t"

@@ -6,7 +6,7 @@ import * as React from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { LogoutIcon } from "@/components/icons";
-import { Mark, Wordmark } from "@/components/surface/stripes";
+import { Mark, Wordmark } from "@/components/surface/brand";
 import { SfAvatar } from "@/components/surface/ui";
 import { ShortCountdown } from "@/components/surface/motion";
 
@@ -84,11 +84,11 @@ export function SurfaceNav({ live }: { live: NavLive | null }) {
     </>
   ) : (
     <>
-      <Link href="/login" className="sf-btn sf-btn-ink-line sf-btn-sm">
+      <Link href="/login" className="sf-login">
         Войти
       </Link>
       <Link href="/join" className="sf-btn sf-btn-amber sf-btn-sm">
-        Играть
+        Подать заявку
       </Link>
     </>
   );
@@ -96,7 +96,7 @@ export function SurfaceNav({ live }: { live: NavLive | null }) {
   return (
     <header className="sf-nav">
       <div className="sf-wrap sf-nav-in">
-        <Link href="/" className="sf-brand" aria-label="GOARC.PRO, на главную">
+        <Link href="/" className="sf-brand" aria-label="Лига Ultimate Royale, на главную">
           <Mark />
           <Wordmark />
         </Link>
@@ -133,12 +133,7 @@ export function SurfaceNav({ live }: { live: NavLive | null }) {
           <div className="sf-drawer-actions">{account}</div>
         </div>
       )}
-      <div className="sf-progress" ref={progress} aria-hidden>
-        <i />
-        <i />
-        <i />
-        <i />
-      </div>
+      <div className="sf-progress" ref={progress} aria-hidden />
     </header>
   );
 }

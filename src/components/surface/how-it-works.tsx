@@ -646,7 +646,6 @@ function Panel({ i, step, title, children }: { i: number; step: number; title: s
         <span className="ln">
           <span key={step === i ? "on" : "off"}>
             {title}
-            <span className="sf-dot">.</span>
           </span>
         </span>
       </h3>

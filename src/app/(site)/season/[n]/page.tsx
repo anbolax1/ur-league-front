@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { n } = await params;
   return {
     title: `Сезон ${n} в цифрах — Лига Ultimate Royale`,
-    description: `Итоги ${n} сезона по ARC Raiders: таблица, гонка за первое место, решающий матч, карты, задания и киллы.`,
+    description: `Итоги ${n} сезона лиги Ultimate Royale: таблица, гонка за первое место, решающий матч, карты, задания и киллы.`,
   };
 }
 

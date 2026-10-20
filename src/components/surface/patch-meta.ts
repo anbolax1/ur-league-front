@@ -38,7 +38,7 @@ export const PATCH_INFO: Record<PatchCode, PatchInfo> = {
   streak: { name: "Неудержимый", rule: "5 побед подряд", about: "Пять побед подряд за сезон. Ничья прерывает серию." },
   flawless: { name: "Без поражений", rule: "5 побед и ни одного поражения", about: "Пять побед и ни одного поражения за весь сезон.", seasonEnd: true },
   david: { name: "Против шансов", rule: "победа при шансе 40% и ниже", about: "Перед матчем шанс по рейтингу был 40% или меньше, а победа - твоя." },
-  comeback: { name: "Камбэк", rule: "проиграл 1-й рейд, выиграл матч", about: "Первый рейд за соперником, матч - за тобой." },
+  comeback: { name: "Камбэк", rule: "проиграл 1-й раунд, выиграл матч", about: "Первый раунд за соперником, матч - за тобой." },
   double: { name: "Двойная ставка", rule: "победа в матче ×2", about: "Победа в матче, где MMR удваивается." },
   photo: { name: "Фотофиниш", rule: "победа в одно очко", about: "Матч выигран с разницей ровно в одно очко." },
   shutout: { name: "Всухую", rule: "соперник без единого очка", about: "Победа, а у соперника за матч ни одного очка." },
@@ -48,7 +48,7 @@ export const PATCH_INFO: Record<PatchCode, PatchInfo> = {
   topknock: { name: "Главный охотник", rule: "больше всех киллов за сезон", about: "Больше всех киллов за сезон.", seasonEnd: true },
   pacifist: { name: "Пацифист", rule: "победа без единого килла", about: "Киллы в матче были, но у победителя - ни одного." },
   king: { name: "Король карты", rule: "больше всех побед на карте", about: "Больше всех побед в матчах на карте, минимум три.", seasonEnd: true },
-  first: { name: "Первый рейд", rule: "играл в первый день сезона", about: "Матч в первый игровой день сезона. Шоу-матчи не в счёт." },
+  first: { name: "Первая высадка", rule: "играл в первый день сезона", about: "Матч в первый игровой день сезона. Шоу-матчи не в счёт." },
   final: { name: "Последний аккорд", rule: "победа в последний день сезона", about: "Победа в последний игровой день сезона. Шоу-матчи не в счёт." },
   marathon: { name: "Марафонец", rule: "20 матчей за сезон", about: "Двадцать матчей за сезон; матч ×2 прошлых сезонов идёт за два." },
   veteran: { name: "Ветеран", rule: "играл и в прошлом сезоне", about: "Играл и в этом сезоне, и в прошлом." },
@@ -101,7 +101,7 @@ export function patchResult(p: Pick<PlayerPatch, "code" | "tier" | "detail" | "e
     case "topknock":
       return `${d.knocks ?? 0} ${pluralKnocks(d.knocks ?? 0)}`;
     case "clear":
-      return `${d.knocks ?? 0} за рейд против ${d.opp ?? "—"}`;
+      return `${d.knocks ?? 0} за заход против ${d.opp ?? "—"}`;
     case "king":
       return (d.maps ?? []).map(mapName).join(", ");
     case "first":
@@ -128,7 +128,7 @@ const RARITIES: Rarity[] = [
   { key: "common", label: "обычная", color: "#a7a0aa" },
 ];
 
-/** Редкость нашивки - как у предметов в игре, по доле рейдеров сезона, что её носят. */
+/** Редкость нашивки - как у предметов в игре, по доле игроков сезона, что её носят. */
 export function patchRarity(holders: number, players: number): Rarity {
   const pct = (holders * 100) / Math.max(players, 1);
   if (pct <= 3) return RARITIES[0];
@@ -140,7 +140,7 @@ export function patchRarity(holders: number, players: number): Rarity {
 
 export const PATCH_RARITIES = RARITIES;
 
-/** Редкость карточки рейдера по MMR сезона: пороги растут с K-фактором, при K=100 - 1400, 1250, 1150, 1050. */
+/** Редкость карточки игрока по MMR сезона: пороги растут с K-фактором, при K=100 - 1400, 1250, 1150, 1050. */
 export function cardRarity(mmr: number, season?: Pick<Season, "kFactor" | "startMmr"> | null): Rarity & { min: number } {
   const k = season?.kFactor || 100, start = season?.startMmr || 1000;
   const steps: Array<[number, Rarity["key"], string]> = [

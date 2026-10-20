@@ -1,4 +1,4 @@
-/* Вход, регистрация, запись на матч и активация: заголовок на ночи и карточка-пропуск с формой. */
+/* Вход, регистрация, запись на матч и активация: заголовок и карточка с формой. */
 
 .au-top {
   padding-bottom: clamp(56px, 7vw, 104px);
@@ -16,7 +16,6 @@
   justify-self: end;
   width: 100%;
   max-width: 480px;
-  border-radius: 8px;
   overflow: hidden;
   background: var(--sf-paper-2);
   box-shadow: 0 40px 80px -40px #000;
@@ -62,7 +61,7 @@
   color: var(--sf-ink);
 }
 .au-game {
-  font-family: var(--sf-ff-m);
+  font-family: var(--sf-ff-c);
 }
 .au-actions {
   display: flex;
@@ -113,17 +112,12 @@
   width: 44px;
   height: 44px;
   border: 2px solid var(--sf-amber);
-  border-radius: 3px;
-  font: 900 20px/1 var(--sf-ff-cc);
+  font: 700 20px/1 var(--sf-ff-c);
   color: var(--sf-amber);
-  transform: rotate(-4deg);
-}
-.au-steps li:nth-child(even) .au-step-n {
-  transform: rotate(3deg);
 }
 .au-steps b {
   display: block;
-  font: 800 13px/1.2 var(--sf-ff-c);
+  font: 600 13px/1.2 var(--sf-ff-c);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }

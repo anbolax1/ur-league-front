@@ -4,7 +4,7 @@ import { SurfaceHighlightsGallery } from "@/components/surface/highlights-galler
 
 const PAGE_SIZE = 12;
 
-/** Хайлайты в новом дизайне: первая порция клипов приходит с сервера, остальные - по кнопке. */
+/** Хайлайты: первая порция клипов приходит с сервера, остальные - по кнопке. */
 export async function SurfaceHighlightsPage() {
   const [{ items, total }, tournaments] = await Promise.all([getHighlights({ limit: PAGE_SIZE, offset: 0 }), getTournaments()]);
   return (

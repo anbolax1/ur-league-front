@@ -1,4 +1,4 @@
-/* Архив в новом дизайне: строки матчей по месяцам на бумаге. */
+/* Архив: строки матчей по месяцам. */
 
 .arc-top {
   padding-bottom: clamp(40px, 5vw, 64px);
@@ -15,10 +15,10 @@
 .arc-month-head {
   margin: 0;
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--sf-ink);
-  font: 900 clamp(24px, 2.6vw, 32px) / 1 var(--sf-ff-d);
-  letter-spacing: -0.02em;
-  text-transform: lowercase;
+  border-bottom: 1px solid var(--sf-line-2);
+  font: 700 clamp(24px, 2.6vw, 32px) / 1 var(--sf-ff-c);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
 .arc-list {
   list-style: none;
@@ -44,13 +44,13 @@
   gap: 3px;
 }
 .arc-date b {
-  font: 900 28px/1 var(--sf-ff-cc);
+  font: 700 28px/1 var(--sf-ff-c);
   font-variant-numeric: tabular-nums;
 }
 .arc-date small,
 .arc-main small,
 .arc-res {
-  font: 600 10px/1.4 var(--sf-ff-m);
+  font: 500 12px/1.4 var(--sf-ff-c);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -77,7 +77,7 @@
   font-weight: 800;
 }
 .arc-score {
-  font: 900 21px/1 var(--sf-ff-cc);
+  font: 700 21px/1 var(--sf-ff-c);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -93,7 +93,7 @@
   color: var(--sf-amber);
 }
 .arc-vs {
-  font: 700 11px/1 var(--sf-ff-c);
+  font: 600 11px/1 var(--sf-ff-c);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -108,7 +108,7 @@
   display: block;
   margin-top: 3px;
   font-style: normal;
-  color: #8a5600;
+  color: var(--sf-amber);
 }
 .arc-more {
   margin-top: 28px;

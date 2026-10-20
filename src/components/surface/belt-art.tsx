@@ -63,7 +63,7 @@ export function BeltArt({
   const rivets = [24, 576].flatMap((x) => [strapMid(x) - 26, strapMid(x) + 26].map((y) => ({ x, y })));
   const g = `${id}-g`;
   const gr = `${id}-gr`;
-  const nameStyle = { fontFamily: "var(--sf-ff-x)", fontStretch: "122%" } as const;
+  const nameStyle = { fontFamily: "var(--sf-ff-c)" } as const;
   const aria = label ?? (vacant ? "Пояс лиги: ничей" : `Пояс лиги: ${name ?? ""}`);
 
   return (

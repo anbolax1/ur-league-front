@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Russo_One, Chakra_Petch, Sofia_Sans, Sofia_Sans_Semi_Condensed, Sofia_Sans_Condensed, Science_Gothic, Martian_Mono, Montserrat } from "next/font/google";
+import { Russo_One, Chakra_Petch, Oswald, Manrope, Montserrat } from "next/font/google";
 import "./globals.css";
 import "./surface.css";
 import { ErrorReporter } from "@/components/error-reporter";
@@ -20,13 +20,9 @@ const chakra = Chakra_Petch({
   display: "swap",
 });
 
-// Шрифты нового дизайна: файлы качаются, только когда он включён (без предзагрузки).
-const sofia = Sofia_Sans({ subsets: ["latin", "cyrillic"], variable: "--font-sofia", display: "swap", preload: false });
-const sofiaSemi = Sofia_Sans_Semi_Condensed({ subsets: ["latin", "cyrillic"], variable: "--font-sofia-semi", display: "swap", preload: false });
-const sofiaCond = Sofia_Sans_Condensed({ subsets: ["latin", "cyrillic"], variable: "--font-sofia-cond", display: "swap", preload: false });
-const science = Science_Gothic({ subsets: ["latin", "cyrillic"], axes: ["wdth"], variable: "--font-science", display: "swap", preload: false });
-const martian = Martian_Mono({ subsets: ["latin", "cyrillic"], variable: "--font-martian", display: "swap", preload: false });
-const surfaceFonts = [sofia, sofiaSemi, sofiaCond, science, martian].map((f) => f.variable).join(" ");
+// Шрифты сайта: Oswald - заголовки и подписи, Manrope - текст.
+const oswald = Oswald({ subsets: ["latin", "cyrillic"], variable: "--font-oswald", display: "swap" });
+const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-manrope", display: "swap" });
 
 // Шрифт виджета «Задания V2» в оверлее: файл качается, только когда виджет на экране.
 const montserrat = Montserrat({ weight: ["800", "900"], subsets: ["latin", "cyrillic"], variable: "--font-montserrat", display: "swap", preload: false });
@@ -34,14 +30,14 @@ const montserrat = Montserrat({ weight: ["800", "900"], subsets: ["latin", "cyri
 export const metadata: Metadata = {
   title: "Лига Ultimate Royale — PUBG Mobile",
   description:
-    "Лига, Турниры и Шоу-Матчи в ARC Raiders от создателя Денис Блим в прямом эфире. Матчи, рейтинг, правила и профили игроков.",
+    "Лига Ultimate Royale по PUBG Mobile в прямом эфире: соло против сквадов, матчи 1×1, рейтинг MMR и шоу-матчи с призами.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" className={`${russo.variable} ${chakra.variable} ${surfaceFonts} ${montserrat.variable}`}>
+    <html lang="ru" className={`${russo.variable} ${chakra.variable} ${oswald.variable} ${manrope.variable} ${montserrat.variable}`}>
       <body>
         <ErrorReporter />
         {children}

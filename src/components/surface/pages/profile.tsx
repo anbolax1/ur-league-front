@@ -3,7 +3,6 @@ import Link from "next/link";
 import "./profile.css";
 import { getBelt, getHighlights, getMaps, getPlayer, getSeasons } from "@/lib/queries";
 import type { PlayerPatch, PlayerProfile, Season } from "@/lib/types";
-import { Stripes } from "@/components/surface/stripes";
 import { ArrowBack, TagStamps } from "@/components/surface/ui";
 import { SurfaceHighlights } from "@/components/surface/highlights";
 import { ProfileSeasons } from "@/components/surface/profile-seasons";
@@ -17,12 +16,11 @@ import { BeltProfile } from "@/components/surface/belt-parts";
 
 function NotFound({ login }: { login: string }) {
   return (
-    <section className="sf-page-head sf-night sf-grain">
-      <Stripes shape="corner" className="corner" draw />
+    <section className="sf-page-head sf-night">
       <div className="sf-wrap">
         <p className="sf-eyebrow">Профиль игрока</p>
         <h1 className="sf-h-big">
-          игрок не найден<span className="sf-dot">.</span>
+          игрок не найден
         </h1>
         <p className="sf-lead pf-lead">
           Логина «{login}» на сайте нет. Возможно, в адресе опечатка или игрок ещё не играл матчей.
@@ -37,11 +35,11 @@ function NotFound({ login }: { login: string }) {
   );
 }
 
-/** Машиночитаемая строка внизу пропуска - как на документах. */
+/** Машиночитаемая строка внизу карточки - как на документах. */
 function codeLine(login: string, season: Season | undefined, mmr: number, place: number): [string, string] {
   const no = season?.name.match(/\d+/)?.[0] ?? "0";
   const name = login.toUpperCase().replace(/[^A-Z0-9]/g, "<");
-  return [`RSP<<${name}${"<".repeat(Math.max(4, 14 - name.length))}`, `S${no}<${String(mmr).padStart(4, "0")}<${String(place).padStart(2, "0")}`];
+  return [`UR<<${name}${"<".repeat(Math.max(4, 14 - name.length))}`, `S${no}<${String(mmr).padStart(4, "0")}<${String(place).padStart(2, "0")}`];
 }
 
 function IdCard({ profile, season }: { profile: PlayerProfile; season?: Season }) {
@@ -66,10 +64,9 @@ function IdCard({ profile, season }: { profile: PlayerProfile; season?: Season }
     <article className="sf-idcard pf-card" aria-label={`Профиль игрока ${name}`}>
       <div className="sf-id-head">
         <span>
-          Пропуск рейдера<span className="sf-hide-sm"> · Speranza</span>
+          Карточка игрока<span className="sf-hide-sm"> · Ultimate Royale</span>
         </span>
         <span className="sf-hide-sm">{season?.name ?? "Вне сезона"}</span>
-        <Stripes shape="badge" />
       </div>
       <div className={`sf-id-photo ${user.avatarUrl ? "has-img" : ""}`} aria-hidden>
         {user.avatarUrl ? (
@@ -111,8 +108,8 @@ function rarestPatches(profile: PlayerProfile, season?: Season): { items: Player
   return { items: items.slice(0, 3), count: own.length };
 }
 
-/** Профиль игрока в новом дизайне: пропуск рейдера, рейтинг по сезонам, матчи, команды и клипы.
-    Свой профиль добавляет под пропуск настройки, а после матчей - заявки. */
+/** Профиль игрока: карточка, рейтинг по сезонам, матчи, команды и клипы.
+    Свой профиль добавляет под карточку настройки, а после матчей - заявки. */
 export async function ProfileView({
   profile,
   eyebrow,
@@ -136,8 +133,7 @@ export async function ProfileView({
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain pf-top">
-        <Stripes shape="head" draw />
+      <section className="sf-page-head sf-night pf-top">
         <div className="sf-wrap">
           {back && (
             <Link className="sf-back" href="/rating">
@@ -168,7 +164,7 @@ export async function ProfileView({
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain pf-main">
+      <section className="sf-sec sf-paper pf-main">
         <div className="sf-wrap">
           {played ? (
             <ProfileSeasons profile={profile} seasons={seasons} maps={maps.map((m) => ({ code: m.code, name: m.name }))} />
@@ -181,13 +177,13 @@ export async function ProfileView({
           <div className="sf-prof-cols sf-block">
             <div>
               <h2 className="sf-h-mid">
-                последние матчи<span className="sf-dot">.</span>
+                последние матчи
               </h2>
               <ProfileHistory items={history} />
             </div>
             <div>
               <h2 className="sf-h-mid">
-                команды 2×2<span className="sf-dot">.</span>
+                команды 2×2
               </h2>
               {teams.length ? (
                 <div className="sf-teams pf-teams">

@@ -1,4 +1,4 @@
-/* Команда 2×2 в новом дизайне: пропуск на двоих. Остальное - общие стили профиля. */
+/* Команда 2×2: карточка на двоих. Остальное - общие стили профиля. */
 
 .tm-photos {
   display: flex;
@@ -28,7 +28,7 @@
 }
 .tm-roster {
   margin: 8px 0 0;
-  font: 600 12px/1.4 var(--sf-ff-m);
+  font: 500 13px/1.4 var(--sf-ff-c);
   letter-spacing: 0.06em;
   color: var(--sf-ink-2);
 }
@@ -48,7 +48,7 @@
   margin: 18px 0 0;
   padding-left: 14px;
   border-left: 3px solid var(--sf-amber);
-  font: 600 11px/1.5 var(--sf-ff-m);
+  font: 500 13px/1.5 var(--sf-ff-c);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--sf-cream-2);

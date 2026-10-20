@@ -29,7 +29,7 @@ function Item({ num, name, text, points, meta, tone, children }: { num: number; 
   );
 }
 
-/** Справочник заданий в новом дизайне: поиск по номеру или тексту, протоколы и легендарные задания. */
+/** Справочник заданий: поиск по номеру или тексту, протоколы и легендарные задания. */
 export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[]; legendary: CatalogLegendary[]; maps: MapInfo[] }) {
   const [q, setQ] = React.useState("");
   const cat = rulesCatalog(tasks, legendary, maps, q);
@@ -37,13 +37,13 @@ export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[];
   const nothing = q ? "Ничего не найдено — попробуй номер или другое слово." : "";
 
   return (
-    <section className="sf-sec sf-paper sf-grain rl-cat" id="tasks" aria-labelledby="rl-t">
+    <section className="sf-sec sf-paper rl-cat" id="tasks" aria-labelledby="rl-t">
       <div className="sf-wrap">
         <div className="sf-sec-head">
           <div>
             <p className="sf-eyebrow">Справочник · перед раундом задание и протокол, ещё одно - на карту захода</p>
             <h2 className="sf-h-big" id="rl-t">
-              задания<span className="sf-dot">.</span>
+              задания
             </h2>
           </div>
           <div className="sf-controls rl-controls">
@@ -82,9 +82,9 @@ export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[];
 
           <aside className="rl-side" aria-labelledby="rl-proto">
             <h3 className="sf-h-mid" id="rl-proto">
-              протоколы<span className="sf-dot">.</span>
+              протоколы
             </h3>
-            <p className="rl-sub">Один на раунд · выполнить до 15-й минуты рейда</p>
+            <p className="rl-sub">Один на раунд · на время, срок указан в задании</p>
             {cat.protocols.length ? (
               <ul className="rl-list">
                 {cat.protocols.map((c) => (
@@ -99,7 +99,7 @@ export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[];
 
         <div className="sf-block" aria-labelledby="rl-leg">
           <h3 className="sf-h-mid" id="rl-leg">
-            легендарные задания<span className="sf-dot">.</span>
+            легендарные задания
           </h3>
           <p className="rl-sub">10 баллов · каждое можно выполнить один раз навсегда</p>
           {cat.legendary.length ? (

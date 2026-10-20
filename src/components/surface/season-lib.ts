@@ -11,8 +11,8 @@ export const W_DAY: Forms = ["день", "дня", "дней"];
 export const W_WIN: Forms = ["победа", "победы", "побед"];
 export const W_LOSS: Forms = ["поражение", "поражения", "поражений"];
 export const W_KNOCK: Forms = ["килл", "килла", "киллов"];
-export const W_RAIDER: Forms = ["рейдер", "рейдера", "рейдеров"];
-export const W_PLAYER: Forms = ["игрока", "игроков", "игроков"];
+export const W_PLAYER: Forms = ["игрок", "игрока", "игроков"];
+export const W_PLAYER_GEN: Forms = ["игрока", "игроков", "игроков"];
 export const W_ROUND: Forms = ["раунд", "раунда", "раундов"];
 
 export function plural(n: number, f: Forms): string {

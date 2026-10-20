@@ -140,13 +140,13 @@ export function BeltStatus({ belt }: { belt: Belt }) {
 export function BeltHome({ belt }: { belt: Belt | null }) {
   if (!belt) return null;
   return (
-    <section className="sf-sec sf-night-2 sf-grain bl-home" aria-labelledby="belt-t">
+    <section className="sf-sec sf-night-2 bl-home" aria-labelledby="belt-t">
       <div className="sf-wrap">
         <div className="sf-sec-head">
           <div>
             <p className="sf-eyebrow">Пояс лиги · переходит в обычных матчах 1×1</p>
             <h2 className="sf-h-big" id="belt-t">
-              пояс лиги<span className="sf-dot">.</span>
+              пояс лиги
             </h2>
           </div>
           <Link className="sf-more" href="/belt">
@@ -176,7 +176,7 @@ export function BeltProfile({ belt, userId }: { belt: Belt | null; userId: strin
     <section className="sf-block bl-prof" aria-labelledby="bl-prof-t">
       <div className="bl-prof-head">
         <h2 className="sf-h-mid" id="bl-prof-t">
-          пояс лиги<span className="sf-dot">.</span>
+          пояс лиги
         </h2>
         <Link className="sf-more" href="/belt">
           Правила и история <Arrow />
@@ -352,7 +352,6 @@ export function BeltMatch({ mark, belt, id, other }: { mark: MatchBeltMark; belt
           <p className="sf-eyebrow">Пояс лиги</p>
           <h2 className="sf-h-mid">
             {head}
-            <span className="sf-dot">.</span>
           </h2>
         </div>
         <Link className="sf-more" href="/belt">

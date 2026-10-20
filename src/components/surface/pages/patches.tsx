@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getPatchCatalog, getSeasons } from "@/lib/queries";
 import type { PatchCode, PatchStat } from "@/lib/types";
-import { Stripes } from "@/components/surface/stripes";
 import { PatchArt } from "@/components/surface/patch-art";
 import { HUNTER_TIERS, PATCH_GROUPS, PATCH_INFO, PATCH_RARITIES, ROMAN, patchRarity } from "@/components/surface/patch-meta";
 import { pluralKnocks } from "@/lib/format";
@@ -14,12 +13,12 @@ const GROUP_ABOUT: Record<string, string> = {
   "Сезон": "от первого игрового дня до последнего",
 };
 
-/** Пороги редкости в процентах рейдеров сезона - как в patchRarity. */
+/** Пороги редкости в процентах игроков сезона - как в patchRarity. */
 const RARITY_SPAN = ["до 3%", "до 5%", "до 10%", "до 20%", "больше 20%"];
 
-function raiders(n: number): string {
+function playersWord(n: number): string {
   const a = n % 100, b = n % 10;
-  return a > 10 && a < 20 ? "рейдеров" : b === 1 ? "рейдер" : b >= 2 && b <= 4 ? "рейдера" : "рейдеров";
+  return a > 10 && a < 20 ? "игроков" : b === 1 ? "игрок" : b >= 2 && b <= 4 ? "игрока" : "игроков";
 }
 
 function Card({ stat, players }: { stat: PatchStat; players: number }) {
@@ -44,7 +43,7 @@ function Card({ stat, players }: { stat: PatchStat; players: number }) {
               <span key={need}>
                 <PatchArt code="hunter" tier={i + 1} label={`Охотник ${ROMAN[i + 1]}: ${need} ${pluralKnocks(need)}`} />
                 {ROMAN[i + 1]} · {need}
-                <small>{stat.tiers?.[i] ? `${stat.tiers[i]} ${raiders(stat.tiers[i])}` : "пока никто"}</small>
+                <small>{stat.tiers?.[i] ? `${stat.tiers[i]} ${playersWord(stat.tiers[i])}` : "пока никто"}</small>
               </span>
             ))}
           </div>
@@ -77,11 +76,11 @@ export async function SurfacePatches({ season }: { season?: string }) {
   const [catalog, seasons] = await Promise.all([getPatchCatalog(season), getSeasons()]);
   if (!catalog) {
     return (
-      <section className="sf-page-head sf-night sf-grain">
+      <section className="sf-page-head sf-night">
         <div className="sf-wrap">
           <p className="sf-eyebrow">Правила</p>
           <h1 className="sf-h-big">
-            нашивки<span className="sf-dot">.</span>
+            нашивки
           </h1>
           <p className="sf-lead pt-lead">Не удалось загрузить нашивки. Обнови страницу чуть позже.</p>
         </div>
@@ -108,15 +107,14 @@ export async function SurfacePatches({ season }: { season?: string }) {
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain">
-        <Stripes shape="corner" draw className="corner" />
+      <section className="sf-page-head sf-night">
         <div className="sf-wrap">
           <p className="sf-eyebrow">
             Правила · {sn.name}
             {sn.status === "active" ? " · идёт" : ""}
           </p>
           <h1 className="sf-h-big">
-            нашивки<span className="sf-dot">.</span>
+            нашивки
           </h1>
           <p className="sf-lead pt-lead">
             Выдаются сами по итогам матчей: за место в таблице, серии, киллы и характер побед. Каждый сезон коллекция собирается заново, прошлые остаются в профиле.
@@ -127,7 +125,7 @@ export async function SurfacePatches({ season }: { season?: string }) {
               <dd>{catalog.patches.length}</dd>
             </div>
             <div>
-              <dt>рейдеров собрали хотя бы одну</dt>
+              <dt>игроков собрали хотя бы одну</dt>
               <dd>
                 {owners.size}
                 <small>из {catalog.players}</small>
@@ -138,7 +136,7 @@ export async function SurfacePatches({ season }: { season?: string }) {
                 <dt>самые редкие: {rarestNames.join(", ")}</dt>
                 <dd>
                   {rarest}
-                  <small>{raiders(rarest)}</small>
+                  <small>{playersWord(rarest)}</small>
                 </dd>
               </div>
             )}
@@ -163,7 +161,7 @@ export async function SurfacePatches({ season }: { season?: string }) {
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain">
+      <section className="sf-sec sf-paper">
         <div className="sf-wrap">
           <div className="pt-rarities">
             {PATCH_RARITIES.map((r, i) => (

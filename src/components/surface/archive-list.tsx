@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import type { SideScore, TournamentMode } from "@/lib/types";
-import { Stripes } from "@/components/surface/stripes";
 import { SearchGlyph } from "@/components/surface/ui";
 import { matchesWord } from "@/components/surface/fmt";
 
@@ -80,7 +79,7 @@ function Row({ m }: { m: ArchiveMatch }) {
   );
 }
 
-/** Архив в новом дизайне: фильтр по формату и поиск по игроку или карте в шапке, ниже - матчи по месяцам. */
+/** Архив: фильтр по формату и поиск по игроку или карте в шапке, ниже - матчи по месяцам. */
 export function ArchiveView({ matches }: { matches: ArchiveMatch[] }) {
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
@@ -102,16 +101,15 @@ export function ArchiveView({ matches }: { matches: ArchiveMatch[] }) {
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain arc-top">
-        <Stripes shape="corner" className="corner" draw />
+      <section className="sf-page-head sf-night arc-top">
         <div className="sf-wrap">
           <p className="sf-eyebrow">
             Результаты · {matches.length} {matchesWord(matches.length)}
           </p>
           <h1 className="sf-h-big">
-            результаты<span className="sf-dot">.</span>
+            результаты
           </h1>
-          <p className="sf-lead arc-lead">Все сыгранные матчи: счёт, карты и разбор каждого рейда.</p>
+          <p className="sf-lead arc-lead">Все сыгранные матчи: счёт, карты и разбор каждого раунда.</p>
           <div className="sf-controls">
             <div className="sf-seg" role="tablist" aria-label="Какие матчи">
               {FILTERS.map((f) => (
@@ -152,7 +150,7 @@ export function ArchiveView({ matches }: { matches: ArchiveMatch[] }) {
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain arc-body">
+      <section className="sf-sec sf-paper arc-body">
         <div className="sf-wrap">
           {months.length ? (
             months.map((g) => (

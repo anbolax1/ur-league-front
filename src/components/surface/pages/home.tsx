@@ -9,7 +9,7 @@ import { HowSection } from "@/components/surface/how-section";
 import { SurfaceHighlights } from "@/components/surface/highlights";
 import { BeltHome } from "@/components/surface/belt-parts";
 
-/** Главная в новом дизайне. */
+/** Главная страница лиги. */
 export async function SurfaceHome() {
   const [match, top, upcoming, finished, hl, me, seasons, maps, belt] = await Promise.all([
     getCurrentMatch(),
@@ -35,10 +35,10 @@ export async function SurfaceHome() {
   return (
     <>
       {match.current ? <LiveMatch st={match.current} matchup={liveMatchup} organizer={organizer} belt={belt} /> : organizer && <OrganizerBar />}
-      <Hero season={season} show={show} showMatchup={showMatchup} />
+      <Hero season={season} />
+      {show && <ShowSection t={show} matchup={showMatchup} />}
       <Schedule live={match.current} shows={shows} />
       <BeltHome belt={belt} />
-      {show && <ShowSection t={show} matchup={showMatchup} />}
       {lastState && <LastMatch st={lastState} />}
       <Ticker matches={finished} />
       <Leaders rows={top} season={season} />

@@ -56,13 +56,13 @@ export function HowSection({
   const start = season?.startMmr ?? 1000;
   const seasonNo = season?.name.match(/\d+/)?.[0];
   return (
-    <section className={`sf-sec ${tone} sf-grain`} id="how" aria-labelledby="how-t">
+    <section className={`sf-sec ${tone}`} id="how" aria-labelledby="how-t">
       <div className="sf-wrap">
         <div className="sf-sec-head">
           <div>
             <p className="sf-eyebrow">{seasonNo ? `Формат ${seasonNo} сезона` : "Формат матча"}</p>
             <h2 className="sf-h-big" id="how-t">
-              как устроен матч<span className="sf-dot">.</span>
+              как устроен матч
             </h2>
           </div>
         </div>

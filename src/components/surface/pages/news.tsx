@@ -4,7 +4,6 @@ import { TelegramIcon } from "@/components/icons";
 import { TELEGRAM_URL } from "@/lib/links";
 import { getNews } from "@/lib/queries";
 import type { News } from "@/lib/types";
-import { Stripes } from "@/components/surface/stripes";
 import { Arrow, ArrowBack } from "@/components/surface/ui";
 import { fullDate } from "@/components/surface/fmt";
 import { NewsBody } from "@/components/surface/news-body";
@@ -49,19 +48,18 @@ function NewsCard({ n, lead }: { n: News; lead: boolean }) {
   );
 }
 
-/** Лента новостей в новом дизайне: свежие сверху, первая на первой странице - крупно. */
+/** Лента новостей: свежие сверху, первая на первой странице - крупно. */
 export async function SurfaceNews({ page }: { page: number }) {
   const { items, total } = await getNews({ limit: PAGE, offset: (page - 1) * PAGE });
   const pages = Math.max(1, Math.ceil(total / PAGE));
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain nw-top">
-        <Stripes shape="corner" className="corner" draw />
+      <section className="sf-page-head sf-night nw-top">
         <div className="sf-wrap">
           <p className="sf-eyebrow">Новости{total ? ` · ${total} ${newsWord(total)}` : ""}</p>
           <h1 className="sf-h-big">
-            новости<span className="sf-dot">.</span>
+            новости
           </h1>
           <p className="sf-lead nw-lead">Сезоны, шоу-матчи и всё, что происходит в лиге. Анонсы эфиров — ещё и в Telegram.</p>
           <div className="sf-controls">
@@ -73,7 +71,7 @@ export async function SurfaceNews({ page }: { page: number }) {
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain">
+      <section className="sf-sec sf-paper">
         <div className="sf-wrap">
           {items.length ? (
             <ul className="nw-list">
@@ -124,8 +122,7 @@ export function SurfaceNewsItem({ n }: { n: News }) {
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain nw-top">
-        <Stripes shape="corner" className="corner" draw />
+      <section className="sf-page-head sf-night nw-top">
         <div className="sf-wrap">
           <Link className="sf-back" href="/news">
             <ArrowBack />
@@ -136,7 +133,7 @@ export function SurfaceNewsItem({ n }: { n: News }) {
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain nw-article-sec">
+      <section className="sf-sec sf-paper nw-article-sec">
         <div className="sf-wrap">
           <article className="nw-article">
             {n.imageUrl ? (

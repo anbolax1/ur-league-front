@@ -132,7 +132,6 @@ export function SecHead({ eyebrow, title, action, id }: { eyebrow?: ReactNode; t
         {eyebrow && <p className="sf-eyebrow">{eyebrow}</p>}
         <h2 className="sf-h-big" id={id}>
           {title}
-          <span className="sf-dot">.</span>
         </h2>
       </div>
       {action}

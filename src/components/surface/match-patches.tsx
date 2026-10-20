@@ -27,7 +27,7 @@ export function MatchPatches({ patches, sides, live }: { patches: MatchPatch[]; 
     <div className="sf-m-block pt-match">
       <p className="sf-eyebrow">{live ? "Получены прямо в этом матче" : "Получены в этом матче"}</p>
       <h2 className="sf-h-mid">
-        нашивки за матч<span className="sf-dot">.</span>
+        нашивки за матч
       </h2>
       <div className="pt-match-cols">
         {sides.map((side) => {

@@ -1,12 +1,11 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
-import { TelegramIcon, TwitchIcon, YouTubeIcon } from "@/components/icons";
-import { STREAM_URL, TELEGRAM_URL, YOUTUBE_URL } from "@/lib/links";
-import { isShowMatch, mapImage, matchSides, roundsLabel, stageLabel } from "@/lib/match";
+import { TwitchIcon, YouTubeIcon } from "@/components/icons";
+import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
+import { isShowMatch, matchSides, roundsLabel, stageLabel } from "@/lib/match";
 import type { LeaderboardRow, MatchState, Matchup, MatchupSide, Season, Tournament } from "@/lib/types";
-import { Stripes } from "@/components/surface/stripes";
 import { Arrow, ScheduleIcon, SecHead, TagStamps, signed } from "@/components/surface/ui";
-import { AnnounceBar, CountUp, FitLine, FlipCountdown, GrowOnView, Parallax, ShortCountdown, Tilt } from "@/components/surface/motion";
+import { CountUp, FitLine, FlipCountdown, GrowOnView, Parallax, ShortCountdown } from "@/components/surface/motion";
 import { dayMonth, hhmm, shortDate, splitTitle, weekdayDate, weekdayLong, winrate } from "@/components/surface/fmt";
 
 /** Шансы сторон по MMR полосой в цветах сторон. */
@@ -32,130 +31,42 @@ export function Odds({ a, b, nameA, nameB, label }: { a: number; b: number; name
 
 /* ---------- герой ---------- */
 
-export function Hero({ season, show, showMatchup }: { season?: Season; show?: Tournament; showMatchup: Matchup | null }) {
+export function Hero({ season }: { season?: Season }) {
   return (
     <Parallax className="sf-hero sf-night">
-      <div className="sf-hero-bg" style={{ backgroundImage: `url(${mapImage("erangel")})` }} aria-hidden />
-      <Stripes shape="hero" draw />
-      <div className="sf-wrap sf-hero-grid">
-        <div>
-          <p className="sf-eyebrow">Денис Блим · ARC Raiders · Турниры</p>
+      <div className="sf-hero-bg" aria-hidden />
+      <div className="sf-wrap">
+        <div className="sf-hero-txt">
+          <div className="sf-tags">
+            <span className="hot">Ultimate Royale</span>
+            <span>PUBG Mobile</span>
+            {season?.number ? <span>Сезон {season.number}</span> : null}
+          </div>
           <h1>
             <span className="ln">
               <span>
-                лига<i>.</i>
+                <em>Один</em> против
               </span>
             </span>
-            {season?.number ? (
-              <span className="ln">
-                <span>
-                  {season.number} сезон<i>.</i>
-                </span>
-              </span>
-            ) : null}
+            <span className="ln">
+              <span>сквадов</span>
+            </span>
           </h1>
           <p className="sf-lead">
-            Матчи 1×1 и 2×2 по ARC Raiders в прямом эфире. Задания, киллы и рейтинг по MMR. Участвуй в лиге, получи звание
-            чемпиона и выиграй призы.
+            Ведущий заходит с тобой в Ultimate Royale, выбывает и дальше смотрит за тобой в эфире. Ты один против сквадов: каждый
+            килл — 3 очка, задания приносят ещё. Матчи 1×1, рейтинг MMR и шоу-матчи с призами.
           </p>
           <div className="sf-hero-actions">
             <Link href="/join" className="sf-btn sf-btn-amber">
-              Участвовать в лиге
+              Подать заявку
             </Link>
-            <a className="sf-btn sf-btn-line" href={STREAM_URL} target="_blank" rel="noopener noreferrer">
-              <TwitchIcon />
-              Twitch
+            <a className="sf-btn sf-btn-line" href="#how">
+              Как проходит матч
             </a>
-            <a className="sf-btn sf-btn-line" href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-              <YouTubeIcon />
-              YouTube
-            </a>
-          </div>
-          <div className="sf-hero-meta">
-            {season && (
-              <span>
-                с {dayMonth(season.startedAt)}
-                {season.endedAt ? ` до ${dayMonth(season.endedAt)}` : ""}
-              </span>
-            )}
-            <span>бесплатное участие</span>
           </div>
         </div>
-        <NextCard show={show} matchup={showMatchup} />
       </div>
     </Parallax>
-  );
-}
-
-/** Анонс ближайшего шоу-матча. Идущий матч и кнопки организатора живут отдельно: обычный матч может идти, пока шоу-матч ещё впереди. */
-function NextCard({ show, matchup }: { show?: Tournament; matchup: Matchup | null }) {
-  if (show?.startsAt) {
-    const [a, b] = splitTitle(show.title);
-    const [sa, sb] = matchup?.sides ?? [];
-    return (
-      <aside className="sf-next" aria-labelledby="next-t">
-        <div className="sf-tags">
-          <span className="hot">Шоу-матч</span>
-          <span>{show.mode}</span>
-          <span>{roundsLabel(show.totalRounds)}</span>
-          {show.ratingMultiplier === 2 && <span>рейтинг ×2</span>}
-        </div>
-        <h2 className="sf-next-title" id="next-t">
-          {a} <em>vs</em> {b}
-        </h2>
-        <p className="sf-next-date">
-          {weekdayDate(show.startsAt)} · {hhmm(show.startsAt)} МСК
-        </p>
-        <FlipCountdown to={show.startsAt} label="До начала шоу-матча" />
-        <AnnounceBar from={show.createdAt} to={show.startsAt} />
-        <dl className="sf-rows">
-          {show.prize && (
-            <div>
-              <dt>Приз</dt>
-              <dd>{show.prize}</dd>
-            </div>
-          )}
-          <div>
-            <dt>Карты</dt>
-            <dd>выбирает игра</dd>
-          </div>
-          {sa?.mmr && sb?.mmr ? (
-            <div>
-              <dt>MMR сторон</dt>
-              <dd className="sf-tnum">
-                {sa.mmr} · {sb.mmr}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-        <div className="sf-next-actions">
-          <a className="sf-btn sf-btn-ink" href="#show">
-            Подробнее о матче
-          </a>
-        </div>
-      </aside>
-    );
-  }
-
-  return (
-    <aside className="sf-next" aria-labelledby="next-t">
-      <div className="sf-tags">
-        <span>Анонс</span>
-      </div>
-      <h2 className="sf-next-title" id="next-t">
-        Шоу-матч
-      </h2>
-      <p className="sf-next-date">Следующий шоу-матч пока не анонсирован. Следите за новостями в наших соц. сетях.</p>
-      <div className="sf-next-actions">
-        <a className="sf-btn sf-btn-ink" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
-          <TelegramIcon />
-          Анонсы в Telegram
-        </a>
-        <Link className="sf-btn sf-btn-ink-line" href="/schedule">
-          Матчи
-        </Link>
-      </div>
-    </aside>
   );
 }
 
@@ -226,7 +137,7 @@ export function ScheduleRows({ live, upcoming }: { live: MatchState | null; upco
 
 export function Schedule({ live, shows }: { live: MatchState | null; shows: Tournament[] }) {
   return (
-    <section className="sf-sched sf-night sf-grain" aria-labelledby="sched-t">
+    <section className="sf-sched sf-night" aria-labelledby="sched-t">
       <div className="sf-wrap">
         <div className="sf-sched-head">
           <h2 className="sf-h-up" id="sched-t">
@@ -249,24 +160,15 @@ function GeneratedPoster({ t }: { t: Tournament }) {
   const [a, b] = splitTitle(t.title);
   return (
     <div className="sf-poster-in">
-      <div className="sf-p-stars" />
-      <div className="sf-p-sun" />
-      <div className="sf-p-orbit" />
-      <Stripes shape="poster" />
-      <div className="sf-p-dots" />
       <div className="sf-p-top">
-        <span>Лига</span>
         <span>Шоу-матч</span>
+        <span>{roundsLabel(t.totalRounds)}</span>
+        <span>Соло против сквадов</span>
       </div>
       <div className="sf-p-names">
         <FitLine>{a}</FitLine>
         <em>vs</em>
         <FitLine>{b || "—"}</FitLine>
-      </div>
-      <div className="sf-p-specs">
-        <span>Соло против сквадов</span>
-        <span>{roundsLabel(t.totalRounds)}</span>
-        <span>Бонусные задания</span>
       </div>
       {t.startsAt && (
         <div className="sf-p-date">
@@ -280,7 +182,6 @@ function GeneratedPoster({ t }: { t: Tournament }) {
           <b>{t.prize}</b>
         </div>
       )}
-      <div className="sf-p-glare" />
     </div>
   );
 }
@@ -301,17 +202,16 @@ export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | 
           title="шоу-матч"
         />
         <div className="sf-show-grid">
-          <Tilt className="sf-poster">
+          <div className="sf-poster">
             {t.previewUrl ? (
               <div className="sf-poster-in is-img">
                 {/* eslint-disable-next-line @next/next/no-img-element -- постер из хранилища медиа */}
                 <img src={t.previewUrl} alt={`Постер шоу-матча ${t.title}`} />
-                <div className="sf-p-glare" />
               </div>
             ) : (
               <GeneratedPoster t={t} />
             )}
-          </Tilt>
+          </div>
           <div className="sf-show-info">
             {t.startsAt && (
               <div>
@@ -321,8 +221,8 @@ export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | 
             )}
             <div className="sf-sides">
               {[
-                { name: a, side: sa, color: "var(--sf-a)", corner: "синий угол" },
-                { name: b, side: sb, color: "var(--sf-b)", corner: "красный угол" },
+                { name: a, side: sa, color: "var(--sf-a)", corner: "жёлтый угол" },
+                { name: b, side: sb, color: "var(--sf-b)", corner: "синий угол" },
               ].map((x) => {
                 const login = x.side?.players[0]?.login;
                 const body = (
@@ -402,12 +302,12 @@ export function Leaders({ rows, season }: { rows: LeaderboardRow[]; season?: Sea
   const min = Math.min(...rows.slice(0, 9).map((r) => r.mmr)) - 60;
   const name = (r: LeaderboardRow) => r.displayName || r.login;
   return (
-    <section className="sf-sec sf-paper sf-grain" aria-labelledby="lead-t">
+    <section className="sf-sec sf-paper" aria-labelledby="lead-t">
       <div className="sf-wrap sf-lead-grid">
         <div>
           <p className="sf-eyebrow">{season ? season.name : "Сезон"} · 1×1 · по MMR</p>
           <h2 className="sf-h-big" id="lead-t">
-            таблица лидеров<span className="sf-dot">.</span>
+            таблица лидеров
           </h2>
           <div className="sf-champ">
             <span className="sf-champ-rank" aria-hidden>
@@ -478,15 +378,17 @@ export function Leaders({ rows, season }: { rows: LeaderboardRow[]; season?: Sea
 export function JoinCta() {
   return (
     <section className="sf-cta" aria-labelledby="cta-t">
-      <Stripes shape="cta" />
-      <div className="sf-wrap">
-        <div className="sf-cta-in">
-          <h2 id="cta-t">готов к рейду?</h2>
-          <p>Подай заявку, и организатор позовёт тебя на матч в прямом эфире.</p>
-          <Link className="sf-btn sf-btn-ink" href="/join">
-            Подать заявку
-          </Link>
+      <div className="sf-wrap sf-cta-in">
+        <div>
+          <h2 id="cta-t">Твой заход — следующий</h2>
+          <p>
+            Зарегистрируйся, укажи ник и игровой ID в PUBG Mobile. Нужен открытый в игре Ultimate Royale. Матчи собираются в эфире
+            из заявок.
+          </p>
         </div>
+        <Link className="sf-btn sf-btn-ink" href="/join">
+          Подать заявку
+        </Link>
       </div>
     </section>
   );

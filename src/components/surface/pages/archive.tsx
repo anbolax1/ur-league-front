@@ -4,7 +4,7 @@ import { isShowMatch } from "@/lib/match";
 import { ArchiveView, type ArchiveMatch } from "@/components/surface/archive-list";
 import { beltMarkLabel, matchBelt } from "@/components/surface/belt-lib";
 
-/** Архив сыгранных матчей в новом дизайне: свежие сверху. */
+/** Архив сыгранных матчей: свежие сверху. */
 export async function SurfaceArchive() {
   const [finished, belt] = await Promise.all([getTournaments("finished"), getBelt()]);
   const matches: ArchiveMatch[] = finished

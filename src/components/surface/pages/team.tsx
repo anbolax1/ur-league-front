@@ -5,7 +5,6 @@ import { getMaps, getSeasons, getTeam, getTeamLeaderboard } from "@/lib/queries"
 import type { MmrStats, Season, TeamProfile } from "@/lib/types";
 import { initials } from "@/lib/format";
 import { seasonStats } from "@/lib/mmr-stats";
-import { Stripes } from "@/components/surface/stripes";
 import { ArrowBack } from "@/components/surface/ui";
 import { SurfaceMissing } from "@/components/surface/missing";
 import { TeamSeasons } from "@/components/surface/team-seasons";
@@ -28,10 +27,9 @@ function TeamCard({ team, name, season, stats, final }: { team: TeamProfile; nam
     <article className="sf-idcard pf-card tm-card" aria-label={`Команда ${name}`}>
       <div className="sf-id-head">
         <span>
-          Пропуск команды<span className="sf-hide-sm"> · Speranza</span>
+          Карточка команды<span className="sf-hide-sm"> · Ultimate Royale</span>
         </span>
         <span className="sf-hide-sm">{season ? `${season.name}${final ? " · итог" : ""}` : "Вне сезона"}</span>
-        <Stripes shape="badge" />
       </div>
       <div className="tm-photos">
         {members.map((m) => (
@@ -67,14 +65,14 @@ function TeamCard({ team, name, season, stats, final }: { team: TeamProfile; nam
         </dl>
       </div>
       <div className="sf-id-code" aria-hidden>
-        <span>{`RSP<<${code}`}</span>
+        <span>{`UR<<${code}`}</span>
         <span>{`S${no}<${String(stats.currentMmr).padStart(4, "0")}<${String(stats.place).padStart(2, "0")}`}</span>
       </div>
     </article>
   );
 }
 
-/** Команда 2×2 в новом дизайне: пропуск состава, рейтинг по сезонам, карты и соперники. */
+/** Команда 2×2: карточка состава, рейтинг по сезонам, карты и соперники. */
 export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
   const team = await getTeam(teamKey);
   if (!team) {
@@ -92,7 +90,7 @@ export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
   const roster = team.members.map((m) => m.displayName || m.login).join(" & ");
   const name = team.name || roster;
 
-  // На пропуске - текущий сезон, а если команда в нём не играла - последний сезон с её матчами и его итог.
+  // На карточке - текущий сезон, а если команда в нём не играла - последний сезон с её матчами и его итог.
   const played = new Set(team.timeline.map((p) => p.season ?? ""));
   const playsNow = !!active && played.has(active.id);
   const season = playsNow ? active : seasons.filter((s) => played.has(s.id)).sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
@@ -112,8 +110,7 @@ export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain pf-top">
-        <Stripes shape="head" draw />
+      <section className="sf-page-head sf-night pf-top">
         <div className="sf-wrap">
           <Link className="sf-back" href="/rating">
             <ArrowBack />
@@ -123,13 +120,13 @@ export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
           <TeamCard team={team} name={name} season={season} stats={stats} final={!playsNow && !!season} />
           {active && !playsNow && team.timeline.length > 0 && (
             <p className="tm-note">
-              В текущем сезоне команда пока не играла{season ? ` — на пропуске итог «${season.name}»` : ""}.
+              В текущем сезоне команда пока не играла{season ? ` — на карточке итог «${season.name}»` : ""}.
             </p>
           )}
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain pf-main">
+      <section className="sf-sec sf-paper pf-main">
         <div className="sf-wrap">
           {team.timeline.length > 0 ? (
             <TeamSeasons team={team} seasons={seasons} maps={maps.map((m) => ({ code: m.code, name: m.name }))} />

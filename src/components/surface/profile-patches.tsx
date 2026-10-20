@@ -22,7 +22,7 @@ import {
 import { pluralKnocks } from "@/lib/format";
 import "@/components/surface/patches.css";
 
-/** Сезон рейдера для карточки и полосок «сколько осталось». */
+/** Сезон игрока для карточки и полосок «сколько осталось». */
 export interface PatchStatsInput {
   mmr: number;
   place: number;
@@ -154,7 +154,7 @@ export function ProfilePatches({
         <div>
           <p className="sf-eyebrow">{seasonLabel} · нашивки выдаются сами по итогам матчей</p>
           <h3 className="sf-h-mid" id="pt-title">
-            карточка и нашивки<span className="sf-dot">.</span>
+            карточка и нашивки
           </h3>
         </div>
         <div className="pt-total">

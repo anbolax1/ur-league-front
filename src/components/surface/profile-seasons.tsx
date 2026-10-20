@@ -84,7 +84,7 @@ export function mergeAnalytics(list: SeasonAnalytics[]): SeasonAnalytics {
 function Knocks({ k, all }: { k: KnockStats; all: boolean }) {
   return (
     <div className="pf-knocks">
-      <h3 className="sf-h-mid">киллы<span className="sf-dot">.</span></h3>
+      <h3 className="sf-h-mid">киллы</h3>
       <dl className="sf-stats">
         <div>
           <dt>Киллов</dt>
@@ -212,7 +212,7 @@ export function ProfileSeasons({
       <div className="sf-sec-head pf-head">
         <div>
           <p className="sf-eyebrow">Рейтинг 1×1 · MMR начинается заново каждый сезон</p>
-          <h2 className="sf-h-mid">рейтинг по сезонам<span className="sf-dot">.</span></h2>
+          <h2 className="sf-h-mid">рейтинг по сезонам</h2>
         </div>
         {tabs.length > 1 && (
           <div className="sf-seg pf-tabs" role="tablist" aria-label="Сезон">
@@ -329,7 +329,7 @@ export function MapsAndRivals({
   return (
     <div className="sf-prof-cols">
       <div>
-        <h3 className="sf-h-mid">карты<span className="sf-dot">.</span></h3>
+        <h3 className="sf-h-mid">карты</h3>
         {mapStats.length ? (
           <ul className="sf-maps-list">
             {mapStats.map((m) => {
@@ -359,7 +359,7 @@ export function MapsAndRivals({
         <p className="pf-hint">Матч на нескольких картах засчитан на каждую.</p>
       </div>
       <div>
-        <h3 className="sf-h-mid">соперники<span className="sf-dot">.</span></h3>
+        <h3 className="sf-h-mid">соперники</h3>
         {opponents.length ? (
           <ul className="sf-hist">
             {opponents.map((o, i) => {

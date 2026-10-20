@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import "./season.css";
 import type { RecapMatch, SeasonRecap } from "@/lib/types";
 import { mapImage } from "@/lib/match";
-import { Stripes } from "@/components/surface/stripes";
 import { SurfaceMissing } from "@/components/surface/missing";
 import { CountUp } from "@/components/surface/motion";
 import { SecHead, signed } from "@/components/surface/ui";
@@ -28,7 +27,7 @@ import {
   W_LOSS,
   W_MATCH,
   W_PLAYER,
-  W_RAIDER,
+  W_PLAYER_GEN,
   W_ROUND,
   W_WIN,
   type Forms,
@@ -60,7 +59,7 @@ const loserName = (r: SeasonRecap, m: RecapMatch) => nameOf(r, m.p[sides(m)[1]])
 
 function Sec({ id, tone, eyebrow, title, lead, children }: { id: string; tone: Tone; eyebrow: string; title: string; lead?: ReactNode; children: ReactNode }) {
   return (
-    <section className={`sf-sec ${tone} sf-grain sn-sec`} id={id} aria-labelledby={`${id}-t`}>
+    <section className={`sf-sec ${tone} sn-sec`} id={id} aria-labelledby={`${id}-t`}>
       <div className="sf-wrap">
         <SecHead eyebrow={eyebrow} title={title} id={`${id}-t`} action={lead ? <p className="sf-lead sn-lead">{lead}</p> : undefined} />
         {children}
@@ -83,28 +82,21 @@ function Hero({ recap, no, nav }: { recap: SeasonRecap; no: string; nav: Array<[
   return (
     <section className="sf-hero sf-night sn-hero" id="top">
       <div className="sf-hero-bg" style={{ backgroundImage: `url(${mapImage("erangel")})` }} aria-hidden />
-      <Stripes shape="hero" draw />
       <div className="sf-wrap sf-hero-grid">
         <div>
           <p className="sf-eyebrow">
-            Лига · ARC Raiders{S.first && S.last ? ` · ${dLong(S.first)} – ${dLong(S.last)} ${year}` : ""}
+            Лига Ultimate Royale{S.first && S.last ? ` · ${dLong(S.first)} – ${dLong(S.last)} ${year}` : ""}
           </p>
           <h1>
             <span className="ln">
-              <span>
-                сезон {no}
-                <i>.</i>
-              </span>
+              <span>сезон {no}</span>
             </span>
             <span className="ln">
-              <span>
-                {recap.live ? "в цифрах" : "итоги"}
-                <i>.</i>
-              </span>
+              <span>{recap.live ? "в цифрах" : "итоги"}</span>
             </span>
           </h1>
           <p className="sf-lead">
-            За <b>{pl(days, W_DAY)}</b> сыграно <b>{pl(S.matches, W_MATCH)}</b> 1×1, в них вышли <b>{pl(S.players, W_RAIDER)}</b>.
+            За <b>{pl(days, W_DAY)}</b> сыграно <b>{pl(S.matches, W_MATCH)}</b> 1×1, в них вышли <b>{pl(S.players, W_PLAYER)}</b>.
             {changes > 0 && (
               <>
                 {" "}
@@ -123,7 +115,6 @@ function Hero({ recap, no, nav }: { recap: SeasonRecap; no: string; nav: Array<[
         </div>
         {champ && (
           <article className="sn-champ" aria-label={recap.live ? "Лидер сезона" : "Чемпион сезона"}>
-            <Stripes shape="corner" className="sn-champ-stripes" />
             <div className="sn-champ-top">
               {recap.live ? "Лидер" : "Чемпион"} {recap.season.name.toLowerCase().replace("сезон", "сезона")} · {pl(champ.matches, W_MATCH)}
             </div>
@@ -169,7 +160,7 @@ function Hero({ recap, no, nav }: { recap: SeasonRecap; no: string; nav: Array<[
             </dd>
           </div>
           <div>
-            <dt>Рейдеров</dt>
+            <dt>Игроков</dt>
             <dd>
               <CountUp value={S.players} />
               <small>{S.oneMatch} сыграли один матч</small>
@@ -920,7 +911,7 @@ function CalendarSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                     key={date}
                     className={`d ${d ? "" : "off"} ${n ? "has" : ""}`}
                     style={n ? { background: fill(n) } : undefined}
-                    title={d ? `${dLong(dayTime(date))}: ${n ? pl(n, W_MATCH) : "матчей не было"}${d.new ? `, новых рейдеров ${d.new}` : ""}` : undefined}
+                    title={d ? `${dLong(dayTime(date))}: ${n ? pl(n, W_MATCH) : "матчей не было"}${d.new ? `, новых игроков ${d.new}` : ""}` : undefined}
                   >
                     <span className="n">{Number(date.slice(8))}</span>
                     {n || ""}
@@ -948,7 +939,7 @@ function CalendarSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
           </div>
           <div>
             <p className="sn-panel-title">
-              <span>Рейдеров в сезоне</span>
+              <span>Игроков в сезоне</span>
               <span>нарастающим итогом</span>
             </p>
             <div className="sn-cum">
@@ -996,17 +987,16 @@ function HowSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
     S.detailed < S.matches
       ? `${pl(S.matches - S.detailed, W_MATCH)} перенесены из таблицы организатора: там есть итог и одна карта. Счёт по раундам, задания и киллы есть у ${pl(S.detailed, W_MATCH)}.`
       : "",
-    `MMR - Эло с K=${sn.kFactor}, у всех старт ${S.startMmr}. Жетон ×2 удваивает изменение.${corr ? ` ${dLong(corr.at)} рейтинг сверили с официальной таблицей у ${pl(corr.players, W_PLAYER)}.` : ""}`,
+    `MMR - Эло с K=${sn.kFactor}, у всех старт ${S.startMmr}. Жетон ×2 удваивает изменение.${corr ? ` ${dLong(corr.at)} рейтинг сверили с официальной таблицей у ${pl(corr.players, W_PLAYER_GEN)}.` : ""}`,
     "Шанс на победу - ожидаемый результат Эло по MMR обоих игроков прямо перед матчем.",
     "Раунд считается сыгранным, если он начался, даже при счёте 0:0. Киллы - только в матчах, где их записывали.",
     "Победы и поражения - как в таблице лидеров: ×2 из таблицы организатора идёт за два матча.",
   ].filter(Boolean);
   return (
-    <section className={`sf-sec ${tone} sf-grain sn-sec sn-how`} id="how">
-      <Stripes shape="cta" className="sn-how-stripes" />
+    <section className={`sf-sec ${tone} sn-sec sn-how`} id="how">
       <div className="sf-wrap">
         <h2 className="sf-h-big">
-          как считали<span className="sf-dot">.</span>
+          как считали
         </h2>
         <ul className="sn-how-list">
           {items.map((t) => (
@@ -1070,7 +1060,7 @@ export function SurfaceSeason({ recap, no }: { recap: SeasonRecap; no: string })
     id: "you",
     nav: "Найди себя",
     render: (tone) => (
-      <Sec id="you" tone={tone} eyebrow="Карточка любого из рейдеров сезона" title="найди себя" lead="Рейтинг по ходу сезона, все матчи и соперники.">
+      <Sec id="you" tone={tone} eyebrow="Карточка любого игрока сезона" title="найди себя" lead="Рейтинг по ходу сезона, все матчи и соперники.">
         <SeasonYou />
       </Sec>
     ),

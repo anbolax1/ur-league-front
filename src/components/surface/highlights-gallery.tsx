@@ -6,7 +6,6 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { Highlight } from "@/lib/types";
 import { useHighlightUpload } from "@/components/domain/highlight-upload";
-import { Stripes } from "@/components/surface/stripes";
 import { ClipLightbox, ClipTile } from "@/components/surface/highlights";
 
 /** «1 клип», «3 клипа», «5 клипов». */
@@ -110,7 +109,7 @@ function UploadForm({ tournaments, onSent }: { tournaments: { id: string; title:
   );
 }
 
-/** Галерея хайлайтов в новом дизайне: клипы порциями, плеер поверх страницы и форма своего клипа для вошедших. */
+/** Галерея хайлайтов: клипы порциями, плеер поверх страницы и форма своего клипа для вошедших. */
 export function SurfaceHighlightsGallery({
   initialItems,
   initialTotal,
@@ -149,14 +148,13 @@ export function SurfaceHighlightsGallery({
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain hlp-top">
-        <Stripes shape="corner" className="corner" draw />
+      <section className="sf-page-head sf-night hlp-top">
         <div className="sf-wrap">
           <p className="sf-eyebrow">
             Лучшие моменты · {total} {clipsWord(total)}
           </p>
           <h1 className="sf-h-big">
-            лучшие моменты<span className="sf-dot">.</span>
+            лучшие моменты
           </h1>
           <p className="sf-lead hlp-lead">
             Клипы с эфиров. Прислать свой клип может любой, кто вошёл, — после проверки организатором он появится здесь.

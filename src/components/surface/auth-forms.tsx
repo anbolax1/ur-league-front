@@ -6,7 +6,7 @@ import { useAuthForm } from "@/components/domain/auth-form";
 import { useClaimForm } from "@/components/domain/claim-form";
 import { useJoinRequest } from "@/components/domain/register-form";
 
-/** Вход или регистрация по логину и паролю в новом дизайне. */
+/** Вход или регистрация по логину и паролю. */
 export function SurfaceAuthForm({ mode, redirectTo }: { mode: "login" | "register"; redirectTo?: string }) {
   const isRegister = mode === "register";
   const f = useAuthForm(mode, redirectTo);
@@ -26,7 +26,7 @@ export function SurfaceAuthForm({ mode, redirectTo }: { mode: "login" | "registe
           autoCorrect="off"
           spellCheck={false}
           maxLength={32}
-          placeholder="например, raider_07"
+          placeholder="например, nova_07"
           value={f.login}
           onChange={(e) => f.setLogin(e.target.value)}
           required
@@ -142,7 +142,7 @@ export function SurfaceJoinForm({ user }: { user: User }) {
           </svg>
         </span>
         <h2 className="sf-h-up">
-          заявка в пуле<span className="sf-dot">.</span>
+          заявка в пуле
         </h2>
         <p className="au-text">Ты в общем списке участников. Организатор позовёт тебя на матч — статус появится в профиле.</p>
         <div className="au-actions">

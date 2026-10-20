@@ -1,7 +1,7 @@
 "use client";
 
-/* Движение нового дизайна: счётчики, отсчёт с перелистыванием цифр, наклон плаката,
-   параллакс героя. Всё показывает итоговое значение и без JavaScript. */
+/* Движение сайта: счётчики, отсчёт с перелистыванием цифр, параллакс героя.
+   Всё показывает итоговое значение и без JavaScript. */
 
 import * as React from "react";
 
@@ -131,53 +131,7 @@ export function ShortCountdown({ to, prefix = "", soon = "скоро начнё�
   );
 }
 
-/** Сколько прошло от анонса до начала - для полоски под отсчётом. */
-export function AnnounceBar({ from, to }: { from?: string | null; to: string }) {
-  const left = useSecondsLeft(to);
-  const end = new Date(to).getTime();
-  const start = from ? new Date(from).getTime() : end - 7 * 86400000;
-  const now = left === null ? start : end - left * 1000;
-  const p = Math.min(1, Math.max(0, (now - start) / Math.max(1, end - start)));
-  const style = { "--p": `${(p * 100).toFixed(1)}%` } as React.CSSProperties;
-  return (
-    <div className="sf-bar4" style={style} title="Сколько осталось от анонса до начала">
-      <i />
-      <i />
-      <i />
-      <i />
-    </div>
-  );
-}
-
-/** Плакат наклоняется за мышью, по нему ходит блик. */
-export function Tilt({ className, children }: { className?: string; children: React.ReactNode }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const reduce = useReducedMotion();
-  const move = (e: React.PointerEvent) => {
-    if (reduce || e.pointerType !== "mouse") return;
-    const el = ref.current?.firstElementChild as HTMLElement | null;
-    if (!el || !ref.current) return;
-    const r = ref.current.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    el.style.setProperty("--rx", `${(-y * 12).toFixed(2)}deg`);
-    el.style.setProperty("--ry", `${(x * 14).toFixed(2)}deg`);
-    el.style.setProperty("--gx", `${(x * 100 + 50).toFixed(1)}%`);
-    el.style.setProperty("--gy", `${(y * 100 + 50).toFixed(1)}%`);
-  };
-  const leave = () => {
-    const el = ref.current?.firstElementChild as HTMLElement | null;
-    el?.style.setProperty("--rx", "0deg");
-    el?.style.setProperty("--ry", "0deg");
-  };
-  return (
-    <div ref={ref} className={className} onPointerMove={move} onPointerLeave={leave}>
-      {children}
-    </div>
-  );
-}
-
-/** Герой: фон и ленты слегка смещаются за мышью. */
+/** Герой: фон слегка смещается за мышью. */
 export function Parallax({ className, children }: { className?: string; children: React.ReactNode }) {
   const ref = React.useRef<HTMLElement>(null);
   const reduce = useReducedMotion();

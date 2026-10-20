@@ -77,7 +77,7 @@ export interface Tournament {
   title: string;
   mode: TournamentMode;
   status: TournamentStatus;
-  totalRounds: number; // обычный матч - два или три раунда (рейда), шоу-матч - три
+  totalRounds: number; // обычный матч - два или три раунда, шоу-матч - три
   /** match - обычный матч, show - шоу-матч из расписания. */
   format?: MatchFormat;
   ratingMultiplier: number; // жетон «×2 рейтинга»: 1 — обычный матч, 2 — считается за два (двойное Elo, W/L +2)
@@ -271,12 +271,12 @@ export interface PlayerPatch {
   /** Сезон идёт: итоговая нашивка закрепится при его закрытии. */
   provisional?: boolean;
   detail: PatchDetail;
-  /** Сколько рейдеров сезона носят эту нашивку. */
+  /** Сколько игроков сезона носят эту нашивку. */
   holders: number;
 }
 
 export interface PatchSeason {
-  /** Сколько рейдеров играло в сезоне: от этого редкость. */
+  /** Сколько игроков играло в сезоне: от этого редкость. */
   players: number;
   final: boolean;
   items: PlayerPatch[];
@@ -292,7 +292,7 @@ export interface PatchHolder {
 export interface PatchStat {
   code: PatchCode;
   holders: number;
-  /** Сколько рейдеров на каждой ступени, начиная с первой. */
+  /** Сколько игроков на каждой ступени, начиная с первой. */
   tiers?: number[];
   /** Владельцы по месту в таблице сезона. */
   top: PatchHolder[];

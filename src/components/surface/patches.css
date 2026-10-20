@@ -1,4 +1,4 @@
-/* Нашивки и карточка рейдера в новом дизайне: классы с префиксом pt-, внутри .sf-root. */
+/* Нашивки и карточка игрока: классы с префиксом pt-, внутри .sf-root. */
 
 /* ---------- блок «карточка и нашивки» в профиле ---------- */
 .pt-block {
@@ -28,11 +28,11 @@
   gap: 8px;
 }
 .pt-total b {
-  font: 900 46px/1 var(--sf-ff-cc);
+  font: 700 46px/1 var(--sf-ff-c);
   font-variant-numeric: tabular-nums;
 }
 .pt-total p span {
-  font: 700 16px/1 var(--sf-ff-c);
+  font: 600 16px/1 var(--sf-ff-c);
   color: var(--sf-ink-2);
 }
 .pt-total .sf-more {
@@ -72,16 +72,16 @@
   align-items: baseline;
   gap: 12px;
   padding: 12px 0 4px;
-  border-top: 2px solid var(--sf-ink);
+  border-top: 1px solid var(--sf-line-2);
 }
 .pt-group-head h4 {
   margin: 0;
-  font: 800 13px/1.2 var(--sf-ff-c);
+  font: 600 13px/1.2 var(--sf-ff-c);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .pt-group-head span {
-  font: 600 11px/1 var(--sf-ff-m);
+  font: 500 13px/1 var(--sf-ff-c);
   letter-spacing: 0.04em;
   color: var(--sf-ink-2);
 }
@@ -115,7 +115,7 @@
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s;
 }
 .pt-art .pt-c {
-  filter: drop-shadow(0 6px 7px rgba(26, 14, 30, 0.32));
+  filter: drop-shadow(0 6px 7px rgba(0, 0, 0, 0.51));
 }
 .pt-row:hover .pt-art svg {
   transform: rotate(-6deg) scale(1.07);
@@ -143,7 +143,7 @@
   min-width: 0;
 }
 .pt-name {
-  font: 800 16px/1.1 var(--sf-ff-c);
+  font: 600 16px/1.1 var(--sf-ff-c);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -160,7 +160,7 @@
   border-radius: 2px;
   background: var(--sf-ink);
   color: var(--sf-paper);
-  font: 600 10px/1.25 var(--sf-ff-m);
+  font: 500 12px/1.25 var(--sf-ff-c);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
@@ -174,7 +174,7 @@ a.pt-res:hover {
   padding: 4px 6px;
   border-radius: 2px;
   box-shadow: inset 0 0 0 1px currentColor;
-  font: 600 10px/1.3 var(--sf-ff-m);
+  font: 500 12px/1.3 var(--sf-ff-c);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -185,7 +185,7 @@ a.pt-res:hover {
   align-items: center;
   gap: 6px 10px;
   margin-top: 6px;
-  font: 600 10px/1.2 var(--sf-ff-m);
+  font: 500 12px/1.2 var(--sf-ff-c);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -206,7 +206,7 @@ a.pt-res:hover {
 }
 .pt-note {
   margin: 0;
-  font: 600 10px/1.5 var(--sf-ff-m);
+  font: 500 12px/1.5 var(--sf-ff-c);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -224,12 +224,12 @@ a.pt-res:hover {
 }
 .pt-locked-head h4 {
   margin: 0;
-  font: 800 12px/1.2 var(--sf-ff-c);
+  font: 600 12px/1.2 var(--sf-ff-c);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .pt-locked-head span {
-  font: 600 10px/1 var(--sf-ff-m);
+  font: 500 12px/1 var(--sf-ff-c);
   color: var(--sf-ink-2);
 }
 .pt-locked ul {
@@ -285,7 +285,7 @@ a.pt-res:hover {
   }
 }
 
-/* ---------- карточка рейдера: редкость по MMR сезона, наклон за мышью ---------- */
+/* ---------- карточка игрока: редкость по MMR сезона, наклон за мышью ---------- */
 .pt-card {
   --rar: #a7a0aa;
   position: relative;
@@ -294,7 +294,7 @@ a.pt-res:hover {
   border-radius: 14px;
   transform: perspective(1100px) rotate(-2deg) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform 0.25s ease-out;
-  box-shadow: 0 30px 60px -30px rgba(26, 14, 30, 0.8);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.9);
 }
 .pt-card-in {
   position: absolute;
@@ -307,10 +307,10 @@ a.pt-res:hover {
   color: var(--sf-cream);
   background:
     radial-gradient(120% 70% at 50% 0%, color-mix(in oklab, var(--rar) 42%, transparent), transparent 62%),
-    linear-gradient(180deg, #24132b, #130918 70%);
+    linear-gradient(180deg, #171e2b, #0c0f15 70%);
   box-shadow:
     0 0 0 2px var(--rar),
-    inset 0 0 0 8px rgba(19, 9, 24, 0.55),
+    inset 0 0 0 8px rgba(12, 15, 21, 0.55),
     inset 0 0 0 9px color-mix(in oklab, var(--rar) 55%, transparent);
 }
 .pt-card-in::after {
@@ -338,10 +338,10 @@ a.pt-res:hover {
     radial-gradient(60% 50% at var(--gx, 30%) var(--gy, 20%), rgba(255, 255, 255, 0.5), transparent 60%),
     repeating-linear-gradient(
       115deg,
-      rgba(127, 237, 230, 0.22) 0 8%,
-      rgba(249, 207, 10, 0.2) 8% 16%,
-      rgba(242, 39, 28, 0.16) 16% 24%,
-      rgba(43, 239, 131, 0.18) 24% 32%
+      rgba(91, 149, 255, 0.22) 0 8%,
+      rgba(242, 169, 0, 0.2) 8% 16%,
+      rgba(238, 90, 66, 0.16) 16% 24%,
+      rgba(61, 220, 132, 0.18) 24% 32%
     );
   background-size: 100% 100%, 300% 300%;
   background-position: 0 0, var(--gx, 30%) var(--gy, 20%);
@@ -359,7 +359,7 @@ a.pt-res:hover {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  font: 700 10px/1 var(--sf-ff-m);
+  font: 600 12px/1 var(--sf-ff-c);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -375,7 +375,7 @@ a.pt-res:hover {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 35%, #3a2142, #170b1c 72%);
+  background: radial-gradient(circle at 50% 35%, #1f2838, #0c0f15 72%);
   box-shadow: 0 0 0 3px var(--rar), 0 0 40px -6px var(--rar);
   overflow: visible;
 }
@@ -394,20 +394,18 @@ a.pt-res:hover {
   object-fit: cover;
 }
 .pt-card-mono b {
-  font: 900 56px/1 var(--sf-ff-x);
-  font-stretch: 135%;
-  letter-spacing: -0.02em;
+  font: 700 56px/1 var(--sf-ff-c);
+  letter-spacing: 0.01em;
 }
 .pt-card-name {
   text-align: center;
-  font: 900 34px/1 var(--sf-ff-x);
-  font-stretch: 118%;
+  font: 700 34px/1 var(--sf-ff-c);
   overflow-wrap: anywhere;
 }
 .pt-card-sub {
   margin-top: 6px;
   text-align: center;
-  font: 600 12px/1.2 var(--sf-ff-m);
+  font: 500 13px/1.2 var(--sf-ff-c);
   letter-spacing: 0.06em;
   color: var(--sf-cream-2);
 }
@@ -436,19 +434,18 @@ a.pt-res:hover {
   border-top: 1px solid var(--sf-cream-line);
 }
 .pt-card-stats dt {
-  font: 600 9px/1.2 var(--sf-ff-m);
+  font: 500 11px/1.2 var(--sf-ff-c);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sf-cream-2);
 }
 .pt-card-stats dd {
   margin: 0;
-  font: 900 18px/1 var(--sf-ff-x);
-  font-stretch: 112%;
+  font: 700 18px/1 var(--sf-ff-c);
   overflow-wrap: anywhere;
 }
 .pt-card-stats dd.sm {
-  font: 800 13px/1.1 var(--sf-ff-c);
+  font: 600 13px/1.1 var(--sf-ff-c);
   text-transform: uppercase;
 }
 .pt-card-foot {
@@ -457,7 +454,7 @@ a.pt-res:hover {
   align-items: center;
   gap: 8px;
   margin-top: 12px;
-  font: 600 9.5px/1 var(--sf-ff-m);
+  font: 500 11.5px/1 var(--sf-ff-c);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--sf-cream-2);
@@ -476,7 +473,7 @@ a.pt-res:hover {
   justify-content: center;
   gap: 6px 14px;
   margin-top: 4px;
-  font: 600 11px/1.3 var(--sf-ff-m);
+  font: 500 13px/1.3 var(--sf-ff-c);
   color: var(--sf-ink-2);
 }
 .pt-card-scale span {
@@ -488,7 +485,7 @@ a.pt-res:hover {
   width: 10px;
   height: 10px;
   border-radius: 2px;
-  box-shadow: inset 0 0 0 1px rgba(26, 14, 30, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(200, 215, 255, 0.25);
 }
 .pt-side p {
   margin: 0;
@@ -498,7 +495,7 @@ a.pt-res:hover {
   color: var(--sf-ink-2);
 }
 
-/* ---------- три самые редкие нашивки, пришитые к пропуску ---------- */
+/* ---------- три самые редкие нашивки, пришитые к карточке ---------- */
 .pt-idwrap {
   position: relative;
   max-width: 820px;
@@ -546,7 +543,7 @@ a.pt-res:hover {
   translate: 0 -3px;
 }
 .pt-sewn small {
-  font: 600 10px/1 var(--sf-ff-m);
+  font: 500 12px/1 var(--sf-ff-c);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -596,7 +593,7 @@ a.pt-res:hover {
 }
 .pt-mini small {
   margin-left: 6px;
-  font: 600 10px/1 var(--sf-ff-m);
+  font: 500 12px/1 var(--sf-ff-c);
   letter-spacing: 0.04em;
   color: var(--sf-ink-2);
 }
@@ -621,8 +618,8 @@ a.pt-res:hover {
 .pt-match-cols h4 {
   margin: 0;
   padding-bottom: 6px;
-  border-bottom: 2px solid var(--sf-ink);
-  font: 800 13px/1.2 var(--sf-ff-c);
+  border-bottom: 1px solid var(--sf-line-2);
+  font: 600 13px/1.2 var(--sf-ff-c);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -648,7 +645,7 @@ a.pt-res:hover {
   width: 64px;
   height: 64px;
   display: block;
-  filter: drop-shadow(0 5px 6px rgba(26, 14, 30, 0.3));
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.48));
 }
 .pt-match-art .sf-stamp {
   position: absolute;
@@ -656,12 +653,12 @@ a.pt-res:hover {
   top: -6px;
   padding: 3px 5px 2px;
   font-size: 9px;
-  color: #8a5600;
+  color: var(--sf-amber);
   background: var(--sf-paper-2);
 }
 .pt-match-cols b {
   display: block;
-  font: 800 15px/1.1 var(--sf-ff-c);
+  font: 600 15px/1.1 var(--sf-ff-c);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -686,7 +683,7 @@ a.pt-res:hover {
   align-items: center;
   min-height: 42px;
   padding: 0 18px;
-  font: 700 13px/1 var(--sf-ff-c);
+  font: 600 13px/1 var(--sf-ff-c);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
@@ -698,7 +695,7 @@ a.pt-res:hover {
 }
 .pt-facts dd small {
   margin-left: 6px;
-  font: 700 16px/1 var(--sf-ff-c);
+  font: 600 16px/1 var(--sf-ff-c);
   color: var(--sf-cream-2);
 }
 .pt-facts {
@@ -714,7 +711,7 @@ a.pt-res:hover {
   gap: 6px;
 }
 .pt-facts dt {
-  font: 600 10.5px/1.35 var(--sf-ff-m);
+  font: 500 12.5px/1.35 var(--sf-ff-c);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sf-cream-2);
@@ -722,7 +719,7 @@ a.pt-res:hover {
 }
 .pt-facts dd {
   margin: 0;
-  font: 900 46px/1 var(--sf-ff-cc);
+  font: 700 46px/1 var(--sf-ff-c);
   font-variant-numeric: tabular-nums;
 }
 .pt-rarities {
@@ -735,7 +732,7 @@ a.pt-res:hover {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font: 600 11px/1.3 var(--sf-ff-m);
+  font: 500 13px/1.3 var(--sf-ff-c);
   letter-spacing: 0.04em;
   color: var(--sf-ink-2);
 }
@@ -745,7 +742,7 @@ a.pt-res:hover {
   width: 10px;
   height: 10px;
   border-radius: 2px;
-  box-shadow: inset 0 0 0 1px rgba(26, 14, 30, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(200, 215, 255, 0.3);
 }
 .pt-cat-group {
   margin-top: 44px;
@@ -758,7 +755,7 @@ a.pt-res:hover {
   align-items: baseline;
   gap: 6px 24px;
   padding: 14px 0 18px;
-  border-top: 2px solid var(--sf-ink);
+  border-top: 1px solid var(--sf-line-2);
 }
 .pt-cat-head h2 {
   margin: 0;
@@ -789,7 +786,7 @@ a.pt-res:hover {
 .pt-cat-card > svg {
   width: 96px;
   height: 96px;
-  filter: drop-shadow(0 7px 8px rgba(26, 14, 30, 0.32));
+  filter: drop-shadow(0 7px 8px rgba(0, 0, 0, 0.51));
 }
 .pt-cat-card > div {
   display: grid;
@@ -803,7 +800,7 @@ a.pt-res:hover {
   gap: 6px 10px;
 }
 .pt-cat-title b {
-  font: 800 18px/1.1 var(--sf-ff-c);
+  font: 600 18px/1.1 var(--sf-ff-c);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -811,7 +808,7 @@ a.pt-res:hover {
   padding: 4px 6px;
   border-radius: 2px;
   box-shadow: inset 0 0 0 1px var(--sf-ink-2);
-  font: 600 9px/1 var(--sf-ff-m);
+  font: 500 11px/1 var(--sf-ff-c);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -830,7 +827,7 @@ a.pt-res:hover {
   display: grid;
   justify-items: center;
   gap: 2px;
-  font: 600 10px/1.2 var(--sf-ff-m);
+  font: 500 12px/1.2 var(--sf-ff-c);
   letter-spacing: 0.04em;
 }
 .pt-cat-tiers svg {
@@ -838,7 +835,7 @@ a.pt-res:hover {
   height: 52px;
 }
 .pt-cat-tiers small {
-  font: 600 9px/1.2 var(--sf-ff-m);
+  font: 500 11px/1.2 var(--sf-ff-c);
   color: var(--sf-ink-2);
 }
 .pt-cat-rar {
@@ -846,7 +843,7 @@ a.pt-res:hover {
   align-items: center;
   gap: 8px;
   margin-top: 6px;
-  font: 600 11px/1.2 var(--sf-ff-m);
+  font: 500 13px/1.2 var(--sf-ff-c);
   letter-spacing: 0.03em;
   color: var(--sf-ink-2);
 }
@@ -854,7 +851,7 @@ a.pt-res:hover {
   display: block;
   height: 4px;
   border-radius: 2px;
-  background: rgba(26, 14, 30, 0.12);
+  background: rgba(238, 241, 246, 0.12);
   overflow: hidden;
 }
 .pt-cat-bar i {
@@ -875,7 +872,7 @@ a.pt-res:hover {
   border-radius: 2px;
   background: var(--sf-paper-3);
   color: var(--sf-ink);
-  font: 700 10px/1 var(--sf-ff-m);
+  font: 600 12px/1 var(--sf-ff-c);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;

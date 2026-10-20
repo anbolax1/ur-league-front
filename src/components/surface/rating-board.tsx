@@ -188,18 +188,16 @@ function TeamRows({ rows, place }: { rows: TeamLeaderboardRow[]; place: Map<stri
   );
 }
 
-/** Таблица лидеров нового дизайна: сезон, режим 1×1 / 2×2, поиск и сортировка.
+/** Таблица лидеров: сезон, режим 1×1 / 2×2, поиск и сортировка.
     MMR в каждом сезоне начинается заново, поэтому таблица всегда за один сезон. */
 export function RatingBoard({
   seasons,
   initialSolo,
   initialDuo,
-  decor,
 }: {
   seasons: Season[];
   initialSolo: LeaderboardRow[];
   initialDuo: TeamLeaderboardRow[];
-  decor?: React.ReactNode;
 }) {
   const active = seasons.find((s) => s.status === "active");
   const finished = seasons.filter((s) => s.status === "finished");
@@ -269,12 +267,11 @@ export function RatingBoard({
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain">
-        {decor}
+      <section className="sf-page-head sf-night">
         <div className="sf-wrap">
           <p className="sf-eyebrow">{seasonLine(shownSeason)}</p>
           <h1 className="sf-h-big">
-            таблица лидеров<span className="sf-dot">.</span>
+            таблица лидеров
           </h1>
           <p className="sf-lead sfr-lead">
             Главный показатель — MMR: в начале каждого сезона у всех {startMmr}, за победы он растёт, за поражения падает. Нажми на игрока, чтобы открыть
@@ -331,7 +328,7 @@ export function RatingBoard({
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain sfr-body">
+      <section className="sf-sec sf-paper sfr-body">
         <div className="sf-wrap">
           {champ && (
             <div className="sf-champ-banner">

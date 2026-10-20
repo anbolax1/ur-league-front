@@ -3,21 +3,18 @@ import Link from "next/link";
 import "./auth.css";
 import { getClaimInfo, getMe } from "@/lib/queries";
 import { JOIN_STEPS } from "@/lib/display";
-import { Stripes } from "@/components/surface/stripes";
 import { SurfaceMissing } from "@/components/surface/missing";
 import { SurfaceAuthForm, SurfaceClaimForm, SurfaceJoinForm } from "@/components/surface/auth-forms";
 
 /** Каркас страниц с формой: слева заголовок и пояснение, справа карточка на бумаге. */
 function AuthLayout({ eyebrow, title, lead, aside, card, children }: { eyebrow: string; title: string; lead: string; aside?: ReactNode; card: string; children: ReactNode }) {
   return (
-    <section className="sf-page-head sf-night sf-grain au-top">
-      <Stripes shape="head" draw />
+    <section className="sf-page-head sf-night au-top">
       <div className="sf-wrap au-grid">
         <div className="au-intro">
           <p className="sf-eyebrow">{eyebrow}</p>
           <h1 className="sf-h-big">
             {title}
-            <span className="sf-dot">.</span>
           </h1>
           <p className="sf-lead au-lead">{lead}</p>
           {aside}
@@ -45,7 +42,7 @@ export function SurfaceLogin({ redirectTo }: { redirectTo?: string }) {
 export function SurfaceRegister() {
   return (
     <AuthLayout
-      eyebrow="Новый рейдер"
+      eyebrow="Новый игрок"
       title="регистрация"
       lead="Аккаунт нужен, чтобы записываться на матчи, вести профиль и присылать клипы с эфиров."
       card="Создай аккаунт"
@@ -103,7 +100,7 @@ export async function SurfaceJoin() {
     <AuthLayout
       eyebrow="Заявка на матч"
       title="записаться"
-      lead="Выйти на поверхность просто: заявка попадает в общий пул участников, и организатор зовёт на матч в эфире."
+      lead="Попасть на матч просто: заявка попадает в общий пул участников, и организатор зовёт на матч в эфире."
       aside={steps}
       card={user ? "Заявка в общий пул" : "Сначала войди"}
     >

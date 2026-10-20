@@ -5,7 +5,6 @@ import { isShowMatch, roundsLabel } from "@/lib/match";
 import { TELEGRAM_URL } from "@/lib/links";
 import type { Tournament } from "@/lib/types";
 import { TelegramIcon } from "@/components/icons";
-import { Stripes } from "@/components/surface/stripes";
 import { Arrow, SecHead } from "@/components/surface/ui";
 import { ScheduleRows } from "@/components/surface/home-parts";
 import { byStartAsc } from "@/components/surface/shell";
@@ -20,11 +19,9 @@ function PastShow({ t }: { t: Tournament }) {
   return (
     <Link className="sch-show" href={`/tournament/${t.id}`}>
       <span className="sch-show-art" aria-hidden>
-        {t.previewUrl ? (
+        {t.previewUrl && (
           // eslint-disable-next-line @next/next/no-img-element -- картинка из нашего хранилища медиа
           <img src={t.previewUrl} alt="" loading="lazy" />
-        ) : (
-          <Stripes shape="poster" />
         )}
       </span>
       <span className="sch-show-body">
@@ -48,7 +45,7 @@ function PastShow({ t }: { t: Tournament }) {
   );
 }
 
-/** Матчи в новом дизайне: идущий матч и анонсы по дате, ниже - сыгранные шоу-матчи. */
+/** Матчи: идущий матч и анонсы по дате, ниже - сыгранные шоу-матчи. */
 export async function SurfaceSchedule() {
   const [all, match] = await Promise.all([getTournaments(), getCurrentMatch()]);
   const upcoming = all.filter((t) => t.status === "upcoming").sort(byStartAsc);
@@ -57,12 +54,11 @@ export async function SurfaceSchedule() {
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain sch-top">
-        <Stripes shape="corner" className="corner" draw />
+      <section className="sf-page-head sf-night sch-top">
         <div className="sf-wrap">
           <p className="sf-eyebrow">Матчи · время московское</p>
           <h1 className="sf-h-big">
-            матчи<span className="sf-dot">.</span>
+            матчи
           </h1>
           <p className="sf-lead sch-lead">
             Шоу-матчи объявляем заранее. Обычные матчи 1×1 ведущий собирает прямо в эфире — все сыгранные лежат в результатах.
@@ -83,7 +79,7 @@ export async function SurfaceSchedule() {
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain">
+      <section className="sf-sec sf-paper">
         <div className="sf-wrap">
           <SecHead
             eyebrow="Были в эфире"

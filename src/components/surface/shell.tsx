@@ -3,7 +3,6 @@ import { getCurrentMatch, getSeasons, getTournaments } from "@/lib/queries";
 import { isShowMatch } from "@/lib/match";
 import { SurfaceNav, type NavLive } from "@/components/surface/nav";
 import { SurfaceFooter, type FooterSeason } from "@/components/surface/footer";
-import { PageWipe } from "@/components/surface/wipe";
 
 /** Ближайший по дате анонс. */
 export function byStartAsc<T extends { startsAt?: string | null }>(a: T, b: T): number {
@@ -12,7 +11,7 @@ export function byStartAsc<T extends { startsAt?: string | null }>(a: T, b: T): 
   return a.startsAt < b.startsAt ? -1 : a.startsAt > b.startsAt ? 1 : 0;
 }
 
-/** Каркас нового дизайна: шапка, подвал и переход между страницами. */
+/** Каркас сайта: шапка и подвал. */
 export async function SurfaceShell({ children }: { children: ReactNode }) {
   const [match, upcoming, seasons] = await Promise.all([getCurrentMatch(), getTournaments("upcoming"), getSeasons()]);
   const numbered = seasons.filter((s) => s.number).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
@@ -36,7 +35,6 @@ export async function SurfaceShell({ children }: { children: ReactNode }) {
         {children}
       </main>
       <SurfaceFooter season={season} />
-      <PageWipe />
     </div>
   );
 }

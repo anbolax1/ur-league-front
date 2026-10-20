@@ -75,7 +75,7 @@ export function SeasonTable() {
           <thead>
             <tr>
               <th>#</th>
-              <th>Рейдер</th>
+              <th>Игрок</th>
               <th className="r">MMR</th>
               <th className="sn-hide-sm">Путь за сезон</th>
               <th className="r sn-hide-sm">Пик</th>
@@ -140,7 +140,7 @@ export function SeasonTable() {
   );
 }
 
-/** Карточка любого рейдера сезона: график как в профиле и все матчи. */
+/** Карточка любого игрока сезона: график как в профиле и все матчи. */
 export function SeasonYou() {
   const { recap, sel, pick } = useSeason();
   const P = recap.players;
@@ -162,7 +162,7 @@ export function SeasonYou() {
   return (
     <>
       <div className="sn-you-tools">
-        <label htmlFor="sn-you-pick">Рейдер</label>
+        <label htmlFor="sn-you-pick">Игрок</label>
         <select id="sn-you-pick" className="sn-select" value={sel} onChange={(e) => pick(Number(e.target.value))}>
           {P.map((x, i) => (
             <option key={x.login} value={i}>

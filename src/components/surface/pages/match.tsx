@@ -24,7 +24,6 @@ import {
   totalScore,
 } from "@/lib/match";
 import type { HeadToHeadMatch, MatchState, Matchup, MatchupSide, Participant, ParticipantMmr, Round } from "@/lib/types";
-import { Stripes } from "@/components/surface/stripes";
 import { ArrowBack, TagChips, signed } from "@/components/surface/ui";
 import { CountUp, FitBoard, FlipCountdown } from "@/components/surface/motion";
 import { MmrMove, Odds } from "@/components/surface/home-parts";
@@ -209,7 +208,6 @@ function Rounds({ st, rounds, sides, finished }: { st: MatchState; rounds: Round
       <p className="sf-eyebrow">По раундам</p>
       <h2 className="sf-h-mid">
         {roundsTitle(rounds.length)}
-        <span className="sf-dot">.</span>
       </h2>
       {detailed ? (
         <>
@@ -271,7 +269,7 @@ function EloBlock({ a, b, ca, cb, k, mult }: { a: Participant; b: Participant; c
     <div className="sf-m-block">
       <p className="sf-eyebrow">Рейтинг сторон{k ? ` · K = ${k}` : ""}</p>
       <h2 className="sf-h-mid">
-        что дал матч<span className="sf-dot">.</span>
+        что дал матч
       </h2>
       <dl className="sf-elo">
         <div>
@@ -298,7 +296,7 @@ function HeadToHead({ h, a, b }: { h: Matchup["headToHead"]; a: string; b: strin
     <div className="sf-m-block">
       <p className="sf-eyebrow">История пары</p>
       <h2 className="sf-h-mid">
-        личные встречи<span className="sf-dot">.</span>
+        личные встречи
       </h2>
       <div className="sf-h2h">
         <div className="sf-h2h-score">
@@ -338,7 +336,7 @@ function HeadToHead({ h, a, b }: { h: Matchup["headToHead"]; a: string; b: strin
 
 /* ---------- страница ---------- */
 
-/** Страница матча в новом дизайне: шапка с табло, раунды с заходами, рейтинг и личные встречи. */
+/** Страница матча: шапка с табло, раунды с заходами, рейтинг и личные встречи. */
 export async function SurfaceMatch({ id }: { id: string }) {
   const st = await getMatch(id);
   if (!st) notFound();
@@ -396,8 +394,7 @@ export async function SurfaceMatch({ id }: { id: string }) {
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain">
-        <Stripes shape="corner" draw className="corner" />
+      <section className="sf-page-head sf-night">
         <div className="sf-wrap">
           <Link className="sf-back" href={finished ? "/archive" : "/schedule"}>
             <ArrowBack />
@@ -417,7 +414,6 @@ export async function SurfaceMatch({ id }: { id: string }) {
               </div>
               <h1 className="sf-h-big">
                 {title}
-                <span className="sf-dot">.</span>
               </h1>
               <div className="sf-mh-meta">
                 {t.startsAt && (
@@ -506,7 +502,7 @@ export async function SurfaceMatch({ id }: { id: string }) {
       </section>
 
       {paper && (
-        <section className="sf-sec sf-paper sf-grain">
+        <section className="sf-sec sf-paper">
           <div className="sf-wrap">
             {live && beltBlock}
             {showRounds && <Rounds st={st} rounds={rounds} sides={sides} finished={finished} />}

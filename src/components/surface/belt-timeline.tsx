@@ -18,8 +18,8 @@ const BAR_H = 32;
 const DOT_Y = 96;
 const AXIS_Y = 140;
 const MONTHS = ["янв", "фев", "март", "апр", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
-const PAST = "#6e5e77";
-const NOW = "#f1aa1c";
+const PAST = "#6b7385";
+const NOW = "#f2a900";
 
 type Tip = { x: number; y: number; lines: string[] };
 
@@ -56,7 +56,7 @@ export function BeltTimeline({ belt, seasons, now }: { belt: Belt; seasons: Time
         <svg viewBox={`0 0 ${W} 164`} role="img" aria-label="История пояса лиги: кто и когда его держал">
           <defs>
             <pattern id="bl-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-              <rect width="1.6" height="6" fill="rgba(236,226,208,.5)" />
+              <rect width="1.6" height="6" fill="rgba(238,241,246,.5)" />
             </pattern>
           </defs>
           {seasons.map((s) => {
@@ -64,7 +64,7 @@ export function BeltTimeline({ belt, seasons, now }: { belt: Belt; seasons: Time
             if (a >= W) return null;
             return (
               <g key={s.from}>
-                <line x1={a} x2={a} y1="0" y2={AXIS_Y} stroke="rgba(236,226,208,.18)" />
+                <line x1={a} x2={a} y1="0" y2={AXIS_Y} stroke="rgba(238,241,246,.18)" />
                 <text x={a + 6} y="14" className="bl-chart-season">
                   {s.label}
                 </text>
@@ -114,8 +114,8 @@ export function BeltTimeline({ belt, seasons, now }: { belt: Belt; seasons: Time
               return (
                 <g key={d.matchId} className="bl-chart-dot" {...hover(lines)} aria-label={lines.join(", ")}>
                   <circle cx={cx} cy={DOT_Y} r="12" fill="transparent" />
-                  <line x1={cx} x2={cx} y1={BAR_Y + BAR_H + 1} y2={DOT_Y - 5} stroke="rgba(236,226,208,.35)" />
-                  <circle cx={cx} cy={DOT_Y} r="4.5" fill="#ece2d0" stroke="#1c0f22" strokeWidth="2" />
+                  <line x1={cx} x2={cx} y1={BAR_Y + BAR_H + 1} y2={DOT_Y - 5} stroke="rgba(238,241,246,.35)" />
+                  <circle cx={cx} cy={DOT_Y} r="4.5" fill="#eef1f6" stroke="#111621" strokeWidth="2" />
                 </g>
               );
             }),
@@ -128,7 +128,7 @@ export function BeltTimeline({ belt, seasons, now }: { belt: Belt; seasons: Time
                   return (
                     <g key={`d${r.matchId}`} className="bl-chart-drop" {...hover(lines)} aria-label={lines.join(", ")}>
                       <rect x={cx - 10} y={DOT_Y + 8} width="58" height="22" fill="transparent" />
-                      <path d={`M${cx - 6} ${DOT_Y + 12} L${cx + 6} ${DOT_Y + 12} L${cx} ${DOT_Y + 22} Z`} fill="#ff5a47" />
+                      <path d={`M${cx - 6} ${DOT_Y + 12} L${cx + 6} ${DOT_Y + 12} L${cx} ${DOT_Y + 22} Z`} fill="#ee5a42" />
                       <text x={cx + 9} y={DOT_Y + 21} className="bl-chart-droptext">
                         выпал
                       </text>
@@ -137,10 +137,10 @@ export function BeltTimeline({ belt, seasons, now }: { belt: Belt; seasons: Time
                 })()
               : null,
           )}
-          <line x1="0" x2={W} y1={AXIS_Y} y2={AXIS_Y} stroke="rgba(236,226,208,.25)" />
+          <line x1="0" x2={W} y1={AXIS_Y} y2={AXIS_Y} stroke="rgba(238,241,246,.25)" />
           {months.map((m) => (
             <g key={m.at}>
-              <line x1={x(m.at)} x2={x(m.at)} y1={AXIS_Y} y2={AXIS_Y + 5} stroke="rgba(236,226,208,.35)" />
+              <line x1={x(m.at)} x2={x(m.at)} y1={AXIS_Y} y2={AXIS_Y + 5} stroke="rgba(238,241,246,.35)" />
               <text x={x(m.at) + 4} y={AXIS_Y + 18} className="bl-chart-axis">
                 {m.label}
               </text>

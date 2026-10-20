@@ -37,7 +37,7 @@ function useSiteHost(): string {
   return React.useSyncExternalStore(noSubscribe, () => window.location.hostname, () => "");
 }
 
-/** Карточка рейдера: редкость по MMR сезона. Мышью наклоняется, блик едет за курсором. */
+/** Карточка игрока: редкость по MMR сезона. Мышью наклоняется, блик едет за курсором. */
 export function RaiderCard({
   name,
   avatarUrl,
@@ -89,7 +89,7 @@ export function RaiderCard({
       style={{ "--rar": rarity.color } as React.CSSProperties}
       onPointerMove={move}
       onPointerLeave={leave}
-      aria-label={`Карточка рейдера ${name}: ${rarity.label.toLowerCase()}, ${seasonName.toLowerCase()}`}
+      aria-label={`Карточка игрока ${name}: ${rarity.label.toLowerCase()}, ${seasonName.toLowerCase()}`}
       role="img"
     >
       <div className="pt-card-in">

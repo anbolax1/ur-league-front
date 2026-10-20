@@ -1,4 +1,4 @@
-/* Профиль игрока в новом дизайне: дополнения к общим стилям пропуска и графика. */
+/* Профиль игрока: дополнения к общим стилям карточки и графика. */
 
 .pf-top {
   padding-bottom: clamp(40px, 6vw, 72px);
@@ -23,7 +23,7 @@
 }
 .pf-login {
   margin: 8px 0 0;
-  font: 600 12px/1.3 var(--sf-ff-m);
+  font: 500 13px/1.3 var(--sf-ff-c);
   letter-spacing: 0.06em;
   color: var(--sf-ink-2);
 }
@@ -32,11 +32,6 @@
   align-items: flex-end;
   max-width: 230px;
   padding-top: 4px;
-}
-/* пропуск - бумага на ночном фоне: цвет тега темнеет, чтобы читался */
-.pf-card .sf-tag {
-  color: color-mix(in oklab, var(--tag, #9a5b00) 62%, #2a1300);
-  background: rgba(245, 238, 223, 0.7);
 }
 @media (max-width: 640px) {
   .pf-stamps {
@@ -67,7 +62,7 @@
 
 .sf-stats dd.pf-sub {
   margin-top: 6px;
-  font: 600 11px/1.3 var(--sf-ff-m);
+  font: 500 13px/1.3 var(--sf-ff-c);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -91,7 +86,7 @@
   align-items: center;
   gap: 6px 18px;
   margin-top: 26px;
-  font: 600 10px/1.3 var(--sf-ff-m);
+  font: 500 12px/1.3 var(--sf-ff-c);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -141,7 +136,7 @@
   opacity: 0.55;
 }
 .sf-chart-box .pf-end {
-  font: 600 12px var(--sf-ff-m);
+  font: 500 13px var(--sf-ff-c);
   fill: var(--sf-ink);
 }
 .sf-chart-box svg {
@@ -156,7 +151,6 @@
 .pf-segs i {
   flex: 1 1 0;
   min-width: 2px;
-  border-radius: 1px;
 }
 .pf-segs i.w {
   background: var(--sf-win-ink);
@@ -167,12 +161,11 @@
 .pf-noimg {
   width: 64px;
   height: 40px;
-  border-radius: 2px;
   background: var(--sf-paper-3);
 }
 .pf-hint {
   margin: 14px 0 0;
-  font: 600 10px/1.4 var(--sf-ff-m);
+  font: 500 12px/1.4 var(--sf-ff-c);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--sf-ink-2);
@@ -188,7 +181,7 @@
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-/* свой профиль: настройки под пропуском и заявки */
+/* свой профиль: настройки под карточкой и заявки */
 .pf-desk {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -197,10 +190,9 @@
   margin-top: 32px;
   padding: 22px 24px;
   border: 2px solid var(--sf-cream-line);
-  border-radius: 6px;
   background: var(--sf-night-2);
 }
-/* нашивки свисают с пропуска вместе с подписью - блок ниже, чтобы их не закрыть */
+/* нашивки свисают с карточки вместе с подписью - блок ниже, чтобы их не закрыть */
 .pt-idwrap.sewn + .pf-desk {
   margin-top: 72px;
 }
@@ -217,7 +209,7 @@
   padding: 0 12px;
 }
 .pf-game #pf-game-id {
-  font-family: var(--sf-ff-m);
+  font-family: var(--sf-ff-c);
 }
 .pf-game .sf-btn {
   justify-self: start;
@@ -255,10 +247,9 @@
   min-height: 38px;
   padding: 0 12px;
   border: 2px solid currentColor;
-  border-radius: 3px;
   background: none;
   color: var(--tag, var(--sf-amber));
-  font: 800 11px/1 var(--sf-ff-c);
+  font: 600 11px/1 var(--sf-ff-c);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
@@ -269,12 +260,11 @@
   height: 10px;
   flex: none;
   border: 2px solid currentColor;
-  border-radius: 2px;
 }
 .pf-tagbtn[aria-pressed="true"] i {
   background: currentColor;
 }
-/* скрытый тег - пунктир и зачёркнутое название: на пропуске его не видно */
+/* скрытый тег - пунктир и зачёркнутое название: на карточке его не видно */
 .pf-tagbtn[aria-pressed="false"] {
   border-style: dashed;
   color: var(--sf-cream-2);

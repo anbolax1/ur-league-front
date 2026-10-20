@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Belt, BeltReign } from "@/lib/types";
 import { getBelt, getSeasons } from "@/lib/queries";
-import { Stripes } from "@/components/surface/stripes";
 import { shortDate, dayMonth } from "@/components/surface/fmt";
 import { plural, W_DAY } from "@/components/surface/season-lib";
 import { BeltPicture, BeltStatus } from "@/components/surface/belt-parts";
@@ -136,11 +135,11 @@ export async function SurfaceBelt() {
 
   if (!belt) {
     return (
-      <section className="sf-page-head sf-night sf-grain">
+      <section className="sf-page-head sf-night">
         <div className="sf-wrap">
           <p className="sf-eyebrow">Пояс лиги</p>
           <h1 className="sf-h-big">
-            пояс лиги<span className="sf-dot">.</span>
+            пояс лиги
           </h1>
           <p className="sf-lead bl-lead">Не удалось загрузить пояс. Обнови страницу чуть позже.</p>
         </div>
@@ -156,12 +155,11 @@ export async function SurfaceBelt() {
 
   return (
     <>
-      <section className="sf-page-head sf-night sf-grain bl-head">
-        <Stripes shape="corner" draw className="corner" />
+      <section className="sf-page-head sf-night bl-head">
         <div className="sf-wrap">
           <p className="sf-eyebrow">Пояс лиги{belt.reigns.length ? ` · с ${dayMonth(belt.reigns[0].from)} ${new Date(belt.reigns[0].from).getFullYear()}` : ""}</p>
           <h1 className="sf-h-big">
-            пояс лиги<span className="sf-dot">.</span>
+            пояс лиги
           </h1>
           <p className="sf-lead bl-lead">
             Пояс всегда у кого-то одного. Его забирают в обычных матчах, и держать его может любой игрок лиги — от новичка до лидера таблицы.
@@ -173,13 +171,13 @@ export async function SurfaceBelt() {
         </div>
       </section>
 
-      <section className="sf-sec sf-paper sf-grain bl-rules-sec" aria-labelledby="bl-rules-t">
+      <section className="sf-sec sf-paper bl-rules-sec" aria-labelledby="bl-rules-t">
         <div className="sf-wrap">
           <div className="sf-sec-head">
             <div>
               <p className="sf-eyebrow">Как это работает</p>
               <h2 className="sf-h-big" id="bl-rules-t">
-                правила<span className="sf-dot">.</span>
+                правила
               </h2>
             </div>
           </div>
@@ -198,7 +196,7 @@ export async function SurfaceBelt() {
       </section>
 
       {belt.reigns.length > 0 && (
-        <section className="sf-sec sf-night-2 sf-grain" aria-labelledby="bl-hist-t">
+        <section className="sf-sec sf-night-2" aria-labelledby="bl-hist-t">
           <div className="sf-wrap">
             <div className="sf-sec-head">
               <div>
@@ -206,7 +204,7 @@ export async function SurfaceBelt() {
                   {changes} {plural(changes, W_CHANGE)} · {stats.length} {plural(stats.length, W_HOLDER)}
                 </p>
                 <h2 className="sf-h-big" id="bl-hist-t">
-                  история<span className="sf-dot">.</span>
+                  история
                 </h2>
               </div>
               <p className="sf-lead bl-hist-lead">Имя каждого носителя остаётся на табличке. Наведи на отрезок или точку — покажем, кто, когда и с кем.</p>
@@ -244,13 +242,13 @@ export async function SurfaceBelt() {
       )}
 
       {stats.length > 0 && (
-        <section className="sf-sec sf-paper sf-grain" aria-labelledby="bl-rec-t">
+        <section className="sf-sec sf-paper" aria-labelledby="bl-rec-t">
           <div className="sf-wrap">
             <div className="sf-sec-head">
               <div>
                 <p className="sf-eyebrow">Рекорды пояса</p>
                 <h2 className="sf-h-big" id="bl-rec-t">
-                  рекорды<span className="sf-dot">.</span>
+                  рекорды
                 </h2>
               </div>
             </div>
