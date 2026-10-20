@@ -263,9 +263,11 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
             <button type="button" className="seg-btn" aria-pressed={true}>
               <span>1×1</span>
             </button>
-            <button type="button" className="seg-btn opacity-50" aria-pressed={false} disabled title="2×2 — следующим шагом">
-              <span>2×2</span>
-            </button>
+            {["2×2", "3×3"].map((m) => (
+              <button key={m} type="button" className="seg-btn opacity-50" aria-pressed={false} disabled title={`${m} — следующим этапом, вместе с составами`}>
+                <span>{m}</span>
+              </button>
+            ))}
           </div>
         </div>
         <div className="space-y-1.5">
