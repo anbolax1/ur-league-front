@@ -58,10 +58,7 @@ export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {
           </div>
         </div>
         <div className="sf-legal">
-          <p>
-            © {new Date().getFullYear()} Лига Ultimate Royale. Фанатский проект, не связан с KRAFTON и Level Infinite. PUBG MOBILE и
-            кадры игры — © KRAFTON, Inc.
-          </p>
+          <p>© {new Date().getFullYear()} Лига Ultimate Royale. Фанатский проект, не связан с KRAFTON и Level Infinite.</p>
           <p>
             Разработка и поддержка — <Link href="/profile/Istwood">Istwood</Link>
           </p>
