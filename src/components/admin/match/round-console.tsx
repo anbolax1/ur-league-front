@@ -15,7 +15,6 @@ import {
   taskKindLabel,
   taskTitle,
   totalScore,
-  type RoundBreakdown,
 } from "@/lib/match";
 import type { CatalogLegendary, MapInfo, MatchLogEntry, MatchState, Participant, Round, RoundBonusTask } from "@/lib/types";
 
@@ -27,6 +26,8 @@ const SIDE_STYLE = [
     edge: "border-t-[var(--primary)]",
     tag: "pts-orange",
     knock: "text-primary-2 [&::before]:bg-[rgba(255,106,26,0.1)] [&::before]:shadow-[inset_0_0_0_1px_rgba(255,106,26,0.55)]",
+    inFrame: "bg-[var(--primary)] text-[#1a0c02]",
+    ring: "shadow-[0_0_0_2px_rgba(255,106,26,0.85),0_0_28px_-8px_rgba(255,106,26,0.7)]",
   },
   {
     letter: "B",
@@ -34,6 +35,8 @@ const SIDE_STYLE = [
     edge: "border-t-[var(--accent)]",
     tag: "pts-cyan",
     knock: "text-accent [&::before]:bg-[rgba(34,211,238,0.08)] [&::before]:shadow-[inset_0_0_0_1px_rgba(34,211,238,0.55)]",
+    inFrame: "bg-[var(--accent)] text-[#04232a]",
+    ring: "shadow-[0_0_0_2px_rgba(34,211,238,0.85),0_0_28px_-8px_rgba(34,211,238,0.6)]",
   },
 ] as const;
 
@@ -47,6 +50,15 @@ function SideTag({ i }: { i: 0 | 1 }) {
   return (
     <span className={`pts ${SIDE_STYLE[i].tag}`}>
       <span>{SIDE_STYLE[i].letter}</span>
+    </span>
+  );
+}
+
+/** Метка стороны в кадре: её заход сейчас показывает оверлей. */
+function InFrameLabel({ i }: { i: 0 | 1 }) {
+  return (
+    <span className={`inline-flex flex-none items-center gap-2 rounded px-2.5 py-1.5 font-display text-sm uppercase leading-none ${SIDE_STYLE[i].inFrame}`}>
+      <span className="h-2 w-2 animate-pulse rounded-full bg-current" aria-hidden />В кадре
     </span>
   );
 }
@@ -67,7 +79,7 @@ function RoundCard({ st, r, now, sides }: { st: MatchState; r: Round; now: boole
   const places = roundPlacesLabel(st, r.number, sides);
   return (
     <div
-      className={`flex items-center justify-between gap-3 rounded-md px-3.5 py-2.5 ${
+      className={`flex items-center justify-between gap-3 rounded-md px-3.5 py-2 ${
         now ? "bg-[rgba(255,106,26,0.12)] shadow-[inset_0_0_0_1px_rgba(255,106,26,0.45)]" : "bg-surface-2 shadow-[inset_0_0_0_1px_var(--border)]"
       }`}
     >
@@ -88,6 +100,7 @@ function RoundCard({ st, r, now, sides }: { st: MatchState; r: Round; now: boole
   );
 }
 
+/** Задание стороны: что сделать слева, зачёт справа. Задание, кроме протокола, может выполнить и соперник - ему +1. */
 function TaskRow({
   t,
   owner,
@@ -105,9 +118,10 @@ function TaskRow({
   const byOwner = t.completedBy === t.participantId;
   const byOpp = !!t.completedBy && !byOwner;
   const desc = taskDescription(t);
+  const rival = opponent?.name ?? "соперник";
   return (
     <div
-      className={`space-y-2.5 rounded-md p-3 ${
+      className={`flex items-center gap-3 rounded-md px-3 py-2 ${
         byOwner
           ? "bg-[rgba(52,211,153,0.08)] shadow-[inset_0_0_0_1px_rgba(52,211,153,0.4)]"
           : byOpp
@@ -115,109 +129,97 @@ function TaskRow({
             : "bg-surface-2 shadow-[inset_0_0_0_1px_var(--border)]"
       }`}
     >
-      <div className="flex flex-wrap items-start gap-x-2.5 gap-y-1.5">
-        <span className={`badge ${KIND_STYLE[kind]}`}>
-          <span>
-            {kind} · {t.points}
-            {t.category === "protocol" ? " · на время" : ""}
+      <div className="min-w-0 flex-1">
+        {/* Плашка и название - один абзац: длинное название переносится по словам рядом с плашкой, а не уходит под неё целиком. */}
+        <p className="text-[0.95rem] font-semibold leading-snug">
+          <span className={`badge mr-2 ${KIND_STYLE[kind]}`}>
+            <span>
+              {kind} · {t.points}
+              {t.category === "protocol" ? " · на время" : ""}
+            </span>
           </span>
-        </span>
-        <div className="min-w-[200px] flex-1">
-          <div className="text-[0.95rem] font-semibold leading-snug">«{taskTitle(t)}»</div>
-          {desc && <div className="text-sm text-muted">{desc}</div>}
-        </div>
+          «{taskTitle(t)}»
+        </p>
+        {desc && <p className="mt-0.5 text-sm leading-snug text-muted">{desc}</p>}
       </div>
       {t.completedBy ? (
-        <div className="flex flex-wrap items-center gap-3">
-          <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${byOwner ? "text-ok" : "text-accent"}`}>
+        <>
+          <span
+            className={`inline-flex flex-none items-center gap-1.5 text-sm font-semibold ${byOwner ? "text-ok" : "text-accent"}`}
+            title={byOwner ? `Выполнил ${owner.name}` : `Выполнил ${rival}`}
+          >
             <CheckIcon className="h-4 w-4" />
-            {byOwner ? `Выполнил ${owner.name} · +${t.points}` : `Выполнил соперник ${opponent?.name ?? ""} · +${CROSS_POINTS} ему`}
+            {byOwner ? `+${t.points}` : `+${CROSS_POINTS} ${rival}`}
           </span>
           <button
             type="button"
-            className="ml-auto min-h-[44px] px-2 text-sm text-muted underline transition hover:text-fg"
+            className="min-h-[36px] flex-none px-1 text-sm text-muted underline transition hover:text-fg"
             onClick={() => onMark(t.id, "none")}
           >
             Отменить
           </button>
-        </div>
+        </>
       ) : (
-        <div className="flex flex-wrap items-center gap-2">
+        <>
+          {/* Кнопки узкие, без лишних слов: место в строке отдано названию задания. */}
           <button
             type="button"
-            className="btn btn-sm min-h-[44px] text-ok [&::before]:bg-[rgba(52,211,153,0.12)] [&::before]:shadow-[inset_0_0_0_1px_rgba(52,211,153,0.5)]"
+            className="btn btn-sm flex-none text-ok [&::before]:bg-[rgba(52,211,153,0.12)] [&::before]:shadow-[inset_0_0_0_1px_rgba(52,211,153,0.5)]"
             onClick={() => onMark(t.id, "owner")}
+            title={`Выполнил ${owner.name}: +${t.points}`}
+            aria-label={`Засчитать «${taskTitle(t)}» ${owner.name}, +${t.points}`}
           >
             <CheckIcon />
-            <span>Своё +{t.points}</span>
+            <span>+{t.points}</span>
           </button>
           {t.category !== "protocol" && (
-            <button type="button" className="btn btn-cyan btn-sm min-h-[44px]" onClick={() => onMark(t.id, "opponent")}>
+            <button
+              type="button"
+              className="btn btn-cyan btn-sm flex-none"
+              onClick={() => onMark(t.id, "opponent")}
+              title={`Выполнил ${rival}: +${CROSS_POINTS} ему`}
+              aria-label={`Засчитать «${taskTitle(t)}» сопернику, +${CROSS_POINTS}`}
+            >
               <span>Соперник +{CROSS_POINTS}</span>
             </button>
           )}
           <button
             type="button"
-            className="ml-auto flex h-11 w-11 items-center justify-center rounded-md bg-surface text-muted transition hover:text-fg"
+            className="flex h-9 w-9 flex-none items-center justify-center rounded-md bg-surface text-muted transition hover:text-fg"
             onClick={() => onReroll(t.id)}
             title="Перебросить задание"
             aria-label={`Перебросить задание «${taskTitle(t)}»`}
           >
             ↻
           </button>
-        </div>
+        </>
       )}
     </div>
   );
 }
 
-/** Из чего сложились очки стороны в раунде, кроме киллов; ручные правятся прямо здесь, на месте своего числа. */
-function ScoreParts({
-  parts,
-  onManual,
-}: {
-  parts: RoundBreakdown;
-  onManual: (delta: number, label: string) => void;
-}) {
-  const num = (v: number) => <span className={`font-display text-xl leading-none tnum ${v ? "" : "text-muted"}`}>{v}</span>;
+/** Ручные очки ведущего без киллов: правка на месте числа. */
+function ManualPoints({ value, onChange }: { value: number; onChange: (delta: number, label: string) => void }) {
   const step =
-    "flex h-8 w-8 items-center justify-center rounded-md bg-surface text-lg leading-none text-muted transition hover:text-fg disabled:cursor-not-allowed disabled:opacity-30";
-  const cells: Array<{ label: string; hint?: string; value: React.ReactNode }> = [
-    { label: "Задания", hint: "Свои задания стороны", value: num(parts.tasks) },
-    { label: "Чужие", hint: `Задания соперника, которые выполнила эта сторона: +${CROSS_POINTS} за каждое`, value: num(parts.cross) },
-    {
-      label: "Ручные",
-      value: (
-        <span className="flex items-center gap-1" role="group" aria-label="Поправка ручных очков">
-          <button
-            type="button"
-            className={step}
-            disabled={parts.manual <= 0}
-            onClick={() => onManual(-1, "поправка")}
-            title={parts.manual > 0 ? "Убрать 1 ручное очко" : "Ручных очков нет - убирать нечего"}
-            aria-label="Убрать 1 ручное очко"
-          >
-            −
-          </button>
-          <span className="w-7 text-center">{num(parts.manual)}</span>
-          <button type="button" className={step} onClick={() => onManual(1, "ручные очки")} aria-label="Добавить 1 ручное очко">
-            +
-          </button>
-        </span>
-      ),
-    },
-    { label: "Легендарка", hint: "Легендарные контракты в этом раунде", value: num(parts.legendary) },
-  ];
-
+    "flex h-9 w-9 items-center justify-center rounded-md bg-surface-2 text-lg leading-none text-muted shadow-[inset_0_0_0_1px_var(--border)] transition hover:text-fg disabled:cursor-not-allowed disabled:opacity-30";
   return (
-    <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-      {cells.map((c) => (
-        <div key={c.label} className="flex flex-col items-center rounded-md bg-surface-2 px-1 py-2 shadow-[inset_0_0_0_1px_var(--border)]" title={c.hint}>
-          <span className="field-label">{c.label}</span>
-          <span className="flex h-8 items-center">{c.value}</span>
-        </div>
-      ))}
-    </div>
+    <span className="flex flex-none items-center gap-1.5" role="group" aria-label="Ручные очки">
+      <span className="field-label">Ручные</span>
+      <button
+        type="button"
+        className={step}
+        disabled={value <= 0}
+        onClick={() => onChange(-1, "поправка")}
+        title={value > 0 ? "Убрать 1 ручное очко" : "Ручных очков нет - убирать нечего"}
+        aria-label="Убрать 1 ручное очко"
+      >
+        −
+      </button>
+      <span className={`w-6 text-center font-display text-xl leading-none tnum ${value ? "" : "text-muted"}`}>{value}</span>
+      <button type="button" className={step} onClick={() => onChange(1, "ручные очки")} aria-label="Добавить 1 ручное очко">
+        +
+      </button>
+    </span>
   );
 }
 
@@ -285,9 +287,9 @@ export function MatchLog({ log, onUndo }: { log: MatchLogEntry[]; onUndo: () => 
 /** Карта захода: игра выбирает её сама, ведущий отмечает выпавшую - после этого выдаётся задание на карту. */
 function HeatMap({ maps, code, name, onPick }: { maps: MapInfo[]; code?: string; name: string; onPick: (mapCode: string) => void }) {
   return (
-    <div className="space-y-1.5">
-      <span className="field-label block">Карта захода</span>
-      <div className="seg flex-wrap" role="group" aria-label={`Карта захода ${name}`}>
+    <span className="flex flex-wrap items-center gap-2">
+      <span className="field-label">Карта</span>
+      <span className="seg flex-wrap" role="group" aria-label={`Карта захода ${name}`}>
         {maps.map((m) => (
           <button
             key={m.code}
@@ -299,9 +301,8 @@ function HeatMap({ maps, code, name, onPick }: { maps: MapInfo[]; code?: string;
             <span>{m.name}</span>
           </button>
         ))}
-      </div>
-      {!code && <p className="text-xs text-muted">Игра покажет карту на старте — отметьте её, и выдастся задание на карту.</p>}
-    </div>
+      </span>
+    </span>
   );
 }
 
@@ -309,15 +310,16 @@ function HeatMap({ maps, code, name, onPick }: { maps: MapInfo[]; code?: string;
 function HeatPlace({ place, name, onPick }: { place?: number | null; name: string; onPick: (place: number | null) => void }) {
   const id = React.useId();
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+    <span className="flex items-center gap-2">
       <label className="field-label" htmlFor={id}>
-        Место в матче
+        Место
       </label>
       <select
         id={id}
-        className="input min-h-[44px] w-auto py-0"
+        className="input min-h-[40px] w-auto py-0"
         value={place ?? ""}
         onChange={(e) => onPick(e.target.value ? Number(e.target.value) : null)}
+        title="По экрану итогов захода, очков не даёт"
         aria-label={`Место ${name} в матче`}
       >
         <option value="">—</option>
@@ -327,8 +329,7 @@ function HeatPlace({ place, name, onPick }: { place?: number | null; name: strin
           </option>
         ))}
       </select>
-      <span className="text-xs text-muted">по экрану итогов захода, очков не даёт</span>
-    </div>
+    </span>
   );
 }
 
@@ -359,7 +360,7 @@ export function RoundConsole({
   online: boolean;
   /** Есть запросы, на которые сервер ещё не ответил. */
   saving: boolean;
-  /** Кнопки хода матча: следующий раунд, завершение, отмена. */
+  /** Кнопки хода матча: следующий заход или раунд, завершение, отмена. */
   actions: React.ReactNode;
   onFocus: (participantId: string) => void;
   onMap: (participantId: string, mapCode: string) => void;
@@ -377,14 +378,14 @@ export function RoundConsole({
   const available = legendary.filter((l) => l.status === "available");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <Panel>
-        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 px-5 pb-4 pt-5">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 px-5 pb-3 pt-4">
           <div className="flex min-w-0 items-center gap-2.5">
             <SideTag i={0} />
             <span className="truncate font-display text-xl uppercase text-primary-2 sm:text-2xl">{a?.name ?? "—"}</span>
           </div>
-          <div className="flex items-center gap-3 font-display text-5xl leading-none tnum" aria-label="Счёт матча">
+          <div className="flex items-center gap-3 font-display text-4xl leading-none tnum" aria-label="Счёт матча">
             <span className="text-primary-2">{totalScore(st, a?.id)}</span>
             <span className="text-2xl text-muted">:</span>
             <span className="text-accent">{totalScore(st, b?.id)}</span>
@@ -395,24 +396,14 @@ export function RoundConsole({
           </div>
         </div>
 
-        <div className={`grid gap-2 px-5 pb-5 ${rounds.length > 2 ? "md:grid-cols-3" : "sm:grid-cols-2"}`}>
+        <div className={`grid gap-2 px-5 pb-4 ${rounds.length > 2 ? "md:grid-cols-3" : "sm:grid-cols-2"}`}>
           {rounds.map((r) => (
             <RoundCard key={r.id} st={st} r={r} now={r.number === round} sides={sides} />
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-[var(--border)] bg-surface-2/50 px-5 py-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-[var(--border)] bg-surface-2/50 px-5 py-2.5">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="field-label">В кадре заход</span>
-            <div className="seg">
-              {sides.map((p) =>
-                p ? (
-                  <button key={p.id} type="button" className="seg-btn" aria-pressed={focusId === p.id} onClick={() => onFocus(p.id)}>
-                    <span>{p.name}</span>
-                  </button>
-                ) : null,
-              )}
-            </div>
             <OverlayStatus online={online} />
             {/* Проявляется с задержкой: быстрый ответ сервера её не покажет, и панель не мигает на каждый клик. */}
             <span
@@ -426,7 +417,7 @@ export function RoundConsole({
         </div>
       </Panel>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-3 xl:grid-cols-2">
         {sides.map((p, i) => {
           if (!p) return null;
           const side = i === 0 ? 0 : 1;
@@ -436,32 +427,37 @@ export function RoundConsole({
           const done = tasks.filter((t) => t.completedBy === p.id).length;
           const parts = roundBreakdown(st, round, p.id);
           const heat = heatOf(st, round, p.id);
+          const inFrame = focusId === p.id;
           return (
-            <Panel key={p.id} className={`flex flex-col border-t-[3px] ${style.edge}`}>
-              <div className="space-y-3 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2.5 pt-1">
-                    <SideTag i={side} />
-                    <h3 className="truncate font-display text-lg uppercase">{p.name}</h3>
-                    {focusId === p.id && (
-                      <span className="badge badge-glad flex-none">
-                        <span>В кадре</span>
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-none text-right">
-                    <span className="field-label">Раунд {round}</span>
-                    <div className={`font-display text-4xl leading-none tnum ${style.text}`}>{roundScore(st, round, p.id)}</div>
-                  </div>
-                </div>
-                <HeatMap maps={maps} code={heat?.mapCode} name={p.name} onPick={(code) => onMap(p.id, code)} />
-                <HeatPlace place={heat?.place} name={p.name} onPick={(place) => onPlace(p.id, place)} />
-                <ScoreParts parts={parts} onManual={(delta, label) => onPoints(p.id, delta, label)} />
-                {/* Отступ справа - под скос кнопки, чтобы её угол не вылезал за край плиток с очками. */}
-                <div className="flex items-center gap-3 pr-1.5">
+            <Panel key={p.id} className={`flex flex-col border-t-[3px] transition-shadow ${style.edge} ${inFrame ? style.ring : ""}`}>
+              <div className="space-y-2.5 px-4 pb-3 pt-3">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    className="flex h-11 w-11 flex-none items-center justify-center rounded-md bg-surface-2 text-lg text-muted shadow-[inset_0_0_0_1px_var(--border)] transition hover:text-fg disabled:cursor-not-allowed disabled:opacity-30"
+                    className="group flex min-w-0 items-center gap-2.5 text-left"
+                    aria-pressed={inFrame}
+                    onClick={() => onFocus(p.id)}
+                    title={inFrame ? `В кадре заход ${p.name}` : `Показать в кадре заход ${p.name}`}
+                  >
+                    <SideTag i={side} />
+                    <span className="truncate font-display text-lg uppercase decoration-2 underline-offset-4 group-hover:underline">{p.name}</span>
+                  </button>
+                  {inFrame && <InFrameLabel i={side} />}
+                  <div className="ml-auto flex flex-none items-baseline gap-2">
+                    <span className="field-label">Раунд {round}</span>
+                    <span className={`font-display text-3xl leading-none tnum ${style.text}`}>{roundScore(st, round, p.id)}</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <HeatMap maps={maps} code={heat?.mapCode} name={p.name} onPick={(code) => onMap(p.id, code)} />
+                  <HeatPlace place={heat?.place} name={p.name} onPick={(place) => onPlace(p.id, place)} />
+                </div>
+                {!heat?.mapCode && <p className="text-xs text-muted">Игра покажет карту на старте — отметьте её, и выдастся задание на карту.</p>}
+                {/* Промежутки шире обычных - под скос кнопок: иначе угол «Килла» заходит на соседей. */}
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="flex h-[42px] w-10 flex-none items-center justify-center rounded-md bg-surface-2 text-lg text-muted shadow-[inset_0_0_0_1px_var(--border)] transition hover:text-fg disabled:cursor-not-allowed disabled:opacity-30"
                     disabled={parts.knocks <= 0}
                     onClick={() => onKnock(p.id, -1)}
                     title={parts.knocks > 0 ? "Снять ошибочный килл" : "Киллов нет - снимать нечего"}
@@ -471,16 +467,17 @@ export function RoundConsole({
                   </button>
                   <button
                     type="button"
-                    className={`btn min-h-[44px] flex-1 ${style.knock}`}
+                    className={`btn min-w-[96px] flex-1 ${style.knock}`}
                     onClick={() => onKnock(p.id, 1)}
                     title={`Килл: +${KNOCK_POINTS} очка`}
                   >
                     <span>Килл{parts.knocks > 0 ? ` · ${parts.knocks}` : ""}</span>
                   </button>
+                  <ManualPoints value={parts.manual} onChange={(delta, label) => onPoints(p.id, delta, label)} />
                 </div>
               </div>
 
-              <div className="space-y-2.5 border-t border-[var(--border)] p-4">
+              <div className="space-y-2 border-t border-[var(--border)] px-4 pb-4 pt-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="field-label">Задания раунда</span>
                   {tasks.length > 0 && (
@@ -490,26 +487,19 @@ export function RoundConsole({
                   )}
                 </div>
                 {tasks.length ? (
-                  tasks.map((t) => (
-                    <TaskRow key={t.id} t={t} owner={p} opponent={opp} onMark={onMark} onReroll={onReroll} />
-                  ))
+                  tasks.map((t) => <TaskRow key={t.id} t={t} owner={p} opponent={opp} onMark={onMark} onReroll={onReroll} />)
                 ) : (
                   <p className="text-sm text-muted">Задания раунда не выданы — в каталоге не нашлось подходящих.</p>
                 )}
-              </div>
-
-              <div className="mt-auto space-y-3 border-t border-[var(--border)] p-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    className="btn btn-sm min-h-[44px] text-gold [&::before]:bg-[rgba(255,197,61,0.08)] [&::before]:shadow-[inset_0_0_0_1px_rgba(255,197,61,0.45)]"
-                    aria-expanded={legFor === p.id}
-                    onClick={() => setLegFor((x) => (x === p.id ? null : p.id))}
-                  >
-                    <span>Легендарка +10</span>
-                  </button>
-                  <span className="text-xs text-muted">легендарный контракт: один раз за всё время</span>
-                </div>
+                <button
+                  type="button"
+                  className="flex min-h-[40px] w-full items-center justify-between gap-3 rounded-md border border-dashed border-[rgba(255,197,61,0.35)] px-3 text-left transition hover:bg-[rgba(255,197,61,0.06)]"
+                  aria-expanded={legFor === p.id}
+                  onClick={() => setLegFor((x) => (x === p.id ? null : p.id))}
+                >
+                  <span className="font-display text-xs uppercase text-gold">+ Легендарка +10</span>
+                  <span className="text-xs text-muted">один раз за всё время</span>
+                </button>
                 {legFor === p.id && (
                   <LegendaryPicker
                     available={available}
