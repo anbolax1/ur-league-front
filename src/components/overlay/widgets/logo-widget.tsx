@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { Mark } from "@/components/surface/brand";
 import { WidgetFrame } from "./frame";
 import type { WidgetProps } from "./types";
 
@@ -7,9 +8,18 @@ import type { WidgetProps } from "./types";
 export function LogoWidget({ instance }: WidgetProps) {
   const url = typeof instance.props?.url === "string" ? instance.props.url : "";
   if (!url) {
+    // Без своей картинки - знак и название лиги: виджет не пустой ни в превью, ни в OBS.
     return (
       <WidgetFrame instance={instance}>
-        <div className="flex h-full items-center justify-center px-4 py-3 text-center text-xs text-muted">Логотип: задай URL</div>
+        <div className="flex h-full items-center gap-3 px-4 py-3">
+          <span className="block h-11 w-11 flex-none [&>svg]:h-full [&>svg]:w-full">
+            <Mark />
+          </span>
+          <span className="flex min-w-0 flex-col gap-1 leading-none">
+            <span className="text-[0.6rem] uppercase tracking-[0.2em] text-muted">Лига · PUBG Mobile</span>
+            <span className="truncate font-display text-xl uppercase">Ultimate Royale</span>
+          </span>
+        </div>
       </WidgetFrame>
     );
   }

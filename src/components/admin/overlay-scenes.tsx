@@ -47,6 +47,7 @@ const SAMPLE_STATE: LiveState = {
   complications: [{ text: "Килл до первого сужения зоны", reward: 1, tag: "timed" }],
   heatKills: 3,
   inFrame: [{ name: "Игрок A", gameNick: "PlayerA_UR" }],
+  belt: { holderParticipantId: "sample-a", defenses: 2 },
 };
 
 /** Данные, которых в идущем матче может не быть: задания и протоколы сервер выдаёт с началом раунда. */
@@ -60,12 +61,19 @@ const SAMPLE_PARTS: { types: WidgetType[]; missing: string; has: (s: LiveState) 
   },
 ];
 
-/** Что показать в превью: настоящий матч, а чего в нём ещё нет - из примера, иначе виджет не расставить. */
+/** Что показать в превью: идущий раунд, а чего в нём ещё нет - из примера, иначе виджет не расставить.
+    Вне раунда «Киллы захода» и «В кадре» пусты, поэтому превью целиком из примера. */
 function previewOf(state: LiveState | null, layout: OverlayLayout): { data: LiveState; note?: string } {
-  if (!state) {
+  if (!state || state.status !== "live") {
     return {
       data: SAMPLE_STATE,
       note: "Матча сейчас нет: в превью пример с условными игроками. Во время матча здесь и в OBS будут его настоящие данные.",
+    };
+  }
+  if (state.stage !== "round") {
+    return {
+      data: SAMPLE_STATE,
+      note: "Раунд сейчас не идёт: в превью пример с условными игроками. В OBS виден настоящий матч, а «Киллы захода» и «В кадре» - с началом захода.",
     };
   }
   const shown = new Set(layout.widgets.filter((w) => w.visible).map((w) => w.type));
