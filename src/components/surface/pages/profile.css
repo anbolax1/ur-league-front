@@ -204,17 +204,44 @@
 .pt-idwrap.sewn + .pf-desk {
   margin-top: 72px;
 }
-.pf-embark {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.pf-game {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 10px;
 }
-.pf-embark .sf-input {
-  flex: 1 1 180px;
+.pf-game .sf-input {
   width: auto;
+  min-width: 0;
   min-height: 38px;
   padding: 0 12px;
+}
+.pf-game #pf-game-id {
   font-family: var(--sf-ff-m);
+}
+.pf-game .sf-btn {
+  justify-self: start;
+  margin-top: 4px;
+}
+@media (max-width: 560px) {
+  .pf-game {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pf-game label:nth-of-type(1) {
+    order: 1;
+  }
+  .pf-game #pf-game-id {
+    order: 2;
+  }
+  .pf-game label:nth-of-type(2) {
+    order: 3;
+  }
+  .pf-game #pf-game-nick {
+    order: 4;
+  }
+  .pf-game .sf-btn {
+    order: 5;
+  }
 }
 .pf-tagset {
   display: flex;

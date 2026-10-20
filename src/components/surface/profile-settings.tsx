@@ -6,20 +6,32 @@ import { useRouter } from "next/navigation";
 import { api, errorText } from "@/lib/api";
 import type { User, UserTag } from "@/lib/types";
 
-// Формат Embark ID: ник, решётка, ровно 4 цифры - напр. «Istwood#1234».
-const EMBARK_RE = /^[^#]+#\d{4}$/;
+// Игровой ID PUBG Mobile - одни цифры (пробелы, как на экране профиля в игре, не мешают).
+const GAME_ID_RE = /^\d{6,12}$/;
+const MAX_NICK = 32;
 
-/** Embark ID для лобби: после сохранения пропуск перерисуется с новым значением. */
-function EmbarkField({ initial }: { initial: string }) {
+const digits = (v: string) => v.replace(/\s+/g, "");
+const oneLine = (v: string) => v.trim().replace(/\s+/g, " ");
+
+/** Игровой ID и ник для группы в PUBG Mobile: после сохранения карточка перерисуется с новыми. */
+function GameFields({ initialId, initialNick }: { initialId: string; initialNick: string }) {
   const router = useRouter();
-  const [value, setValue] = React.useState(initial);
-  const [saved, setSaved] = React.useState(initial);
+  const [id, setId] = React.useState(initialId);
+  const [nick, setNick] = React.useState(initialNick);
+  const [saved, setSaved] = React.useState({ id: initialId, nick: initialNick });
   const [status, setStatus] = React.useState<"idle" | "saving" | "ok" | "error">("idle");
   const [error, setError] = React.useState("");
-  const trimmed = value.trim();
-  const dirty = trimmed !== saved.trim();
-  const invalid = trimmed.length > 0 && !EMBARK_RE.test(trimmed);
+  const cleanId = digits(id);
+  const cleanNick = oneLine(nick);
+  const dirty = cleanId !== saved.id || cleanNick !== saved.nick;
+  const badId = cleanId.length > 0 && !GAME_ID_RE.test(cleanId);
+  const badNick = cleanNick.length > MAX_NICK;
+  const invalid = badId || badNick;
   const done = status === "ok" && !dirty;
+
+  function touch() {
+    if (status !== "idle") setStatus("idle");
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,9 +39,10 @@ function EmbarkField({ initial }: { initial: string }) {
     setStatus("saving");
     setError("");
     try {
-      const u = await api.patch<User>("/me", { embarkId: trimmed });
-      setSaved(u.embarkId ?? "");
-      setValue(u.embarkId ?? "");
+      const u = await api.patch<User>("/me", { gameId: cleanId, gameNick: cleanNick });
+      setSaved({ id: u.gameId ?? "", nick: u.gameNick ?? "" });
+      setId(u.gameId ?? "");
+      setNick(u.gameNick ?? "");
       setStatus("ok");
       router.refresh();
     } catch (err) {
@@ -40,36 +53,56 @@ function EmbarkField({ initial }: { initial: string }) {
 
   return (
     <form className="sf-field" onSubmit={onSubmit}>
-      <label className="sf-field-label" htmlFor="pf-embark">
-        Embark ID
-      </label>
-      <div className="pf-embark">
+      <div className="pf-game">
+        <label className="sf-field-label" htmlFor="pf-game-id">
+          Игровой ID
+        </label>
+        <label className="sf-field-label" htmlFor="pf-game-nick">
+          Ник в игре
+        </label>
         <input
-          id="pf-embark"
+          id="pf-game-id"
           className="sf-input"
-          placeholder="Ник#1234"
+          inputMode="numeric"
+          placeholder="5123456789"
           autoComplete="off"
           spellCheck={false}
-          aria-invalid={invalid}
-          aria-describedby="pf-embark-note"
-          value={value}
+          aria-invalid={badId}
+          aria-describedby="pf-game-note"
+          value={id}
           onChange={(e) => {
-            setValue(e.target.value);
-            if (status !== "idle") setStatus("idle");
+            setId(e.target.value);
+            touch();
+          }}
+        />
+        <input
+          id="pf-game-nick"
+          className="sf-input"
+          placeholder="Ник в PUBG Mobile"
+          autoComplete="off"
+          spellCheck={false}
+          aria-invalid={badNick}
+          aria-describedby="pf-game-note"
+          value={nick}
+          onChange={(e) => {
+            setNick(e.target.value);
+            touch();
           }}
         />
         <button type="submit" className="sf-btn sf-btn-amber sf-btn-sm" disabled={!dirty || invalid || status === "saving"}>
           {status === "saving" ? "Сохраняем…" : "Сохранить"}
         </button>
       </div>
-      <p id="pf-embark-note" className={`sf-field-note ${invalid || status === "error" ? "bad" : done ? "good" : ""}`} aria-live="polite">
-        {invalid
-          ? "Формат: Ник#1234 — ник, решётка и 4 цифры."
-          : status === "error"
-            ? error
-            : done
-              ? "Сохранено"
-              : "Для лобби в ARC Raiders, подставится в заявки."}
+      <p id="pf-game-note" className={`sf-field-note ${invalid || status === "error" ? "bad" : done ? "good" : ""}`} aria-live="polite">
+        {badId
+          ? "Игровой ID — только цифры, от 6 до 12."
+          : badNick
+            ? `Ник в игре — до ${MAX_NICK} символов.`
+            : status === "error"
+              ? error
+              : done
+                ? "Сохранено"
+                : "ID — в профиле PUBG Mobile, под ником. По нему ведущий позовёт тебя в группу, оба подставятся в заявки."}
       </p>
     </form>
   );
@@ -133,10 +166,10 @@ function TagToggles({ initial }: { initial: UserTag[] }) {
 }
 
 /** Настройки своего профиля под пропуском рейдера. */
-export function ProfileSettings({ embarkId, tags }: { embarkId: string; tags: UserTag[] }) {
+export function ProfileSettings({ gameId, gameNick, tags }: { gameId: string; gameNick: string; tags: UserTag[] }) {
   return (
     <section className="pf-desk" aria-label="Настройки профиля">
-      <EmbarkField initial={embarkId} />
+      <GameFields initialId={gameId} initialNick={gameNick} />
       <TagToggles initial={tags} />
     </section>
   );

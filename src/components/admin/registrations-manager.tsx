@@ -71,7 +71,7 @@ export function RegistrationsManager() {
       {!loading && regs.length > 0 && (
         <input
           className="input max-w-md"
-          placeholder="Поиск по нику или Embark ID…"
+          placeholder="Поиск по нику или игровому ID…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -90,7 +90,7 @@ export function RegistrationsManager() {
               <tr className="border-b border-[var(--border)] text-left text-xs uppercase tracking-wide text-muted">
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Игрок</th>
-                <th className="px-4 py-3">Embark ID</th>
+                <th className="px-4 py-3">Игровой ID и ник</th>
                 <th className="px-4 py-3">Удобные даты / пожелания</th>
                 <th className="px-4 py-3">Подал</th>
                 <th className="px-4 py-3 text-right">Действия</th>
@@ -111,7 +111,10 @@ export function RegistrationsManager() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 tnum">{r.embarkId || "—"}</td>
+                  <td className="px-4 py-3">
+                    <div className="tnum">{r.gameId || "—"}</div>
+                    {r.gameNick && <div className="text-xs text-muted">{r.gameNick}</div>}
+                  </td>
                   <td className="px-4 py-3 text-muted">{r.note || "—"}</td>
                   <td className="px-4 py-3 text-xs text-muted">{fmtDate(r.createdAt)}</td>
                   <td className="px-4 py-3">

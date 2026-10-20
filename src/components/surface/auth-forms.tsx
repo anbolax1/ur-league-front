@@ -127,9 +127,10 @@ export function SurfaceClaimForm({ token, login }: { token: string; login: strin
   );
 }
 
-/** Заявка в общий пул: Embark ID берётся из профиля, здесь - только удобные даты. */
+/** Заявка в общий пул: игровой ID и ник берутся из профиля, здесь - только удобные даты. */
 export function SurfaceJoinForm({ user }: { user: User }) {
-  const embarkId = (user.embarkId ?? "").trim();
+  const gameId = (user.gameId ?? "").trim();
+  const gameNick = (user.gameNick ?? "").trim();
   const f = useJoinRequest();
 
   if (f.status === "ok") {
@@ -162,15 +163,22 @@ export function SurfaceJoinForm({ user }: { user: User }) {
         Вошёл как <b>{user.displayName || user.login}</b>
       </p>
       <div className="sf-field">
-        <span className="sf-field-label">Embark ID</span>
-        {embarkId ? (
+        <span className="sf-field-label">Игровой ID и ник</span>
+        {gameId ? (
           <p className="au-text">
-            <b className="au-embark">{embarkId}</b> · <Link href="/profile">изменить в профиле</Link>
+            <b className="au-game">{gameId}</b>
+            {gameNick && (
+              <>
+                {" "}
+                · <b>{gameNick}</b>
+              </>
+            )}{" "}
+            · <Link href="/profile">изменить в профиле</Link>
           </p>
         ) : (
           <p className="au-text">
-            Не указан — заявку можно подать и так. Организатору он нужен для лобби в ARC Raiders: <Link href="/profile">добавь в профиле</Link>, и он сам подставится
-            в заявку.
+            Не указан — заявку можно подать и так. По ID ведущий позовёт тебя в группу в PUBG Mobile:{" "}
+            <Link href="/profile">добавь его в профиле</Link>, и он сам подставится в заявку.
           </p>
         )}
       </div>
@@ -182,7 +190,7 @@ export function SurfaceJoinForm({ user }: { user: User }) {
           id="au-note"
           className="sf-input"
           rows={3}
-          placeholder="Например: могу по будням вечером и в выходные. Напарник — ник#0000."
+          placeholder="Например: могу по будням вечером и в выходные."
           value={f.note}
           onChange={(e) => f.setNote(e.target.value)}
         />

@@ -18,7 +18,10 @@ export interface User {
   displayName: string;
   avatarUrl: string;
   role: Role;
-  embarkId: string;
+  /** Игровой ID PUBG Mobile; в чужом профиле середина скрыта точками. */
+  gameId: string;
+  /** Ник в игре. */
+  gameNick: string;
   createdAt: string;
   /** Теги, тег роли первым. На сайте приходят только видимые, в кабинете - все. */
   tags?: UserTag[];
@@ -120,7 +123,8 @@ export interface Registration {
   id: string;
   tournamentId?: string | null; // куда поставлен; пусто — пока в пуле
   userId: string;
-  embarkId: string;
+  gameId: string;
+  gameNick: string;
   status: RegistrationStatus;
   note: string;
   createdAt: string;

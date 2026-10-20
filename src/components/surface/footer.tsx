@@ -57,7 +57,7 @@ export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {
         <div className="sf-foot-bottom">
           <p>
             © {new Date().getFullYear()} GOARC.PRO. Лига, Турниры и Шоу-Матчи в ARC Raiders от создателя Денис Блим. Фанатский проект, не
-            является официальным продуктом Embark Studios AB.
+            связан с KRAFTON и Level Infinite.
           </p>
           <p>
             Разработка и поддержка — <Link href="/profile/Istwood">Istwood</Link>

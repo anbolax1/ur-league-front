@@ -8,7 +8,7 @@ import { matchName } from "@/lib/format";
 /** Шаги записи на матч - одинаковые в обоих дизайнах. */
 export const JOIN_STEPS = [
   { n: 1, title: "Аккаунт", text: "Войди по логину и паролю — так заявка свяжется с твоим профилем." },
-  { n: 2, title: "Embark ID в профиле", text: "Ник вида «ник#0000» задаётся один раз в профиле — он нужен для лобби в ARC Raiders и подставляется в заявку." },
+  { n: 2, title: "Игровой ID в профиле", text: "Игровой ID и ник из PUBG Mobile задаются один раз в профиле — по ним ведущий позовёт тебя в группу, они подставятся в заявку." },
   { n: 3, title: "Удобные даты", text: "Напиши, в какие даты можешь играть. Организатор позовёт тебя на матч." },
 ];
 
@@ -39,11 +39,11 @@ export function tournamentPill(status: string): { status: PillStatus; label: str
   }
 }
 
-/** Подходит ли заявка под поисковый запрос (по нику, логину, Embark ID, заметке). */
+/** Подходит ли заявка под поисковый запрос (по нику, логину, игровому ID и нику, заметке). */
 export function registrationMatches(r: Registration, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  return [r.userDisplayName, r.userLogin, r.embarkId, r.note]
+  return [r.userDisplayName, r.userLogin, r.gameId, r.gameNick, r.note]
     .some((f) => (f ?? "").toLowerCase().includes(q));
 }
 

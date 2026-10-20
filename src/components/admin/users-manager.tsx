@@ -166,7 +166,7 @@ export function UsersManager({
       <div className="flex flex-wrap items-center gap-3">
         <input
           className="input max-w-xs flex-1"
-          placeholder="Поиск по имени, логину, Embark ID, email…"
+          placeholder="Поиск по имени, логину, игровому ID и нику, email…"
           value={queryInput}
           onChange={(e) => setQueryInput(e.target.value)}
         />
@@ -198,7 +198,7 @@ export function UsersManager({
               <thead>
                 <tr className="border-b border-[var(--border)] text-left text-xs uppercase tracking-wide text-muted">
                   <th className="px-4 py-3">Игрок</th>
-                  <th className="px-4 py-3">Embark ID</th>
+                  <th className="px-4 py-3">Игровой ID и ник</th>
                   <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3">Регистрация</th>
                   <th className="px-4 py-3 text-right">Матчей</th>
@@ -235,7 +235,10 @@ export function UsersManager({
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 tnum text-muted">{u.embarkId || "—"}</td>
+                        <td className="px-4 py-3 text-muted">
+                          <div className="tnum">{u.gameId || "—"}</div>
+                          {u.gameNick && <div className="text-xs">{u.gameNick}</div>}
+                        </td>
                         <td className="px-4 py-3 text-muted">{u.email || "—"}</td>
                         <td className="whitespace-nowrap px-4 py-3 text-muted">
                           {/* У заглушки дата создания - это дата импорта, а не регистрации игрока */}

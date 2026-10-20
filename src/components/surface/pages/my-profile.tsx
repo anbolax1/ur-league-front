@@ -17,7 +17,7 @@ function SignIn() {
         <h1 className="sf-h-big">
           нужно войти<span className="sf-dot">.</span>
         </h1>
-        <p className="sf-lead pf-lead">Профиль, заявки и Embark ID доступны после входа по логину и паролю.</p>
+        <p className="sf-lead pf-lead">Профиль, заявки, игровой ID и ник доступны после входа по логину и паролю.</p>
         <div className="sf-controls">
           <Link className="sf-btn sf-btn-amber" href="/login?redirect=/profile">
             Войти
@@ -50,7 +50,8 @@ function MyRegistrations({ items }: { items: Registration[] }) {
                 <span>
                   <b>{r.status === "accepted" && r.tournamentTitle ? r.tournamentTitle : "Заявка на матч"}</b>
                   <small>
-                    Embark ID {r.embarkId || "не указан"} · {fullDate(r.createdAt)}
+                    {r.gameId ? `ID ${r.gameId}` : "ID не указан"}
+                    {r.gameNick ? ` · ${r.gameNick}` : ""} · {fullDate(r.createdAt)}
                   </small>
                 </span>
                 <span />
@@ -72,13 +73,13 @@ function MyRegistrations({ items }: { items: Registration[] }) {
   );
 }
 
-/** Свой профиль в новом дизайне: тот же пропуск и рейтинг, что видят другие, плюс Embark ID, теги и заявки. */
+/** Свой профиль в новом дизайне: тот же пропуск и рейтинг, что видят другие, плюс игровой ID и ник, теги и заявки. */
 export async function SurfaceMyProfile() {
   const user = await getMe();
   if (!user) return <SignIn />;
 
   const [profile, regs, tags] = await Promise.all([getPlayer(user.login), getMyRegistrations(), getMyTags()]);
-  const settings = <ProfileSettings embarkId={user.embarkId ?? ""} tags={tags} />;
+  const settings = <ProfileSettings gameId={user.gameId ?? ""} gameNick={user.gameNick ?? ""} tags={tags} />;
   const registrations = <MyRegistrations items={regs} />;
 
   if (!profile) {
