@@ -4,6 +4,6 @@ import "./rating.css";
 
 /** Рейтинг: по умолчанию - активный сезон. */
 export async function SurfaceRating() {
-  const [seasons, solo, duo] = await Promise.all([getSeasons(), getLeaderboard("1x1"), getTeamLeaderboard()]);
-  return <RatingBoard seasons={seasons} initialSolo={solo} initialDuo={duo} />;
+  const [seasons, solo, duo, trio] = await Promise.all([getSeasons(), getLeaderboard("1x1"), getTeamLeaderboard("2x2"), getTeamLeaderboard("3x3")]);
+  return <RatingBoard seasons={seasons} initialSolo={solo} initialTeams={{ "2x2": duo, "3x3": trio }} />;
 }

@@ -73,13 +73,13 @@ export async function getLeaderboard(mode: TournamentMode, season?: string): Pro
   return res.rows ?? [];
 }
 
-/** Сезонный рейтинг 2×2 по КОМАНДАМ (пара игроков = команда). season как в getLeaderboard. */
-export async function getTeamLeaderboard(season?: string): Promise<TeamLeaderboardRow[]> {
+/** Сезонный рейтинг составов формата mode (2×2 или 3×3) по КОМАНДАМ. season как в getLeaderboard. */
+export async function getTeamLeaderboard(mode: TournamentMode, season?: string): Promise<TeamLeaderboardRow[]> {
   const q = season ? `&season=${encodeURIComponent(season)}` : "";
   const res = await safe(
-    "leaderboard(2x2/teams)",
-    serverFetch<TeamLeaderboardResponse>(`/leaderboard?mode=2x2${q}`),
-    { mode: "2x2" as TournamentMode, rows: [] },
+    `leaderboard(${mode}/teams)`,
+    serverFetch<TeamLeaderboardResponse>(`/leaderboard?mode=${mode}${q}`),
+    { mode, rows: [] },
   );
   return res.rows ?? [];
 }
@@ -125,7 +125,7 @@ export async function getPlayer(login: string): Promise<PlayerProfile | null> {
   }
 }
 
-/** Публичная страница команды 2×2 по ключу (пара userId). null — 404/ошибка.
+/** Публичная страница команды по ключу (userId состава через «|»). null — 404/ошибка.
     Ключ нормализуем: сначала декодируем (Next может отдать параметр уже закодированным —
     `A%7CB`), затем кодируем ровно один раз, иначе `|` уедет в двойное кодирование → 404. */
 export async function getTeam(teamKey: string): Promise<TeamProfile | null> {

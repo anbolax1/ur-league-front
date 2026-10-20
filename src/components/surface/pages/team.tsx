@@ -4,20 +4,22 @@ import "./team.css";
 import { getMaps, getSeasons, getTeam, getTeamLeaderboard } from "@/lib/queries";
 import type { MmrStats, Season, TeamProfile } from "@/lib/types";
 import { initials } from "@/lib/format";
+import { modeLabel } from "@/lib/match";
 import { seasonStats } from "@/lib/mmr-stats";
 import { ArrowBack } from "@/components/surface/ui";
 import { SurfaceMissing } from "@/components/surface/missing";
 import { TeamSeasons } from "@/components/surface/team-seasons";
 import { fullDate } from "@/components/surface/fmt";
 
-/** Пропуск команды: оба игрока, название и цифры сезона, в котором команда играла последним. */
+/** Карточка команды: состав, название и цифры сезона, в котором команда играла последним. */
 function TeamCard({ team, name, season, stats, final }: { team: TeamProfile; name: string; season?: Season; stats: MmrStats; final: boolean }) {
   const { members } = team;
+  const label = modeLabel(team.mode);
   const no = season?.name.match(/\d+/)?.[0] ?? "0";
   const code = members.map((m) => m.login.toUpperCase().replace(/[^A-Z0-9]/g, "<")).join("<<");
   const fields = [
-    { k: "Место 2×2", v: stats.place > 0 ? `#${stats.place}` : "вне рейтинга" },
-    { k: final ? "MMR в конце" : "MMR 2×2", v: String(stats.currentMmr) },
+    { k: `Место ${label}`, v: stats.place > 0 ? `#${stats.place}` : "вне рейтинга" },
+    { k: final ? "MMR в конце" : `MMR ${label}`, v: String(stats.currentMmr) },
     { k: "Пик MMR", v: stats.peakMmr ? String(stats.peakMmr) : "—" },
     { k: "Победы", v: stats.games ? `${stats.wins} из ${stats.games} · ${stats.winrate}%` : "нет матчей" },
     { k: "Лучшая серия", v: stats.bestWinStreak ? `${stats.bestWinStreak} подряд` : "—" },
@@ -31,7 +33,7 @@ function TeamCard({ team, name, season, stats, final }: { team: TeamProfile; nam
         </span>
         <span className="sf-hide-sm">{season ? `${season.name}${final ? " · итог" : ""}` : "Вне сезона"}</span>
       </div>
-      <div className="tm-photos">
+      <div className={`tm-photos ${members.length > 2 ? "trio" : ""}`}>
         {members.map((m) => (
           <Link key={m.userId || m.login} href={`/profile/${m.login}`} className={`sf-id-photo ${m.avatarUrl ? "has-img" : ""}`} aria-label={`Профиль ${m.displayName || m.login}`}>
             {m.avatarUrl ? (
@@ -72,12 +74,12 @@ function TeamCard({ team, name, season, stats, final }: { team: TeamProfile; nam
   );
 }
 
-/** Команда 2×2: карточка состава, рейтинг по сезонам, карты и соперники. */
+/** Команда 2×2 или 3×3: карточка состава, рейтинг по сезонам, карты и соперники. */
 export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
   const team = await getTeam(teamKey);
   if (!team) {
     return (
-      <SurfaceMissing eyebrow="Команда 2×2" title="команда не найдена" lead="Возможно, эта пара ещё не сыграла ни одного матча 2×2.">
+      <SurfaceMissing eyebrow="Команда" title="команда не найдена" lead="Возможно, этот состав ещё не сыграл ни одного матча.">
         <Link className="sf-btn sf-btn-amber" href="/rating">
           К таблице лидеров
         </Link>
@@ -103,7 +105,7 @@ export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
     if (playsNow) {
       stats = { ...own, currentMmr: team.stats.currentMmr, place: team.stats.place };
     } else {
-      const rows = await getTeamLeaderboard(season.id);
+      const rows = await getTeamLeaderboard(team.mode, season.id);
       stats = { ...own, place: rows.findIndex((r) => r.teamKey === team.teamKey) + 1 };
     }
   }
@@ -116,7 +118,7 @@ export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
             <ArrowBack />
             Таблица лидеров
           </Link>
-          <p className="sf-eyebrow">Команда 2×2</p>
+          <p className="sf-eyebrow">Команда {modeLabel(team.mode)}</p>
           <TeamCard team={team} name={name} season={season} stats={stats} final={!playsNow && !!season} />
           {active && !playsNow && team.timeline.length > 0 && (
             <p className="tm-note">
@@ -131,7 +133,7 @@ export async function SurfaceTeam({ teamKey }: { teamKey: string }) {
           {team.timeline.length > 0 ? (
             <TeamSeasons team={team} seasons={seasons} maps={maps.map((m) => ({ code: m.code, name: m.name }))} />
           ) : (
-            <p className="sf-note">У команды пока нет сыгранных матчей 2×2 — график и разбор по картам появятся после первого.</p>
+            <p className="sf-note">У команды пока нет сыгранных матчей {modeLabel(team.mode)} — график и разбор по картам появятся после первого.</p>
           )}
         </div>
       </section>

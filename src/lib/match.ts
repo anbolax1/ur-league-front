@@ -9,6 +9,21 @@ export function mapImage(code?: string | null): string {
   return code ? `/maps/${code}.jpg` : "";
 }
 
+/** Матч составов: в стороне два (2×2) или три (3×3) игрока. */
+export function isTeamMode(mode?: string | null): boolean {
+  return mode === "2x2" || mode === "3x3";
+}
+
+/** Сколько игроков в стороне матча этого формата. */
+export function teamSize(mode: string): number {
+  return mode === "2x2" ? 2 : mode === "3x3" ? 3 : 1;
+}
+
+/** Формат для подписи: «1×1», «2×2», «3×3». */
+export function modeLabel(mode: string): string {
+  return mode.replace("x", "×");
+}
+
 /** Стороны матча по порядку: A заходит в раунде первой. */
 export function matchSides(st: MatchState): [Participant | null, Participant | null] {
   const parts = [...(st.tournament.participants ?? [])].sort((a, b) => a.seed - b.seed);

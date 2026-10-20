@@ -1,4 +1,4 @@
-/* Команда 2×2: карточка на двоих. Остальное - общие стили профиля. */
+/* Команда: карточка состава на двоих или троих. Остальное - общие стили профиля. */
 
 .tm-photos {
   display: flex;
@@ -10,6 +10,9 @@
   width: clamp(92px, 10vw, 128px);
   text-decoration: none;
   transition: transform 0.2s;
+}
+.tm-photos.trio .sf-id-photo {
+  width: clamp(76px, 8vw, 104px);
 }
 .tm-photos .sf-id-photo:hover {
   transform: translateY(-2px);

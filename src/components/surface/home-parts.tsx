@@ -52,7 +52,7 @@ export function Hero({ season }: { season?: Season }) {
           </h1>
           <p className="sf-lead">
             Ведущий заходит с тобой в Ultimate Royale, выбывает и дальше смотрит за тобой в эфире. Ты один против сквадов: каждый
-            килл — 3 очка, задания приносят ещё. Матчи 1×1, рейтинг MMR и шоу-матчи с призами.
+            килл — 3 очка, задания приносят ещё. Матчи 1×1, 2×2 и 3×3, рейтинг MMR и шоу-матчи с призами.
           </p>
           <div className="sf-hero-actions">
             <Link href="/join" className="sf-btn sf-btn-amber">
@@ -106,7 +106,7 @@ export function ScheduleRows({ live, upcoming }: { live: MatchState | null; upco
     cls: "",
     time: "каждый эфир",
     icon: ScheduleIcon.aim,
-    title: "Обычные матчи 1×1",
+    title: "Обычные матчи 1×1, 2×2 и 3×3",
     sub: "Ведущий собирает прямо в эфире · подай заявку",
     when: "по ходу стрима",
   });
@@ -233,7 +233,7 @@ export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | 
                     {x.side?.mmr ? <span className="mmr">{x.side.mmr}</span> : <span />}
                   </>
                 );
-                return login && t.mode !== "2x2" ? (
+                return login && t.mode === "1x1" ? (
                   <Link key={x.color} className="sf-side-row" href={`/profile/${login}`}>
                     {body}
                   </Link>

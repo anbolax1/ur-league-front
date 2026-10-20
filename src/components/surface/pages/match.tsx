@@ -347,7 +347,7 @@ export async function SurfaceMatch({ id }: { id: string }) {
 
   const sides = matchSides(st);
   const [a, b] = sides;
-  const solo = t.mode !== "2x2";
+  const solo = t.mode === "1x1";
   const finished = t.status === "finished";
   const live = t.status === "live";
   const upcoming = !finished && !live;

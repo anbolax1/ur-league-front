@@ -448,6 +448,7 @@ export function RoundConsole({
                     <span className={`font-display text-3xl leading-none tnum ${style.text}`}>{roundScore(st, round, p.id)}</span>
                   </div>
                 </div>
+                {p.members.length > 1 && <p className="truncate text-sm text-muted">{p.members.map((m) => m.name).join(" · ")}</p>}
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                   <HeatMap maps={maps} code={heat?.mapCode} name={p.name} onPick={(code) => onMap(p.id, code)} />
                   <HeatPlace place={heat?.place} name={p.name} onPick={(place) => onPlace(p.id, place)} />

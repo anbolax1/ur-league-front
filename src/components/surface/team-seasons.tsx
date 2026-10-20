@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { MmrPoint, MmrStats, Season, SeasonAnalytics, TeamProfile } from "@/lib/types";
+import { modeLabel } from "@/lib/match";
 import { seasonStats } from "@/lib/mmr-stats";
 import { ProfileChart, type ChartSegment } from "@/components/surface/profile-chart";
 import { ChartLegend, MapsAndRivals, mergeAnalytics } from "@/components/surface/profile-seasons";
@@ -62,7 +63,7 @@ export function TeamSeasons({ team, seasons, maps }: { team: TeamProfile; season
     <div className="pf-seasons">
       <div className="sf-sec-head pf-head">
         <div>
-          <p className="sf-eyebrow">Рейтинг 2×2 · MMR команды начинается заново каждый сезон</p>
+          <p className="sf-eyebrow">Рейтинг {modeLabel(team.mode)} · MMR команды начинается заново каждый сезон</p>
           <h2 className="sf-h-mid">
             рейтинг команды
           </h2>
@@ -82,7 +83,7 @@ export function TeamSeasons({ team, seasons, maps }: { team: TeamProfile; season
         <div>
           <dt>{current ? "MMR сейчас" : "MMR в конце"}</dt>
           <dd>{stats.currentMmr}</dd>
-          <dd className="pf-sub">{current ? (stats.place > 0 ? `#${stats.place} в таблице 2×2` : "в этом сезоне не играла") : "итог сезона"}</dd>
+          <dd className="pf-sub">{current ? (stats.place > 0 ? `#${stats.place} в таблице ${modeLabel(team.mode)}` : "в этом сезоне не играла") : "итог сезона"}</dd>
         </div>
         <div>
           <dt>Пик MMR</dt>

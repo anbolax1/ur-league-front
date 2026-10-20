@@ -30,7 +30,7 @@ const montserrat = Montserrat({ weight: ["800", "900"], subsets: ["latin", "cyri
 export const metadata: Metadata = {
   title: "Лига Ultimate Royale — PUBG Mobile",
   description:
-    "Лига Ultimate Royale по PUBG Mobile в прямом эфире: соло против сквадов, матчи 1×1, рейтинг MMR и шоу-матчи с призами.",
+    "Лига Ultimate Royale по PUBG Mobile в прямом эфире: соло против сквадов, матчи 1×1, 2×2 и 3×3, рейтинг MMR и шоу-матчи с призами.",
 };
 
 export default function RootLayout({

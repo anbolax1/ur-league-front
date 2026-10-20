@@ -34,7 +34,7 @@ export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {
               <Mark />
               <Wordmark />
             </Link>
-            <p>Соло против сквадов в прямом эфире: матчи 1×1, рейтинг MMR, шоу-матчи и пояс лиги.</p>
+            <p>Соло против сквадов в прямом эфире: матчи 1×1, 2×2 и 3×3, рейтинг MMR, шоу-матчи и пояс лиги.</p>
           </div>
           <div>
             <h3>Лига</h3>

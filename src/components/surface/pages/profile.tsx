@@ -9,6 +9,7 @@ import { ProfileSeasons } from "@/components/surface/profile-seasons";
 import { ProfileHistory } from "@/components/surface/profile-history";
 import { fullDate, winrate } from "@/components/surface/fmt";
 import { initials } from "@/lib/format";
+import { modeLabel } from "@/lib/match";
 import { PatchArt } from "@/components/surface/patch-art";
 import { PATCH_ORDER } from "@/components/surface/patch-meta";
 import { firstProfileSeason } from "@/components/surface/profile-season";
@@ -43,13 +44,14 @@ function codeLine(login: string, season: Season | undefined, mmr: number, place:
 }
 
 function IdCard({ profile, season }: { profile: PlayerProfile; season?: Season }) {
-  const { user, mmrSolo, mmrDuo, mmr1x1, stats } = profile;
+  const { user, mmrSolo, mmrDuo, mmrTrio, mmr1x1, stats } = profile;
   const name = user.displayName || user.login;
   const [code1, code2] = codeLine(user.login, season, mmrSolo, mmr1x1.place);
   const fields = [
     { k: "Место в сезоне", v: mmr1x1.place > 0 ? `#${mmr1x1.place}` : "вне рейтинга" },
     { k: "MMR 1×1", v: String(mmrSolo) },
     { k: "MMR 2×2", v: String(mmrDuo) },
+    { k: "MMR 3×3", v: String(mmrTrio) },
     { k: "Пик MMR", v: mmr1x1.peakMmr ? String(mmr1x1.peakMmr) : "—" },
     { k: "В рейтинге с", v: mmr1x1.firstMatch ? fullDate(mmr1x1.firstMatch) : "—" },
     { k: "Ник в игре", v: user.gameNick || "не указан" },
@@ -59,6 +61,7 @@ function IdCard({ profile, season }: { profile: PlayerProfile; season?: Season }
     { k: "Чикены", v: stats.chickens ? `${stats.chickens} из ${stats.placedHeats}` : "пока нет" },
     { k: "Победы 1×1", v: stats.soloPlayed ? `${stats.soloWins} из ${stats.soloPlayed} · ${winrate(stats.soloWins, stats.soloPlayed - stats.soloWins)}%` : "нет матчей" },
     { k: "Победы 2×2", v: stats.duoPlayed ? `${stats.duoWins} из ${stats.duoPlayed} · ${winrate(stats.duoWins, stats.duoPlayed - stats.duoWins)}%` : "нет матчей" },
+    { k: "Победы 3×3", v: stats.trioPlayed ? `${stats.trioWins} из ${stats.trioPlayed} · ${winrate(stats.trioWins, stats.trioPlayed - stats.trioWins)}%` : "нет матчей" },
   ];
   return (
     <article className="sf-idcard pf-card" aria-label={`Профиль игрока ${name}`}>
@@ -183,7 +186,7 @@ export async function ProfileView({
             </div>
             <div>
               <h2 className="sf-h-mid">
-                команды 2×2
+                команды
               </h2>
               {teams.length ? (
                 <div className="sf-teams pf-teams">
@@ -193,7 +196,7 @@ export async function ProfileView({
                       <Link key={t.teamKey} className="sf-team" href={`/teams/${encodeURIComponent(t.teamKey)}`}>
                         <b>{t.name || members}</b>
                         <small>
-                          {t.name ? `${members} · ` : ""}
+                          {modeLabel(t.mode)} · {t.name ? `${members} · ` : ""}
                           {t.place > 0 ? `#${t.place} · ` : ""}
                           {t.wins}–{t.losses}
                         </small>
@@ -204,7 +207,7 @@ export async function ProfileView({
                   })}
                 </div>
               ) : (
-                <p className="sf-note">Пока нет команд: сыграй матч 2×2, и команда появится здесь.</p>
+                <p className="sf-note">Пока нет команд: сыграй матч 2×2 или 3×3, и команда появится здесь.</p>
               )}
             </div>
           </div>

@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { isTeamMode } from "@/lib/match";
 import type { PlayerHistoryItem } from "@/lib/types";
 import { fullDate, matchesWord } from "@/components/surface/fmt";
 import { signed } from "@/components/surface/ui";
 
 const FIRST = 8;
 
-/** Матчи игрока (1×1 и 2×2): сначала последние, остальные - по кнопке. */
+/** Матчи игрока (1×1 и составы): сначала последние, остальные - по кнопке. */
 export function ProfileHistory({ items }: { items: PlayerHistoryItem[] }) {
   const [all, setAll] = React.useState(false);
   if (!items.length) return <p className="sf-note">Здесь появятся матчи игрока.</p>;
@@ -27,7 +28,7 @@ export function ProfileHistory({ items }: { items: PlayerHistoryItem[] }) {
                   <small>
                     {h.mode}
                     {h.date ? ` · ${fullDate(h.date)}` : ""}
-                    {h.mode === "2x2" && h.name ? ` · ${h.name}` : ""}
+                    {isTeamMode(h.mode) && h.name ? ` · ${h.name}` : ""}
                   </small>
                 </span>
                 {h.mmrDelta ? <span className={`d ${h.mmrDelta > 0 ? "sf-up" : "sf-down"}`}>{signed(h.mmrDelta)}</span> : <span />}

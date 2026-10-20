@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { modeLabel } from "@/lib/match";
 import type {
   LeaderboardResponse,
   LeaderboardRow,
@@ -188,16 +189,24 @@ function TeamRows({ rows, place }: { rows: TeamLeaderboardRow[]; place: Map<stri
   );
 }
 
-/** Таблица лидеров: сезон, режим 1×1 / 2×2, поиск и сортировка.
+type TeamMode = "2x2" | "3x3";
+
+const TABS: Array<[TournamentMode, string]> = [
+  ["1x1", "Одиночный 1×1"],
+  ["2x2", "Пары 2×2"],
+  ["3x3", "Сквады 3×3"],
+];
+
+/** Таблица лидеров: сезон, формат 1×1 / 2×2 / 3×3, поиск и сортировка.
     MMR в каждом сезоне начинается заново, поэтому таблица всегда за один сезон. */
 export function RatingBoard({
   seasons,
   initialSolo,
-  initialDuo,
+  initialTeams,
 }: {
   seasons: Season[];
   initialSolo: LeaderboardRow[];
-  initialDuo: TeamLeaderboardRow[];
+  initialTeams: Record<TeamMode, TeamLeaderboardRow[]>;
 }) {
   const active = seasons.find((s) => s.status === "active");
   const finished = seasons.filter((s) => s.status === "finished");
@@ -205,7 +214,7 @@ export function RatingBoard({
   // "" - активный сезон (так пришло с сервера), "all" - только если активного нет, иначе id.
   const [seasonSel, setSeasonSel] = React.useState<string>(active ? "" : "all");
   const [solo, setSolo] = React.useState(initialSolo);
-  const [duo, setDuo] = React.useState(initialDuo);
+  const [teams, setTeams] = React.useState(initialTeams);
   const [loading, setLoading] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [sort, setSort] = React.useState<SortKey>("mmr");
@@ -216,12 +225,13 @@ export function RatingBoard({
     setLoading(true);
     try {
       const q = value ? `&season=${encodeURIComponent(value)}` : "";
-      const [s, d] = await Promise.all([
+      const [s, d, t] = await Promise.all([
         api.get<LeaderboardResponse>(`/leaderboard?mode=1x1${q}`),
         api.get<TeamLeaderboardResponse>(`/leaderboard?mode=2x2${q}`),
+        api.get<TeamLeaderboardResponse>(`/leaderboard?mode=3x3${q}`),
       ]);
       setSolo(s.rows ?? []);
-      setDuo(d.rows ?? []);
+      setTeams({ "2x2": d.rows ?? [], "3x3": t.rows ?? [] });
     } catch {
       /* оставим прежнюю таблицу */
     } finally {
@@ -233,8 +243,10 @@ export function RatingBoard({
   const seasonOver = shownSeason?.status === "finished";
   const startMmr = shownSeason?.startMmr ?? active?.startMmr ?? 1000;
 
+  const team = React.useMemo(() => (tab === "1x1" ? [] : teams[tab]), [tab, teams]);
+  const label = modeLabel(tab);
   const soloPlace = React.useMemo(() => new Map(solo.map((r, i) => [r.userId || r.login, i + 1])), [solo]);
-  const duoPlace = React.useMemo(() => new Map(duo.map((r, i) => [r.teamKey, i + 1])), [duo]);
+  const teamPlace = React.useMemo(() => new Map(team.map((r, i) => [r.teamKey, i + 1])), [team]);
 
   const q = norm(query);
   const soloShown = sortRows(
@@ -242,27 +254,28 @@ export function RatingBoard({
     sort,
     (r) => r.tournaments,
   );
-  const duoShown = sortRows(
-    duo.filter((r) => !q || norm(teamName(r)).includes(q) || r.members.some((m) => norm(m.displayName || "").includes(q) || norm(m.login || "").includes(q))),
+  const teamShown = sortRows(
+    team.filter((r) => !q || norm(teamName(r)).includes(q) || r.members.some((m) => norm(m.displayName || "").includes(q) || norm(m.login || "").includes(q))),
     sort,
     (r) => r.games,
   );
-  const total = tab === "1x1" ? solo.length : duo.length;
-  const shown = tab === "1x1" ? soloShown.length : duoShown.length;
+  const total = tab === "1x1" ? solo.length : team.length;
+  const shown = tab === "1x1" ? soloShown.length : teamShown.length;
 
   const champ =
     seasonOver && tab === "1x1" && solo[0]
       ? { name: solo[0].displayName || solo[0].login, href: `/profile/${solo[0].login}`, mmr: solo[0].mmr, tags: solo[0].tags }
-      : seasonOver && tab === "2x2" && duo[0]
-        ? { name: teamName(duo[0]), href: `/teams/${encodeURIComponent(duo[0].teamKey)}`, mmr: duo[0].mmr, tags: undefined }
+      : seasonOver && tab !== "1x1" && team[0]
+        ? { name: teamName(team[0]), href: `/teams/${encodeURIComponent(team[0].teamKey)}`, mmr: team[0].mmr, tags: undefined }
         : null;
 
   function onTabKey(e: React.KeyboardEvent) {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
     e.preventDefault();
-    const next = tab === "1x1" ? "2x2" : "1x1";
-    setTab(next);
-    tabRefs.current[next === "1x1" ? 0 : 1]?.focus();
+    const at = TABS.findIndex(([m]) => m === tab);
+    const i = (at + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length;
+    setTab(TABS[i][0]);
+    tabRefs.current[i]?.focus();
   }
 
   return (
@@ -279,7 +292,7 @@ export function RatingBoard({
           </p>
           <div className="sf-controls">
             <div className="sf-seg" role="tablist" aria-label="Режим рейтинга" onKeyDown={onTabKey}>
-              {(["1x1", "2x2"] as const).map((m, i) => (
+              {TABS.map(([m, title], i) => (
                 <button
                   key={m}
                   ref={(el) => {
@@ -293,7 +306,7 @@ export function RatingBoard({
                   tabIndex={tab === m ? 0 : -1}
                   onClick={() => setTab(m)}
                 >
-                  {m === "1x1" ? "Одиночный 1×1" : "Составы 2×2"}
+                  {title}
                 </button>
               ))}
             </div>
@@ -333,7 +346,7 @@ export function RatingBoard({
           {champ && (
             <div className="sf-champ-banner">
               <span className="sf-stamp sfr-gold">
-                Чемпион «{shownSeason?.name}» · {tab === "1x1" ? "1×1" : "2×2"}
+                Чемпион «{shownSeason?.name}» · {label}
               </span>
               <Link className="sfr-champ-name" href={champ.href}>
                 <b>{champ.name}</b>
@@ -353,16 +366,16 @@ export function RatingBoard({
             {total === 0 ? (
               <SfEmpty
                 title="рейтинг пока пуст."
-                hint={tab === "1x1" ? "MMR появится после первых сыгранных матчей сезона." : "MMR команд появится после первых завершённых матчей 2×2."}
+                hint={tab === "1x1" ? "MMR появится после первых сыгранных матчей сезона." : `MMR команд появится после первых завершённых матчей ${label}.`}
               />
             ) : shown === 0 ? (
               <SfEmpty title="никого не нашли." hint={tab === "1x1" ? "Проверь написание ника." : "Проверь название состава или ник игрока."} />
             ) : (
-              <div role="table" aria-label={tab === "1x1" ? "Таблица лидеров 1×1" : "Таблица лидеров 2×2"}>
+              <div role="table" aria-label={`Таблица лидеров ${label}`}>
                 <Head who={tab === "1x1" ? "Игрок" : "Состав"} sort={sort} onSort={setSort} />
                 {/* Ключ по режиму и сезону: строки заново выезжают при переключении, но не при поиске. */}
                 <div key={`${tab}-${seasonSel}`} className="sfr-rows" role="rowgroup">
-                  {tab === "1x1" ? <SoloRows rows={soloShown} place={soloPlace} /> : <TeamRows rows={duoShown} place={duoPlace} />}
+                  {tab === "1x1" ? <SoloRows rows={soloShown} place={soloPlace} /> : <TeamRows rows={teamShown} place={teamPlace} />}
                 </div>
               </div>
             )}

@@ -2,7 +2,7 @@
    Это копия контракта, НЕ импорт из бэкенда — проекты независимы. */
 
 export type Role = "user" | "superadmin";
-export type TournamentMode = "1x1" | "2x2";
+export type TournamentMode = "1x1" | "2x2" | "3x3";
 export type TournamentStatus = "draft" | "upcoming" | "live" | "finished";
 export type ParticipantKind = "player" | "team";
 export type RegistrationStatus = "pending" | "accepted" | "declined";
@@ -147,7 +147,7 @@ export interface LeaderboardRow {
   patchCount?: number; // всего нашивок в сезоне
 }
 
-/** Игрок в составе команды 2×2 (для командного лидерборда). */
+/** Игрок в составе команды 2×2 или 3×3. */
 export interface TeamMember {
   userId: string;
   login: string;
@@ -156,11 +156,12 @@ export interface TeamMember {
   tags?: UserTag[]; // теги, видные на сайте
 }
 
-/** Строка рейтинга 2×2 по КОМАНДАМ (пара игроков = команда с одним MMR).
+/** Строка рейтинга составов по КОМАНДАМ (состав = команда с одним MMR).
     wins/losses/games учитывают жетон ×2 (матч = 2). */
 export interface TeamLeaderboardRow {
   teamKey: string;
   name: string;
+  mode: TournamentMode;
   mmr: number;
   wins: number;
   losses: number;
@@ -324,6 +325,7 @@ export interface PatchFlash {
 export interface TeamSummary {
   teamKey: string;
   name: string;
+  mode: TournamentMode;
   members: TeamMember[];
   mmr: number;
   wins: number;
@@ -332,10 +334,11 @@ export interface TeamSummary {
   place: number;
 }
 
-/** Публичная страница команды 2×2: GET /api/teams/{teamKey}. */
+/** Публичная страница команды 2×2 или 3×3: GET /api/teams/{teamKey}. */
 export interface TeamProfile {
   teamKey: string;
   name: string;
+  mode: TournamentMode;
   members: TeamMember[];
   /** Лента - за все сезоны, MMR и место - в текущем сезоне (не игравшая в нём команда - место 0). */
   stats: MmrStats;
@@ -590,6 +593,8 @@ export interface PlayerStats {
   soloPlayed: number;
   duoWins: number;
   duoPlayed: number;
+  trioWins: number;
+  trioPlayed: number;
   streakKind: "win" | "loss" | "";
   streakLen: number;
   basePoints: number; // ручные очки раунда вместе с киллами
@@ -608,7 +613,8 @@ export interface PlayerStats {
 export interface PlayerProfile {
   user: User;
   mmrSolo: number; // MMR 1x1 (старт 1000)
-  mmrDuo: number; // MMR 2x2 (старт 1000)
+  mmrDuo: number; // лучший MMR среди команд игрока 2x2 (старт 1000)
+  mmrTrio: number; // лучший MMR среди команд игрока 3x3 (старт 1000)
   points: number;
   wins: number;
   tournaments: number;

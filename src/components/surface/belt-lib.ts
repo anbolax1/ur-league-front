@@ -86,7 +86,7 @@ export type MatchBeltMark =
   | { kind: "defend"; holder: BeltPlayer; defenses: number; rust: number }
   | { kind: "vacant"; leaders: BeltPlayer[] };
 
-/** Пояс в матче; шоу-матчи и 2×2 его не разыгрывают. users - игроки сторон: без них ничью носителя не узнать. */
+/** Пояс в матче; шоу-матчи и составы его не разыгрывают. users - игроки сторон: без них ничью носителя не узнать. */
 export function matchBelt(belt: Belt | null, t: Tournament, users: string[]): MatchBeltMark | null {
   if (!belt || t.mode !== "1x1" || t.format === "show") return null;
   if (t.status === "finished") {

@@ -20,12 +20,13 @@ export interface ArchiveMatch {
   belt?: string;
 }
 
-type Filter = "all" | "1x1" | "2x2" | "show";
+type Filter = "all" | "1x1" | "2x2" | "3x3" | "show";
 
 const FILTERS: Array<{ id: Filter; label: string }> = [
   { id: "all", label: "Все" },
   { id: "1x1", label: "1×1" },
   { id: "2x2", label: "2×2" },
+  { id: "3x3", label: "3×3" },
   { id: "show", label: "Шоу-матчи" },
 ];
 

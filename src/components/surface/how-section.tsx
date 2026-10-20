@@ -1,4 +1,4 @@
-import { matchSides } from "@/lib/match";
+import { isTeamMode, matchSides } from "@/lib/match";
 import type { MapInfo, MatchState, Season, Tournament } from "@/lib/types";
 import { HowItWorks, type HowCalc, type HowExample } from "@/components/surface/how-it-works";
 import { dayMonth } from "@/components/surface/fmt";
@@ -33,7 +33,7 @@ function calcDefaults(st: MatchState | null, start: number): HowCalc {
   const [a, b] = st ? matchSides(st) : [null, null];
   const ca = t?.mmrChanges?.find((c) => c.participantId === a?.id);
   const cb = t?.mmrChanges?.find((c) => c.participantId === b?.id);
-  if (!t || !ca || !cb || t.mode === "2x2") return { a: start, b: start };
+  if (!t || !ca || !cb || isTeamMode(t.mode)) return { a: start, b: start };
   const winner = ca.delta > 0 ? ca.delta : cb.delta;
   return { a: ca.before, b: cb.before, nameA: a?.name, nameB: b?.name, date: dayMonth(t.startsAt), mult: t.ratingMultiplier, delta: winner };
 }
