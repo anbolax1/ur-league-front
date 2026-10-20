@@ -292,7 +292,13 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
           </section>
         ))
       ) : (
-        <Panel className="p-8 text-center text-sm text-muted">Под эти фильтры ничего нет.</Panel>
+        <Panel className="p-8 text-center text-sm text-muted">
+          {items.some((t) => (t.category || "task") === category)
+            ? "Под эти фильтры ничего нет."
+            : category === "protocol"
+              ? "Протоколов пока нет: добавьте по одному или вставьте списком из таблицы."
+              : "Заданий пока нет: добавьте задания PUBG по одному или вставьте списком из таблицы."}
+        </Panel>
       )}
 
       <Modal open={!!draft} onClose={() => setDraft(null)} title={draft?.id ? "Изменить" : category === "protocol" ? "Новый протокол" : "Новое задание"}>
