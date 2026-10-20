@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import type { SeasonRecap } from "@/lib/types";
 import { ProfileChart } from "@/components/surface/profile-chart";
 import { signed } from "@/components/surface/ui";
-import { dLong, dShort, highlightColors, leadDays, mapNames, nameSize, pc, playerPoints, plural, W_DAY, W_MATCH, W_WIN, pl } from "@/components/surface/season-lib";
+import { dLong, dShort, highlightColors, leadDays, mapNames, matchMaps, nameSize, pc, playerPoints, plural, W_DAY, W_MATCH, W_WIN, pl } from "@/components/surface/season-lib";
 
 interface SeasonCtx {
   recap: SeasonRecap;
@@ -218,7 +218,7 @@ export function SeasonYou() {
             {ms.map(({ m }) => {
               const me = m.p.indexOf(sel), op = 1 - me, won = m.winner === me;
               const opp = P[m.p[op]];
-              const maps = m.rounds.filter((r) => r.played && r.map).map((r) => names[r.map] ?? "").filter(Boolean).join(", ");
+              const maps = matchMaps(m, names).join(", ");
               return (
                 <tr key={m.id}>
                   <td className="mp">

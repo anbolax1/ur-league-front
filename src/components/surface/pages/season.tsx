@@ -21,13 +21,16 @@ import {
   pc,
   pl,
   plural,
+  roundMaps,
   sides,
+  W_CHICKEN,
   W_DAY,
+  W_HEAT,
+  W_HEAT_GEN,
   W_KNOCK,
   W_LOSS,
   W_MATCH,
   W_PLAYER,
-  W_PLAYER_GEN,
   W_ROUND,
   W_WIN,
   type Forms,
@@ -185,7 +188,10 @@ function Hero({ recap, no, nav }: { recap: SeasonRecap; no: string; nav: Array<[
               <dt>Киллов</dt>
               <dd>
                 <CountUp value={S.knocks} />
-                <small>в матчах, где их записывали</small>
+                <small>
+                  по {f1(S.knocks / Math.max(1, S.heats))} за заход
+                  {S.chickens > 0 ? ` · ${pl(S.chickens, W_CHICKEN)}` : ""}
+                </small>
               </dd>
             </div>
           )}
@@ -322,10 +328,10 @@ function FinalSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                 const tot = sa + sb || 1;
                 return (
                   <div key={k} className="sn-rtile">
-                    <div className="img" style={r.map ? { backgroundImage: `url(${mapImage(r.map)})` } : undefined} />
+                    <div className="img" style={r.maps[w] || r.maps[l] ? { backgroundImage: `url(${mapImage(r.maps[w] || r.maps[l])})` } : undefined} />
                     <div>
                       <div className="rn">Раунд {k + 1}</div>
-                      <div className="mp">{names[r.map] ?? "Карта не записана"}</div>
+                      <div className="mp">{roundMaps(r, names) || "Карты не отмечены"}</div>
                     </div>
                     <div>
                       <div className="rs">
@@ -338,7 +344,8 @@ function FinalSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                         <i style={{ flex: 1, background: "var(--sf-cream-2)" }} />
                       </div>
                       <div className="rk">
-                        киллы {r.knocks[w]}:{r.knocks[l]} · после раунда {after[k][0]}:{after[k][1]}
+                        киллы {r.knocks[w]}:{r.knocks[l]}
+                        {r.places[w] || r.places[l] ? ` · места ${r.places[w] || "–"}:${r.places[l] || "–"}` : ""} · после раунда {after[k][0]}:{after[k][1]}
                       </div>
                     </div>
                   </div>
@@ -386,7 +393,7 @@ function LastMatch({ recap, m }: { recap: SeasonRecap; m: RecapMatch }) {
             .filter((r) => r.played)
             .map((r, k) => (
               <span key={k} className="sf-stamp">
-                {k + 1}. {names[r.map] ?? "?"} {r.points[w]}:{r.points[l]}
+                {k + 1}. {roundMaps(r, names) || "?"} {r.points[w]}:{r.points[l]}
               </span>
             ))}
         </div>
@@ -520,29 +527,27 @@ function UpsetsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   );
 }
 
+// Меньше заходов на карте - отметки «больше всего киллов» и «тише всех» были бы случайностью.
+const MAP_SOLID_HEATS = 5;
+
 function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
-  const S = recap.summary;
-  const maps = recap.maps.filter((m) => m.rounds > 0);
-  const per = (m: (typeof maps)[number], v: number) => (m.rounds ? v / (2 * m.rounds) : 0);
-  const solid = maps.filter((m) => m.rounds >= 5);
+  const maps = recap.maps.filter((m) => m.heats > 0);
+  const per = (m: (typeof maps)[number], v: number) => (m.heats ? v / m.heats : 0);
+  const solid = maps.filter((m) => m.heats >= MAP_SOLID_HEATS);
   const mostKn = [...solid].sort((a, b) => per(b, b.knocks) - per(a, a.knocks))[0];
   const quiet = [...solid].sort((a, b) => per(a, a.points) - per(b, b.points))[0];
-  const rounds = maps.reduce((s, m) => s + m.rounds, 0);
+  const heats = maps.reduce((s, m) => s + m.heats, 0);
   return (
     <Sec
       id="maps"
       tone={tone}
       eyebrow="Что происходит на карте"
       title="карты"
-      lead={
-        <>
-          Раунды записаны у {pl(S.detailed, W_MATCH)}: {pl(rounds, W_ROUND)}.
-        </>
-      }
+      lead={<>Карту каждого захода выбирает игра, ведущий её отмечает: отмечено {pl(heats, W_HEAT)}.</>}
     >
       <div className="sn-maps-grid">
         {[...maps]
-          .sort((a, b) => b.rounds - a.rounds)
+          .sort((a, b) => b.heats - a.heats)
           .map((m) => {
             const st: string[] = [];
             if (m === mostKn) st.push("больше всего киллов");
@@ -563,15 +568,22 @@ function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                 </div>
                 <dl>
                   <div>
-                    <dt>Сыграно раундов</dt>
-                    <dd>{m.rounds}</dd>
+                    <dt>Заходов</dt>
+                    <dd>{m.heats}</dd>
                   </div>
                   <div>
-                    <dt>Очков за раунд</dt>
+                    <dt>Среднее место</dt>
+                    <dd>
+                      {m.placed ? f1(m.avgPlace) : "—"}
+                      {m.chickens > 0 && <small>{pl(m.chickens, W_CHICKEN)}</small>}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Очков за заход</dt>
                     <dd>{f1(per(m, m.points))}</dd>
                   </div>
                   <div>
-                    <dt>Киллов за раунд</dt>
+                    <dt>Киллов за заход</dt>
                     <dd>{f1(per(m, m.knocks))}</dd>
                   </div>
                   <div className="wide">
@@ -588,22 +600,26 @@ function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
             );
           })}
       </div>
-      <p className="sn-cap">Очки, киллы и задания - у одной стороны за сыгранный раунд.</p>
+      <p className="sn-cap">Очки, киллы, место и задания - у стороны за её заход.</p>
     </Sec>
   );
 }
 
-function RoundsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
-  const [r1, r2] = recap.rounds;
-  const side = (r: typeof r1, v: number) => (r.rounds ? v / (2 * r.rounds) : 0);
-  const cmp: Array<[string, number, number, (v: number) => string, string]> = r2
-    ? [
-        ["Очки", side(r1, r1.points), side(r2, r2.points), f1, `${r1.rounds} и ${r2.rounds} раундов`],
-        ["Киллы", side(r1, r1.knocks), side(r2, r2.knocks), f1, "килл - 3 очка"],
-        ["Задания выполнены", pc(r1.tasksDone, r1.tasksOffered), pc(r2.tasksDone, r2.tasksOffered), (v) => `${Math.round(v)}%`, `${r1.tasksDone} из ${r1.tasksOffered} и ${r2.tasksDone} из ${r2.tasksOffered}`],
-      ]
-    : [];
-  const knockGrow = r2 && side(r1, r1.knocks) ? pc(side(r2, r2.knocks) - side(r1, r1.knocks), side(r1, r1.knocks)) : 0;
+// Корзины мест в заходе: первое место - чикен, отдельным столбцом.
+const PLACE_BINS: Array<[string, number, number]> = [
+  ["1 · чикен", 1, 1],
+  ["2–5", 2, 5],
+  ["6–10", 6, 10],
+  ["11–16", 11, 16],
+];
+const MAX_PLACE = 16; // в Ultimate Royale 16 команд
+// Меньше заходов с местом - среднее место ещё ничего не говорит.
+const PLACE_MIN_HEATS = 3;
+const LIST_LEN = 5;
+
+function HeatsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
+  const S = recap.summary;
+  const names = mapNames(recap);
   const scored = recap.matches.filter((m) => m.score && m.winner >= 0);
   const margins = MARGINS.map(([label, a, b]) => ({
     label,
@@ -613,70 +629,52 @@ function RoundsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
     }).length,
   }));
   const mMax = Math.max(1, ...margins.map((x) => x.n));
+  const bins = PLACE_BINS.map(([label, a, b]) => ({ label, n: recap.places.slice(a - 1, b).reduce((s, v) => s + v, 0) }));
+  const bMax = Math.max(1, ...bins.map((x) => x.n));
+  const placed = bins.reduce((s, x) => s + x.n, 0);
   const kMax = Math.max(1, ...recap.knockers.map((k) => k.knocks));
   const bk = recap.bestKnock;
+  const chickens = recap.placers.filter((p) => p.chickens > 0).slice(0, LIST_LEN);
+  const cMax = Math.max(1, ...chickens.map((p) => p.chickens));
+  const steady = recap.placers
+    .filter((p) => p.placed >= PLACE_MIN_HEATS)
+    .sort((a, b) => a.avgPlace - b.avgPlace || b.placed - a.placed)
+    .slice(0, LIST_LEN);
   return (
     <Sec
-      id="rounds"
+      id="heats"
       tone={tone}
-      eyebrow="Первый раунд против второго"
-      title="раунды и киллы"
+      eyebrow="Места, киллы и чикены"
+      title="заходы"
       lead={
-        r2 ? (
-          <>
-            В первом раунде играют с бесплатным набором, во втором - со своим снаряжением. Во втором раунде киллов {knockGrow >= 0 ? `на ${knockGrow}% больше` : `на ${-knockGrow}% меньше`}, а
-            заданий выполняют {pc(r2.tasksDone, r2.tasksOffered) < pc(r1.tasksDone, r1.tasksOffered) ? "реже" : "не реже"}.
-          </>
-        ) : undefined
+        <>
+          За сезон сыграно {pl(S.heats, W_HEAT)}, в среднем {f1(S.knocks / Math.max(1, S.heats))} килла за заход.
+          {S.chickens > 0 ? ` Первое место против всех сквадов взяли ${pl(S.chickens, W_TIMES)}.` : ""}
+        </>
       }
     >
       <div className="sn-two">
         <div>
-          {r2 && (
+          {placed > 0 && (
             <>
               <p className="sn-panel-title">
-                <span>В среднем у одной стороны за раунд</span>
+                <span>Места в заходах</span>
+                <span>по экрану итогов, заходов</span>
               </p>
-              <div className="sn-legend">
-                <span>
-                  <i className="sn-sw" style={{ background: "var(--sn-fg2)" }} />1 раунд
-                </span>
-                <span>
-                  <i className="sn-sw" style={{ background: "var(--sf-amber)" }} />2 раунд
-                </span>
-              </div>
-              <div className="sn-cmp">
-                {cmp.map(([name, a, b, fmt, hint]) => {
-                  const mx = Math.max(a, b, 0.0001) * 1.08;
-                  return (
-                    <div key={name} className="sn-cmp-row">
-                      <h4>
-                        {name}
-                        <span>{hint}</span>
-                      </h4>
-                      {(
-                        [
-                          ["1 раунд", a, "r1"],
-                          ["2 раунд", b, "r2"],
-                        ] as const
-                      ).map(([lbl, v, cls]) => (
-                        <div key={lbl} className="sn-cmp-bar">
-                          {lbl}
-                          <span className="track">
-                            <i className={cls} style={{ width: `${(v / mx) * 100}%` }} />
-                          </span>
-                          <b>{fmt(v)}</b>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })}
+              <div className="sn-cols" role="img" aria-label={bins.map((x) => `${x.label}: ${x.n}`).join(", ")}>
+                {bins.map((x, k) => (
+                  <div key={x.label}>
+                    <b>{x.n}</b>
+                    <i className={k === 0 ? "acc" : undefined} style={{ height: `${(x.n / bMax) * 100}%` }} />
+                    <span>{x.label}</span>
+                  </div>
+                ))}
               </div>
             </>
           )}
           {scored.length > 0 && (
             <>
-              <p className="sn-panel-title sn-gap">
+              <p className={`sn-panel-title ${placed > 0 ? "sn-gap" : ""}`}>
                 <span>Насколько близко</span>
                 <span>разница в счёте, матчей</span>
               </p>
@@ -689,34 +687,6 @@ function RoundsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                   </div>
                 ))}
               </div>
-            </>
-          )}
-        </div>
-        <div>
-          {recap.knockers.length > 0 && (
-            <>
-              <p className="sn-panel-title">
-                <span>Больше всех киллов</span>
-                <span>за матч</span>
-              </p>
-              <div className="sn-hbars">
-                {recap.knockers.map((k) => (
-                  <div key={k.player} className="sn-hbar">
-                    <span className="nm">{nameOf(recap, k.player)}</span>
-                    <span className="tr">
-                      <i style={{ width: `calc((100% - 130px) * ${(k.knocks / kMax).toFixed(3)})` }} />
-                      <b>{k.knocks}</b>
-                      <span>{f1(k.knocks / k.matches)} за матч</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {bk && (
-                <p className="sn-cap">
-                  Рекорд одного матча: {nameOf(recap, bk.player)} - {pl(bk.knocks, W_KNOCK)} против{" "}
-                  {nameOf(recap, recap.matches[bk.match].p.find((p) => p !== bk.player) ?? 0)}, {dLong(recap.matches[bk.match].at)}.
-                </p>
-              )}
             </>
           )}
           {recap.comebacks.length > 0 && (
@@ -747,6 +717,77 @@ function RoundsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                     );
                   })}
               </ul>
+            </>
+          )}
+        </div>
+        <div>
+          {recap.knockers.length > 0 && (
+            <>
+              <p className="sn-panel-title">
+                <span>Больше всех киллов</span>
+                <span>за сезон</span>
+              </p>
+              <div className="sn-hbars">
+                {recap.knockers.map((k) => (
+                  <div key={k.player} className="sn-hbar">
+                    <span className="nm">{nameOf(recap, k.player)}</span>
+                    <span className="tr">
+                      <i style={{ width: `calc((100% - 130px) * ${(k.knocks / kMax).toFixed(3)})` }} />
+                      <b>{k.knocks}</b>
+                      <span>{f1(k.knocks / Math.max(1, k.heats))} за заход</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {bk && (
+                <p className="sn-cap">
+                  Рекорд одного захода: {nameOf(recap, bk.player)} - {pl(bk.knocks, W_KNOCK)} против{" "}
+                  {nameOf(recap, recap.matches[bk.match].p.find((p) => p !== bk.player) ?? 0)}
+                  {names[bk.map] ? `, ${names[bk.map]}` : ""}, {dLong(recap.matches[bk.match].at)}.
+                </p>
+              )}
+            </>
+          )}
+          {chickens.length > 0 && (
+            <>
+              <p className="sn-panel-title sn-gap">
+                <span>Больше всех чикенов</span>
+                <span>первых мест</span>
+              </p>
+              <div className="sn-hbars">
+                {chickens.map((p) => (
+                  <div key={p.player} className="sn-hbar">
+                    <span className="nm">{nameOf(recap, p.player)}</span>
+                    <span className="tr">
+                      <i style={{ width: `calc((100% - 130px) * ${(p.chickens / cMax).toFixed(3)})` }} />
+                      <b>{p.chickens}</b>
+                      <span>из {pl(p.placed, W_HEAT_GEN)}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {steady.length > 0 && (
+            <>
+              <p className="sn-panel-title sn-gap">
+                <span>Лучшее среднее место</span>
+                <span>от {PLACE_MIN_HEATS} заходов</span>
+              </p>
+              <div className="sn-hbars">
+                {steady.map((p) => (
+                  <div key={p.player} className="sn-hbar">
+                    <span className="nm">{nameOf(recap, p.player)}</span>
+                    <span className="tr">
+                      <i style={{ width: `calc((100% - 130px) * ${((MAX_PLACE + 1 - p.avgPlace) / MAX_PLACE).toFixed(3)})` }} />
+                      <b>{f1(p.avgPlace)}</b>
+                      <span>
+                        топ-5: {p.top5} из {p.placed}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
             </>
           )}
         </div>
@@ -980,18 +1021,15 @@ function CalendarSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
 function HowSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   const S = recap.summary;
   const sn = recap.season;
-  const corr = S.corrections[0];
   const up = recap.upcoming[0];
   const items = [
     "Цифры - из базы сайта и обновляются после каждого матча сезона.",
-    S.detailed < S.matches
-      ? `${pl(S.matches - S.detailed, W_MATCH)} перенесены из таблицы организатора: там есть итог и одна карта. Счёт по раундам, задания и киллы есть у ${pl(S.detailed, W_MATCH)}.`
-      : "",
-    `MMR - Эло с K=${sn.kFactor}, у всех старт ${S.startMmr}. Жетон ×2 удваивает изменение.${corr ? ` ${dLong(corr.at)} рейтинг сверили с официальной таблицей у ${pl(corr.players, W_PLAYER_GEN)}.` : ""}`,
+    `MMR - Эло с K=${sn.kFactor}, у всех старт ${S.startMmr}. Жетон ×2 удваивает изменение.`,
     "Шанс на победу - ожидаемый результат Эло по MMR обоих игроков прямо перед матчем.",
-    "Раунд считается сыгранным, если он начался, даже при счёте 0:0. Киллы - только в матчах, где их записывали.",
-    "Победы и поражения - как в таблице лидеров: ×2 из таблицы организатора идёт за два матча.",
-  ].filter(Boolean);
+    "Раунд - заход стороны A и заход стороны B, карту каждого захода выбирает игра. Заход сыгран, если ведущий отметил карту или место или в нём есть киллы.",
+    "Место в заходе - по экрану итогов PUBG, от 1 до 16; чикен - первое место.",
+    "Победы и поражения - как в таблице лидеров.",
+  ];
   return (
     <section className={`sf-sec ${tone} sn-sec sn-how`} id="how">
       <div className="sf-wrap">
@@ -1052,8 +1090,8 @@ export function SurfaceSeason({ recap, no }: { recap: SeasonRecap; no: string })
   if (recap.days.length) parts.push({ id: "race", nav: "Гонка", render: (tone) => <RaceSection recap={recap} tone={tone} /> });
   if (recap.decisive >= 0) parts.push({ id: "final", nav: "Финал", render: (tone) => <FinalSection recap={recap} tone={tone} /> });
   if (recap.upsets.length) parts.push({ id: "upsets", nav: "Сенсации", render: (tone) => <UpsetsSection recap={recap} tone={tone} /> });
-  if (recap.maps.some((m) => m.rounds > 0)) parts.push({ id: "maps", nav: "Карты", render: (tone) => <MapsSection recap={recap} tone={tone} /> });
-  if (recap.rounds.length || recap.knockers.length) parts.push({ id: "rounds", nav: "Раунды", render: (tone) => <RoundsSection recap={recap} tone={tone} /> });
+  if (recap.maps.some((m) => m.heats > 0)) parts.push({ id: "maps", nav: "Карты", render: (tone) => <MapsSection recap={recap} tone={tone} /> });
+  if (S.heats > 0) parts.push({ id: "heats", nav: "Заходы", render: (tone) => <HeatsSection recap={recap} tone={tone} /> });
   if (recap.tasks.all[1] > 0) parts.push({ id: "tasks", nav: "Задания", render: (tone) => <TasksSection recap={recap} tone={tone} /> });
   if (recap.days.length) parts.push({ id: "calendar", nav: "Календарь", render: (tone) => <CalendarSection recap={recap} tone={tone} /> });
   parts.push({

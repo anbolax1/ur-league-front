@@ -733,8 +733,12 @@ export interface RecapPlayer {
   curve: Array<[number, number, number]>;
 }
 
+/** Раунд матча: у каждой стороны свой заход со своей картой и местом. */
 export interface RecapRound {
-  map: string;
+  /** Коды карт заходов A и B; пусто - не отмечена. */
+  maps: [string, string];
+  /** Места в заходах; 0 - не записано. */
+  places: [number, number];
   played: boolean;
   points: [number, number];
   knocks: [number, number];
@@ -752,7 +756,7 @@ export interface RecapMatch {
   show: boolean;
   before: [number, number];
   delta: [number, number];
-  /** У матчей из таблицы организатора счёта нет. */
+  /** У матча без заходов счёта нет. */
   score?: [number, number];
   rounds: RecapRound[];
 }
@@ -765,23 +769,28 @@ export interface RecapDay {
   order: number[];
 }
 
+/** Заходы на карте за сезон: очки, киллы и задания стороны в её заходе, места по экрану итогов. */
 export interface RecapMap {
   code: string;
   name: string;
-  rounds: number;
+  heats: number;
   points: number;
   knocks: number;
   tasksDone: number;
   tasksOffered: number;
+  placed: number;
+  /** 0 - мест не записано. */
+  avgPlace: number;
+  chickens: number;
 }
 
-export interface RecapRoundStat {
-  number: number;
-  rounds: number;
-  points: number;
-  knocks: number;
-  tasksDone: number;
-  tasksOffered: number;
+/** Места игрока в заходах сезона. */
+export interface RecapPlacer {
+  player: number;
+  placed: number;
+  avgPlace: number;
+  chickens: number;
+  top5: number;
 }
 
 export interface RecapTask {
@@ -804,11 +813,13 @@ export interface SeasonRecap {
     x2: number;
     detailed: number;
     knocks: number;
+    /** Сыгранных заходов. */
+    heats: number;
+    chickens: number;
     gameDays: number;
     first?: string;
     last?: string;
     startMmr: number;
-    corrections: Array<{ at: string; players: number }>;
   };
   players: RecapPlayer[];
   matches: RecapMatch[];
@@ -817,9 +828,12 @@ export interface SeasonRecap {
   /** Матч, после которого первым стал итоговый лидер; -1 - лидер не менялся. */
   decisive: number;
   maps: RecapMap[];
-  rounds: RecapRoundStat[];
-  knockers: Array<{ player: number; knocks: number; matches: number }>;
-  bestKnock?: { match: number; player: number; knocks: number };
+  knockers: Array<{ player: number; knocks: number; heats: number }>;
+  /** Лучший заход сезона по киллам; map - код карты захода. */
+  bestKnock?: { match: number; player: number; knocks: number; round: number; map: string };
+  /** Заходов на каждом месте, с первого. */
+  places: number[];
+  placers: RecapPlacer[];
   comebacks: Array<{ match: number; round1: [number, number] }>;
   tasks: {
     all: DoneOffered;

@@ -1,7 +1,7 @@
 /* Итоги сезона: склонения, проценты, даты по Москве и то, что страница выводит из ответа бэкенда. */
 
 import type { CSSProperties } from "react";
-import type { MmrPoint, RecapMatch, SeasonRecap } from "@/lib/types";
+import type { MmrPoint, RecapMatch, RecapRound, SeasonRecap } from "@/lib/types";
 
 const MSK = "Europe/Moscow";
 
@@ -14,6 +14,9 @@ export const W_KNOCK: Forms = ["килл", "килла", "киллов"];
 export const W_PLAYER: Forms = ["игрок", "игрока", "игроков"];
 export const W_PLAYER_GEN: Forms = ["игрока", "игроков", "игроков"];
 export const W_ROUND: Forms = ["раунд", "раунда", "раундов"];
+export const W_HEAT: Forms = ["заход", "захода", "заходов"];
+export const W_HEAT_GEN: Forms = ["захода", "заходов", "заходов"];
+export const W_CHICKEN: Forms = ["чикен", "чикена", "чикенов"];
 
 export function plural(n: number, f: Forms): string {
   const a = Math.abs(n) % 100, b = a % 10;
@@ -50,6 +53,24 @@ export function sides(m: RecapMatch): [number, number] {
 
 export function mapNames(recap: SeasonRecap): Record<string, string> {
   return Object.fromEntries(recap.maps.map((m) => [m.code, m.name]));
+}
+
+/** Карты заходов раунда: «Эрангель · Мирамар», одна - если обе стороны играли на ней. */
+export function roundMaps(r: RecapRound, names: Record<string, string>): string {
+  return [...new Set(r.maps.filter(Boolean).map((c) => names[c] ?? c))].join(" · ");
+}
+
+/** Карты сыгранных заходов матча по порядку, без повторов. */
+export function matchMaps(m: RecapMatch, names: Record<string, string>): string[] {
+  const out: string[] = [];
+  for (const r of m.rounds) {
+    if (!r.played) continue;
+    for (const c of r.maps) {
+      const n = c ? (names[c] ?? c) : "";
+      if (n && !out.includes(n)) out.push(n);
+    }
+  }
+  return out;
 }
 
 /** Дни на первом месте по отрезкам лидерства. */
@@ -89,7 +110,7 @@ export function playerPoints(recap: SeasonRecap, i: number): MmrPoint[] {
       date: m.at,
       opponent: P[m.p[op]].login,
       opponentKey: P[m.p[op]].login,
-      map: m.rounds.filter((r) => r.played && r.map).map((r) => names[r.map] ?? "").filter(Boolean).join(" · "),
+      map: matchMaps(m, names).join(" · "),
       mmr: m.before[me] + m.delta[me],
       delta: m.delta[me],
       win: m.winner === me,
