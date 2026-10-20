@@ -16,14 +16,9 @@ import {
   putShowPreview,
   useChosenPreview,
 } from "@/components/admin/match/show-preview";
-import type { Belt, MatchFormat, MatchPlayer, MatchState, PlayerType, Registration, User } from "@/lib/types";
+import type { Belt, MatchFormat, MatchPlayer, MatchState, Registration, User } from "@/lib/types";
 import { holderName } from "@/components/surface/belt-lib";
 
-const PLAYER_TYPES: Array<[PlayerType, string]> = [
-  ["pvp", "PvP"],
-  ["pve", "PvE"],
-  ["pvpve", "PvPvE"],
-];
 
 /** Кто станет стороной A (заходит в раунде первой), как решит сервер: меньше MMR, при равном - меньше матчей
     в прошлых сезонах; при полном равенстве сервер бросит жребий, здесь стороны остаются в порядке выбора. */
@@ -33,9 +28,9 @@ function orderSides(a: MatchPlayer, b: MatchPlayer): { sides: [MatchPlayer, Matc
   return { sides: [a, b], why: "coin" };
 }
 
-/** Подсказки у карточек сторон: почему A ходит первой. */
+/** Подсказки у карточек сторон: почему A заходит первой. */
 const SIDE_HINTS = {
-  mmr: ["ходит первым: меньше MMR", "больше MMR"],
+  mmr: ["заходит первым: меньше MMR", "больше MMR"],
   games: ["MMR равный, меньше матчей в прошлых сезонах", "больше матчей в прошлых сезонах"],
   coin: ["MMR и опыт равны — стороны решит жребий", "MMR и опыт равны — стороны решит жребий"],
 } as const;
@@ -122,7 +117,7 @@ function defaultShowTime(): string {
   return `${tomorrow.slice(0, 10)}T20:00`;
 }
 
-/** Новый матч: стороны, тип игроков и ×2 - и сразу в пульт; шоу-матч - в расписание на дату. */
+/** Новый матч: стороны, раунды и ×2 - и сразу в пульт; шоу-матч - в расписание на дату. */
 export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: string; belt?: Belt | null }) {
   const router = useRouter();
   const [format, setFormat] = React.useState<MatchFormat>(liveMatchId ? "show" : "match");
@@ -131,7 +126,6 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
   const [pool, setPool] = React.useState<Registration[]>([]);
   const [first, setFirst] = React.useState<MatchPlayer | null>(null);
   const [second, setSecond] = React.useState<MatchPlayer | null>(null);
-  const [playerType, setPlayerType] = React.useState<PlayerType>("pvp");
   const [mult, setMult] = React.useState(1);
   const [rounds, setRounds] = React.useState<2 | 3>(2);
   const [prize, setPrize] = React.useState("");
@@ -198,7 +192,6 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
     try {
       const st = await api.post<MatchState>("/matches", {
         mode: "1x1",
-        playerType,
         ratingMultiplier: mult,
         format,
         rounds: roundCount,
@@ -273,16 +266,6 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
             <button type="button" className="seg-btn opacity-50" aria-pressed={false} disabled title="2×2 — следующим шагом">
               <span>2×2</span>
             </button>
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <span className="field-label">Тип игроков</span>
-          <div className="seg">
-            {PLAYER_TYPES.map(([v, label]) => (
-              <button key={v} type="button" className="seg-btn" aria-pressed={playerType === v} onClick={() => setPlayerType(v)}>
-                <span>{label}</span>
-              </button>
-            ))}
           </div>
         </div>
         <div className="space-y-1.5">
@@ -431,8 +414,7 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
             {sideA && sideB ? `${sideA.displayName || sideA.login} vs ${sideB.displayName || sideB.login}` : "Выберите обоих игроков"}
           </div>
           <div className="text-sm text-muted">
-            {show ? "Шоу-матч · " : ""}1×1 · {PLAYER_TYPES.find(([v]) => v === playerType)?.[1]} · {roundsLabel(roundCount)} ·
-            рейтинг ×{mult}
+            {show ? "Шоу-матч · " : ""}1×1 · {roundsLabel(roundCount)} · рейтинг ×{mult}
             {show && prize.trim() ? ` · приз: ${prize.trim()}` : ""}
           </div>
           <div className="text-xs text-muted">

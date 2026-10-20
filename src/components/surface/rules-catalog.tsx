@@ -4,7 +4,7 @@ import * as React from "react";
 import type { CatalogLegendary, CatalogTask, MapInfo } from "@/lib/types";
 import { mapImage } from "@/lib/match";
 import { pointsLabel } from "@/lib/format";
-import { KIND_LABEL, rulesCatalog } from "@/components/domain/rules-list";
+import { rulesCatalog } from "@/components/domain/rules-list";
 import { SearchGlyph } from "@/components/surface/ui";
 import { fullDate } from "@/components/surface/fmt";
 
@@ -29,11 +29,10 @@ function Item({ num, name, text, points, meta, tone, children }: { num: number; 
   );
 }
 
-/** Справочник заданий в новом дизайне: пул PvP или PvE, поиск по номеру или тексту, протоколы и легендарные задания. */
+/** Справочник заданий в новом дизайне: поиск по номеру или тексту, протоколы и легендарные задания. */
 export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[]; legendary: CatalogLegendary[]; maps: MapInfo[] }) {
   const [q, setQ] = React.useState("");
-  const [pool, setPool] = React.useState<"pvp" | "pve">("pvp");
-  const cat = rulesCatalog(tasks, legendary, maps, pool, q);
+  const cat = rulesCatalog(tasks, legendary, maps, q);
   const map = (code: string) => maps.find((m) => m.code === code);
   const nothing = q ? "Ничего не найдено — попробуй номер или другое слово." : "";
 
@@ -42,19 +41,12 @@ export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[];
       <div className="sf-wrap">
         <div className="sf-sec-head">
           <div>
-            <p className="sf-eyebrow">Справочник · перед раундом два задания и протокол</p>
+            <p className="sf-eyebrow">Справочник · перед раундом задание и протокол, ещё одно - на карту захода</p>
             <h2 className="sf-h-big" id="rl-t">
               задания<span className="sf-dot">.</span>
             </h2>
           </div>
           <div className="sf-controls rl-controls">
-            <div className="sf-seg" role="tablist" aria-label="Пул заданий">
-              {(["pvp", "pve"] as const).map((k) => (
-                <button key={k} type="button" role="tab" aria-selected={pool === k} onClick={() => setPool(k)}>
-                  {k === "pvp" ? "Задания PvP" : "Задания PvE"}
-                </button>
-              ))}
-            </div>
             <label className="sf-search">
               <SearchGlyph />
               <input type="search" placeholder="Номер или текст" autoComplete="off" aria-label="Поиск заданий и протоколов" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -73,7 +65,7 @@ export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[];
                       {/* eslint-disable-next-line @next/next/no-img-element -- превью карты */}
                       {m && <img src={mapImage(m.code)} alt="" loading="lazy" />}
                       <span>{m ? m.name : g.code ? g.code : "Общие задания"}</span>
-                      <small>{m ? "на карту раунда" : "на любой карте"}</small>
+                      <small>{m ? "когда заход на этой карте" : "на любой карте"}</small>
                     </h3>
                     <ul className="rl-list">
                       {g.items.map((t) => (
@@ -115,7 +107,7 @@ export function RulesCatalog({ tasks, legendary, maps }: { tasks: CatalogTask[];
               {cat.legendary.map((l) => {
                 const c = l.completion;
                 return (
-                  <Item key={l.id} num={l.num} text={l.text} points={l.points} meta={[KIND_LABEL[l.kind], sourceLine(l)].filter(Boolean).join(" · ")} tone="leg">
+                  <Item key={l.id} num={l.num} text={l.text} points={l.points} meta={sourceLine(l)} tone="leg">
                     {l.status === "done" ? (
                       <em className="rl-done">
                         выполнено{c ? ` · ${[c.nickname, c.map, c.completedAt ? fullDate(c.completedAt) : ""].filter(Boolean).join(" · ")}` : ""}

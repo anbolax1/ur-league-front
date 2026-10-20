@@ -8,9 +8,7 @@ export type ParticipantKind = "player" | "team";
 export type RegistrationStatus = "pending" | "accepted" | "declined";
 export type ValueType = "fixed" | "percent";
 export type CatalogSource = "official" | "boosty";
-export type TaskKind = "pve" | "pvp" | "pvpve";
 /** Тип игроков турнира — определяет пул основных заданий и контрактов. */
-export type PlayerType = "pve" | "pvp" | "pvpve";
 
 export interface User {
   id: string;
@@ -78,7 +76,6 @@ export interface Tournament {
   id: string;
   title: string;
   mode: TournamentMode;
-  playerType: PlayerType; // pve | pvp | pvpve
   status: TournamentStatus;
   totalRounds: number; // обычный матч - два или три раунда (рейда), шоу-матч - три
   /** match - обычный матч, show - шоу-матч из расписания. */
@@ -358,7 +355,6 @@ export interface CatalogTask {
   text: string;
   points: number;
   valueType: ValueType;
-  kind: TaskKind;
   source: CatalogSource;
   author?: string;
   title?: string;
@@ -383,7 +379,6 @@ export interface RoundBonusTask {
   text: string;
   points: number;
   valueType: ValueType;
-  kind: TaskKind;
   times: number;
   completedBy?: string | null;
   name?: string;
@@ -396,7 +391,6 @@ export interface CatalogLegendary {
   id: string;
   text: string;
   points: number;
-  kind: TaskKind;
   source: CatalogSource;
   author?: string;
   title?: string;

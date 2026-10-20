@@ -414,7 +414,6 @@ export async function SurfaceMatch({ id }: { id: string }) {
                 <span>{t.mode}</span>
                 <span>{roundsLabel(rounds.length || t.totalRounds)}</span>
                 {mult > 1 && <span>рейтинг ×{mult}</span>}
-                {t.playerType && <span>{t.playerType.toUpperCase()}</span>}
               </div>
               <h1 className="sf-h-big">
                 {title}

@@ -5,13 +5,7 @@ import { api, errorText } from "@/lib/api";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Panel } from "@/components/ui/card";
-import type { CatalogTask, MapInfo, TaskCategory, TaskKind, TaskTag } from "@/lib/types";
-
-const KINDS: Array<[TaskKind, string]> = [
-  ["pvp", "PvP"],
-  ["pve", "PvE"],
-  ["pvpve", "Для всех"],
-];
+import type { CatalogTask, MapInfo, TaskCategory, TaskTag } from "@/lib/types";
 
 const TAGS: Array<[TaskTag, string]> = [
   ["normal", "Обычное"],
@@ -23,7 +17,6 @@ type Draft = {
   id?: string;
   name: string;
   text: string;
-  kind: TaskKind;
   tag: TaskTag;
   mapCodes: string[];
   points: string;
@@ -43,10 +36,9 @@ function draftPoints(v: string): number | null {
   return n >= MIN_POINTS && n <= MAX_POINTS ? n : null;
 }
 
-const emptyDraft = (category: TaskCategory, kind: TaskKind, mapCode: string): Draft => ({
+const emptyDraft = (category: TaskCategory, mapCode: string): Draft => ({
   name: "",
   text: "",
-  kind,
   // протокол выполняют до 15-й минуты, он на время
   tag: category === "protocol" ? "timed" : "normal",
   mapCodes: mapCode ? [mapCode] : [],
@@ -72,11 +64,10 @@ function parseBulk(raw: string): Array<{ name: string; text: string }> {
     .filter((x) => x.text);
 }
 
-/** Каталог 3 сезона: задания (общие и на карты, отдельно PvP и PvE) и протоколы за +1. */
+/** Каталог: задания (общие и на карты) и протоколы за +1. */
 export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: MapInfo[] }) {
   const [items, setItems] = React.useState(initial);
   const [category, setCategory] = React.useState<TaskCategory>("task");
-  const [kind, setKind] = React.useState<TaskKind | "all">("pvp");
   const [mapFilter, setMapFilter] = React.useState<string>("all");
   const [showOff, setShowOff] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -92,11 +83,9 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
     (t) =>
       (t.category || "task") === category &&
       (showOff || t.active) &&
-      (kind === "all" || t.kind === kind || category === "protocol") &&
       (mapFilter === "all" || (mapFilter === "universal" ? !t.mapCodes.length : t.mapCodes.includes(mapFilter))) &&
       (!q || `${t.name ?? ""} ${t.text}`.toLowerCase().includes(q)),
   );
-  const defaultKind: TaskKind = category === "protocol" ? "pvpve" : kind === "all" ? "pvp" : kind;
   const defaultMap = mapFilter !== "all" && mapFilter !== "universal" ? mapFilter : "";
 
   // Задание на нескольких картах стоит в группе каждой своей карты.
@@ -158,7 +147,6 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
         items: rows.map((r) => ({
           ...r,
           category,
-          kind: defaultKind,
           mapCodes: category === "protocol" || !defaultMap ? [] : [defaultMap],
           points: category === "protocol" ? 1 : 2,
           valueType: "fixed",
@@ -196,14 +184,14 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setBulk("")}>
             <span>Вставить списком</span>
           </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setDraft(emptyDraft(category, defaultKind, defaultMap))}>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setDraft(emptyDraft(category, defaultMap))}>
             <span>+ Добавить</span>
           </button>
         </div>
       </div>
       <p className="text-sm text-muted">
-        В матче каждой стороне на раунд выпадает общее задание, задание на карту раунда и протокол — из пула под тип игроков, без
-        повторов в матче. Задание стоит 2 балла (соперник за чужое получает 1), протокол — 1 балл. Тег «обычное» или «на время»
+        В каждом раунде стороне выпадают общее задание и протокол, а когда ведущий отметит карту захода, — задание на эту карту;
+        без повторов в матче. Задание стоит 2 балла (соперник за чужое получает 1), протокол — 1 балл. Тег «обычное» или «на время»
         виден на стриме в виджете «Задания V2».
       </p>
 
@@ -221,16 +209,6 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
         </div>
         {category === "task" && (
           <>
-            <div className="space-y-1.5">
-              <span className="field-label">Пул</span>
-              <div className="seg">
-                {(["pvp", "pve", "all"] as const).map((k) => (
-                  <button key={k} type="button" className="seg-btn" aria-pressed={kind === k} onClick={() => setKind(k)}>
-                    <span>{k === "all" ? "Все" : k === "pvp" ? "PvP" : "PvE"}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
             <div className="space-y-1.5">
               <label className="field-label" htmlFor="cat-map">
                 Карта
@@ -281,7 +259,6 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
                     )}
                   </div>
                   {t.tag === "timed" && <span className="badge badge-champ"><span>на время</span></span>}
-                  <span className="badge badge-official"><span>{KINDS.find(([k]) => k === t.kind)?.[1] ?? t.kind}</span></span>
                   <span className="pts pts-orange"><span>+{t.points}</span></span>
                   <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => toggle(t)}>
                     <span>{t.active ? "Выключить" : "Включить"}</span>
@@ -294,7 +271,6 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
                         id: t.id,
                         name: t.name ?? "",
                         text: t.text,
-                        kind: t.kind,
                         tag: t.tag,
                         mapCodes: t.mapCodes,
                         points: String(t.points),
@@ -341,20 +317,6 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
               <textarea id="d-text" className="input min-h-[80px]" value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {category === "task" && (
-                <div className="space-y-1.5">
-                  <label className="field-label" htmlFor="d-kind">
-                    Пул
-                  </label>
-                  <select id="d-kind" className="select" value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value as TaskKind })}>
-                    {KINDS.map(([k, label]) => (
-                      <option key={k} value={k}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
               <div className="space-y-1.5">
                 <span className="field-label block">Тег</span>
                 <div className="seg">
@@ -445,7 +407,7 @@ export function TasksCatalog({ initial, maps }: { initial: CatalogTask[]; maps: 
         <div className="space-y-3">
           <p className="text-sm text-muted">
             По строке на {category === "protocol" ? "протокол" : "задание"}: «Название | Описание» или две колонки, скопированные из таблицы.
-            Всё уйдёт в {category === "protocol" ? "протоколы" : `пул ${KINDS.find(([k]) => k === defaultKind)?.[1]}`}
+            Всё уйдёт в {category === "protocol" ? "протоколы" : "задания"}
             {category === "task" && (defaultMap ? `, карта «${mapName(defaultMap)}»` : ", общие задания")} — поменять можно фильтрами сверху.
           </p>
           <textarea className="input min-h-[200px] font-mono text-xs" value={bulk ?? ""} onChange={(e) => setBulk(e.target.value)} />

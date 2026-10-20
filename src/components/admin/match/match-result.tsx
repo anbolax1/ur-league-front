@@ -22,7 +22,7 @@ export function MatchResult({ st, sides }: { st: MatchState; sides: [Participant
           <span className="field-label text-accent">{winner ? "Победа" : "Ничья"}</span>
           <div className="truncate font-display text-3xl uppercase">{winner ? winner.name : "Ничья — MMR не меняется"}</div>
           <div className="text-sm text-muted">
-            {t.mode} · {t.playerType.toUpperCase()} · {rounds.length} раунда{t.ratingMultiplier === 2 ? " · рейтинг ×2" : ""}
+            {t.mode} · {rounds.length} раунда{t.ratingMultiplier === 2 ? " · рейтинг ×2" : ""}
           </div>
         </div>
         <div className="flex items-center gap-3 font-display text-5xl leading-none tnum">

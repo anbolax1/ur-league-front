@@ -7,10 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { fmtDate } from "@/lib/format";
 import { tournamentName } from "@/lib/display";
-import type { CatalogLegendary, Participant, TaskKind, Tournament } from "@/lib/types";
+import type { CatalogLegendary, Participant, Tournament } from "@/lib/types";
 
-const KIND_LABEL: Record<string, string> = { pve: "PvE", pvp: "PvP", pvpve: "PvPvE" };
-const normalizeKind = (k?: string): TaskKind => (k === "pve" || k === "pvp" ? k : "pvpve");
 
 /** Раздел «Легендарные контракты» — глобальный пул (10 баллов), выполнимы один раз навсегда.
     CRUD каталога + отметка выполнения (ник/карта/опц. турнир/участник) и возврат в пул. */
@@ -30,7 +28,6 @@ export function LegendaryManager({
   // Форма каталога.
   const [text, setText] = React.useState("");
   const [points, setPoints] = React.useState(10);
-  const [kind, setKind] = React.useState<TaskKind>("pvpve");
   const [source, setSource] = React.useState<"official" | "boosty">("official");
   const [author, setAuthor] = React.useState("");
   const [title, setTitle] = React.useState("");
@@ -48,7 +45,6 @@ export function LegendaryManager({
     setEditing(null);
     setText("");
     setPoints(10);
-    setKind("pvpve");
     setSource("official");
     setAuthor("");
     setTitle("");
@@ -60,7 +56,6 @@ export function LegendaryManager({
     setEditing(it);
     setText(it.text);
     setPoints(it.points || 10);
-    setKind(normalizeKind(it.kind));
     setSource(it.source === "boosty" ? "boosty" : "official");
     setAuthor(it.author ?? "");
     setTitle(it.title ?? "");
@@ -79,7 +74,6 @@ export function LegendaryManager({
     const body: Record<string, unknown> = {
       text: text.trim(),
       points: Number(points) || 10,
-      kind,
       source,
       author: source === "boosty" ? author.trim() : "",
       title: source === "boosty" ? title.trim() : "",
@@ -207,9 +201,6 @@ export function LegendaryManager({
                     <span className="pts pts-orange flex-none">
                       <span>+{it.points || 10}</span>
                     </span>
-                    <span className="chip">
-                      <span>{KIND_LABEL[normalizeKind(it.kind)]}</span>
-                    </span>
                     {it.source === "boosty" ? <Badge kind="boosty">Boosty</Badge> : <Badge kind="official">official</Badge>}
                     {done ? (
                       <span className="chip chip-cyan text-[0.62rem]">
@@ -289,14 +280,6 @@ export function LegendaryManager({
             <div className="w-28 space-y-1.5">
               <label className="field-label" htmlFor="lf-points">Баллы</label>
               <input id="lf-points" type="number" min={1} className="input" value={points} onChange={(e) => setPoints(Number(e.target.value))} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="field-label" htmlFor="lf-kind">Вид</label>
-              <select id="lf-kind" className="select" value={kind} onChange={(e) => setKind(e.target.value as TaskKind)}>
-                <option value="pve">PvE</option>
-                <option value="pvp">PvP</option>
-                <option value="pvpve">PvPvE</option>
-              </select>
             </div>
           </div>
           <div className="space-y-1.5">

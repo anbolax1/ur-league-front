@@ -262,7 +262,6 @@ export function MatchConsole({
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
             {show && <span className="chip chip-cyan"><span>Шоу-матч</span></span>}
             <span className="chip"><span>{st.tournament.mode}</span></span>
-            <span className="chip"><span>{st.tournament.playerType.toUpperCase()}</span></span>
             {st.tournament.ratingMultiplier === 2 && <span className="chip chip-cyan"><span>рейтинг ×2</span></span>}
             {beltLabel && <span className="badge badge-champ"><span>{beltLabel}</span></span>}
             <span>{stageLabel(st.stage, st.currentRound || 1, total)}</span>

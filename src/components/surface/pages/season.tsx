@@ -805,7 +805,7 @@ function TasksSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
           {(
             [
               ["Задания на карту", "уничтожить роботов в здании или на крыше", T.mapTasks],
-              ["Общие задания", "PvP и всё остальное", T.general],
+              ["Общие задания", "на любой карте", T.general],
               ["Протоколы", "до 15-й минуты", T.protocols],
             ] as const
           ).map(([name, hint, v]) => (
