@@ -2,11 +2,11 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { TwitchIcon, YouTubeIcon } from "@/components/icons";
 import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
-import { hasScore, isShowMatch, mapImage, matchSides, roundScore, roundsLabel, stageLabel, totalScore } from "@/lib/match";
+import { hasScore, isShowMatch, mapImage, matchSides, roundMapCode, roundMapsLabel, roundScore, roundsLabel, stageLabel, totalScore } from "@/lib/match";
 import type { Belt, MatchState, Matchup, MatchupSide } from "@/lib/types";
 import { CountUp, FitBoard } from "@/components/surface/motion";
 import { RoundCard } from "@/components/surface/round-card";
-import { roundTasks, VetoChips } from "@/components/surface/last-match";
+import { roundTasks } from "@/components/surface/last-match";
 import { Odds } from "@/components/surface/home-parts";
 import { beltMarkLabel, matchBelt } from "@/components/surface/belt-lib";
 
@@ -45,8 +45,7 @@ export function LiveMatch({ st, matchup, organizer, belt = null }: { st: MatchSt
   const holder = mark?.kind === "defend" ? mark.holder.userId : "";
   const beltLine = mark?.kind === "defend" ? `носитель пояса${mark.defenses ? ` · ★${mark.defenses}` : ""}` : "";
   const poster = show && t.previewUrl ? t.previewUrl : "";
-  const vetoNow = st.stage === "veto" && st.veto.length > 0;
-  const withMaps = !vetoNow && rounds.some((r) => r.map);
+  const started = rounds.some((r) => r.status !== "pending");
   const eyebrow = [stageLabel(st.stage, st.currentRound || 1, total), t.mode, roundsLabel(total), t.ratingMultiplier > 1 ? `рейтинг ×${t.ratingMultiplier}` : ""]
     .filter(Boolean)
     .join(" · ");
@@ -91,15 +90,14 @@ export function LiveMatch({ st, matchup, organizer, belt = null }: { st: MatchSt
                 {holder && b?.userId === holder && <span className="sf-side-mmr sf-live-belt">{beltLine}</span>}
               </div>
             </FitBoard>
-            {vetoNow && <VetoChips veto={st.veto} />}
-            {withMaps && (
+            {started && (
               <div className="sf-rounds" style={{ "--n": Math.min(rounds.length, 3) } as CSSProperties}>
                 {rounds.map((r) => (
                   <RoundCard
                     key={r.id}
                     n={r.number}
-                    map={r.map}
-                    image={mapImage(r.mapCode)}
+                    map={roundMapsLabel(st, r.number, sides) || (r.status === "pending" ? "карты выберет игра" : "карты не отмечены")}
+                    image={mapImage(roundMapCode(st, r.number, sides))}
                     scoreA={roundScore(st, r.number, a?.id)}
                     scoreB={roundScore(st, r.number, b?.id)}
                     scored={scored && r.status !== "pending"}

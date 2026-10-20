@@ -49,12 +49,6 @@ const SAMPLE_STATE: LiveState = {
     { text: "Сапёр: Найдите и уничтожьте 5 Взрывоботов.", points: 1, valueType: "fixed", times: 0, category: "task", opponent: true },
   ],
   complications: [{ text: "S.O.S: Первые 3 минуты рейда: Вызовите Эвакуацию.", penalty: 0, valueType: "fixed", reward: 1, tag: "timed" }],
-  veto: [
-    { mapCode: "spaceport", mapName: "Космопорт", action: "ban", side: "A", sideName: "Игрок A" },
-    { mapCode: "blue_gate", mapName: "Синие ворота", action: "ban", side: "B", sideName: "Игрок B" },
-    { mapCode: "dam", mapName: "Поле битвы у Дамбы", action: "pick", side: "B", sideName: "Игрок B", round: 1 },
-    { mapCode: "buried_city", mapName: "Погребённый город", action: "pick", side: "A", sideName: "Игрок A", round: 2 },
-  ],
 };
 
 /** Данные, которых в идущем матче может не быть: задания и протоколы сервер выдаёт с началом раунда,
@@ -68,7 +62,6 @@ const SAMPLE_PARTS: { types: WidgetType[]; missing: string; has: (s: LiveState) 
     has: (s) => !!s.complications?.length || !!s.complication,
     part: { complications: SAMPLE_STATE.complications },
   },
-  { types: ["veto"], missing: "пиков-банов", has: (s) => !!s.veto?.length, part: { veto: SAMPLE_STATE.veto } },
 ];
 
 /** Что показать в превью: настоящий матч, а чего в нём ещё нет - из примера, иначе виджет не расставить. */

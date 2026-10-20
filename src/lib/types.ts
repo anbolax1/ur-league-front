@@ -445,16 +445,6 @@ export interface LiveComplication {
   tag?: TaskTag;
 }
 
-/** Ход пиков-банов в оверлее. */
-export interface LiveVeto {
-  mapCode: string;
-  mapName: string;
-  action: VetoActionKind;
-  side?: "A" | "B" | "";
-  sideName?: string;
-  round?: number;
-}
-
 /** Сторона матча в оверлее с суммарными очками (по всем раундам). */
 export interface LiveStanding {
   participantId?: string;
@@ -495,10 +485,9 @@ export interface LiveState {
   complications?: LiveComplication[]; // протоколы: в матче - стороны в рейде, в старом пульте - обеих сторон
   /** Кастомизируемая раскладка модульного оверлея. Если нет — рендерится DEFAULT_LAYOUT. */
   layout?: OverlayLayout | null;
-  /** Карта текущего раунда. */
+  /** Карта захода стороны в кадре. */
   currentMap?: string;
   stage?: MatchStage;
-  veto?: LiveVeto[];
   /** Нашивки, полученные в идущем матче: каждая новая показывается плашкой. */
   patchFlashes?: PatchFlash[];
   /** Матч идёт за пояс лиги: табло отмечает носителя, после матча - итог. */
@@ -536,8 +525,7 @@ export type WidgetType =
   | "bonusTasks"
   | "tasksV2"
   | "text"
-  | "logo"
-  | "veto";
+  | "logo";
 
 /** Фон (вкл/выкл + прозрачность 0..1) — для виджета и для сцены целиком. */
 export interface OverlayBg {
@@ -778,9 +766,6 @@ export interface RecapDay {
 export interface RecapMap {
   code: string;
   name: string;
-  ban: number;
-  pick: number;
-  rest: number;
   rounds: number;
   points: number;
   knocks: number;
@@ -816,7 +801,6 @@ export interface SeasonRecap {
     oneMatch: number;
     x2: number;
     detailed: number;
-    vetoed: number;
     knocks: number;
     gameDays: number;
     first?: string;
@@ -861,7 +845,7 @@ export interface MapInfo {
   name: string;
   image: string;
   sortOrder: number;
-  /** С этого момента карта в пуле пиков-банов: в прошлых матчах её не было. */
+  /** Когда карта появилась в справочнике. */
   addedAt?: string;
 }
 
@@ -890,25 +874,12 @@ export interface NewsBelt {
   vacant?: boolean;
 }
 
-/** vote - карту выбрал чат голосованием, ведущий ставит её сам. */
-export type VetoActionKind = "ban" | "pick" | "rest" | "vote";
-
-/** Ход пиков-банов матча. */
-export interface VetoAction {
-  seq: number;
-  action: VetoActionKind;
-  side: "A" | "B" | "";
-  mapCode: string;
-  mapName: string;
-  roundNumber?: number | null;
-}
-
 /** Запись журнала матча. */
 export interface MatchLogEntry {
   id: string;
   roundNumber: number;
   participantId?: string | null;
-  kind: "task" | "points" | "knock" | "legendary";
+  kind: "task" | "points" | "knock" | "legendary" | "map";
   text: string;
   delta: number;
   createdAt: string;
@@ -928,16 +899,17 @@ export interface RoundKnocks {
   knocks: number;
 }
 
-/** Стадия матча: запланирован, пики-баны, карты готовы, идёт раунд, завершён. */
-export type MatchStage = "scheduled" | "veto" | "ready" | "round" | "finished";
+/** Стадия матча: запланирован, стороны собраны, идёт раунд, завершён. */
+export type MatchStage = "scheduled" | "ready" | "round" | "finished";
 
 export type MatchFormat = "match" | "show";
 
-/** Ход в порядке пиков-банов: кто ходит, что делает и в какой раунд уходит карта. */
-export interface VetoStep {
-  action: VetoActionKind;
-  side: "A" | "B" | "";
-  round?: number;
+/** Заход стороны в раунде: карта, которую выбрала игра; пусто - ещё не отмечена. */
+export interface Heat {
+  roundNumber: number;
+  participantId: string;
+  mapCode?: string;
+  map?: string;
 }
 
 /** Матч целиком: GET /api/tournaments/{id}/match. */
@@ -945,8 +917,7 @@ export interface MatchState {
   tournament: Tournament;
   stage: MatchStage;
   currentRound: number;
-  veto: VetoAction[];
-  vetoOrder: VetoStep[];
+  heats: Heat[];
   tasks: RoundBonusTask[];
   legendary: LegendaryCompletion[];
   scores: RoundScore[];
@@ -955,6 +926,8 @@ export interface MatchState {
   log: MatchLogEntry[];
   /** Нашивки, полученные в этом матче. */
   patches?: MatchPatch[];
+  /** Сторона, чей заход идёт: её задания и счёт показывает оверлей; приходит только в идущем раунде. */
+  focus?: string;
 }
 
 /** Сторона матча для его страницы. У сыгранного матча mmr - рейтинг перед ним, у остальных - текущий,

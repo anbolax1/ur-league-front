@@ -3,17 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TwitchIcon, YouTubeIcon } from "@/components/icons";
 import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
-import { getBelt, getHighlights, getMaps, getMatch, getMatchup } from "@/lib/queries";
+import { getBelt, getHighlights, getMatch, getMatchup } from "@/lib/queries";
 import {
   breakdownParts,
   CROSS_POINTS,
   hasScore,
+  heatOf,
   isShowMatch,
-  loadoutLabel,
   mapImage,
-  mapsAt,
   matchSides,
   roundBreakdown,
+  roundMapsLabel,
   roundScore,
   roundsLabel,
   stageLabel,
@@ -21,15 +21,13 @@ import {
   taskKindLabel,
   taskTitle,
   totalScore,
-  vetoOrder,
 } from "@/lib/match";
 import type { HeadToHeadMatch, MatchState, Matchup, MatchupSide, Participant, ParticipantMmr, Round } from "@/lib/types";
 import { Stripes } from "@/components/surface/stripes";
 import { ArrowBack, TagChips, signed } from "@/components/surface/ui";
 import { CountUp, FitBoard, FlipCountdown } from "@/components/surface/motion";
-import { MmrMove, Odds, VetoOrder } from "@/components/surface/home-parts";
+import { MmrMove, Odds } from "@/components/surface/home-parts";
 import { SurfaceHighlights } from "@/components/surface/highlights";
-import { MatchVeto } from "@/components/surface/match-veto";
 import { MatchPatches } from "@/components/surface/match-patches";
 import { fullDate, hhmm } from "@/components/surface/fmt";
 import { beltMarkLabel, matchBelt } from "@/components/surface/belt-lib";
@@ -37,8 +35,8 @@ import { BeltMatch } from "@/components/surface/belt-parts";
 
 const SIDE_COLOR = ["var(--sf-a)", "var(--sf-b)"] as const;
 
-function raidsTitle(n: number): string {
-  return n === 1 ? "один рейд" : n === 2 ? "два рейда" : n === 3 ? "три рейда" : n === 4 ? "четыре рейда" : `${n} рейдов`;
+function roundsTitle(n: number): string {
+  return n === 1 ? "один раунд" : n === 2 ? "два раунда" : n === 3 ? "три раунда" : n === 4 ? "четыре раунда" : `${n} раундов`;
 }
 
 /** Ссылка стороны: игрок ведёт в профиль, команда - на свою страницу. */
@@ -129,7 +127,8 @@ function BoardSide({
 /* ---------- раунды ---------- */
 
 function SideColumn({ st, round, p, other }: { st: MatchState; round: number; p: Participant; other: Participant | null }) {
-  const parts = breakdownParts(roundBreakdown(st, round, p.id));
+  const map = heatOf(st, round, p.id)?.map;
+  const parts = [map ? `карта ${map}` : "", ...breakdownParts(roundBreakdown(st, round, p.id))].filter(Boolean);
   const tasks = st.tasks.filter((x) => x.roundNumber === round && x.participantId === p.id);
   const legendary = st.legendary.filter((l) => l.roundNumber === round && l.participantId === p.id);
   const score = roundScore(st, round, p.id);
@@ -171,15 +170,19 @@ function SideColumn({ st, round, p, other }: { st: MatchState; round: number; p:
   );
 }
 
-function RoundArt({ r, many, st, sides, scored }: { r: Round; many: boolean; st: MatchState; sides: [Participant | null, Participant | null]; scored: boolean }) {
+function RoundArt({ r, st, sides, scored }: { r: Round; st: MatchState; sides: [Participant | null, Participant | null]; scored: boolean }) {
   const [a, b] = sides;
   const sa = roundScore(st, r.number, a?.id);
   const sb = roundScore(st, r.number, b?.id);
+  // У заходов на разных картах - обе картинки пополам.
+  const codes = [...new Set(sides.map((p) => heatOf(st, r.number, p?.id)?.mapCode ?? "").filter(Boolean))];
   return (
     <div className="sf-rd-art">
-      <div className="sf-duo">
-        {/* eslint-disable-next-line @next/next/no-img-element -- превью карты */}
-        {r.mapCode && <img src={mapImage(r.mapCode)} alt="" loading="lazy" />}
+      <div className={`sf-duo ${codes.length > 1 ? "two" : ""}`}>
+        {codes.map((c) => (
+          // eslint-disable-next-line @next/next/no-img-element -- превью карты
+          <img key={c} src={mapImage(c)} alt="" loading="lazy" />
+        ))}
       </div>
       {scored && r.status !== "pending" && (
         <span className="sf-round-score sf-tnum" aria-label={`Счёт раунда ${sa}:${sb}`}>
@@ -189,10 +192,9 @@ function RoundArt({ r, many, st, sides, scored }: { r: Round; many: boolean; st:
       <span className="sf-round-body">
         <span className="sf-round-n">
           Раунд {r.number}
-          {many ? ` · ${loadoutLabel(st.tournament, r.number)}` : ""}
           {r.status === "live" ? " · идёт" : ""}
         </span>
-        <span className="sf-round-map">{r.map || "Карта не указана"}</span>
+        <span className="sf-round-map">{roundMapsLabel(st, r.number, sides) || (r.status === "pending" ? "Карты выберет игра" : "Карты не отмечены")}</span>
       </span>
     </div>
   );
@@ -201,12 +203,11 @@ function RoundArt({ r, many, st, sides, scored }: { r: Round; many: boolean; st:
 function Rounds({ st, rounds, sides, finished }: { st: MatchState; rounds: Round[]; sides: [Participant | null, Participant | null]; finished: boolean }) {
   const scored = hasScore(st);
   const detailed = st.tasks.length > 0 || scored;
-  const many = rounds.length > 1;
   return (
     <div className="sf-m-block">
       <p className="sf-eyebrow">По раундам</p>
       <h2 className="sf-h-mid">
-        {raidsTitle(rounds.length)}
+        {roundsTitle(rounds.length)}
         <span className="sf-dot">.</span>
       </h2>
       {detailed ? (
@@ -214,7 +215,7 @@ function Rounds({ st, rounds, sides, finished }: { st: MatchState; rounds: Round
           <div className="sf-rdetail">
             {rounds.map((r) => (
               <article key={r.id} className="sf-rd">
-                <RoundArt r={r} many={many} st={st} sides={sides} scored={scored} />
+                <RoundArt r={r} st={st} sides={sides} scored={scored} />
                 {r.status === "pending" ? (
                   <p className="sf-rd-note">{finished ? "Не сыгран: матч завершили досрочно." : "Задания появятся, когда раунд начнётся."}</p>
                 ) : (
@@ -231,7 +232,7 @@ function Rounds({ st, rounds, sides, finished }: { st: MatchState; rounds: Round
         <>
           <div className="sf-rd-plain">
             {rounds.map((r) => (
-              <RoundArt key={r.id} r={r} many={many} st={st} sides={sides} scored={false} />
+              <RoundArt key={r.id} r={r} st={st} sides={sides} scored={false} />
             ))}
           </div>
           <p className="sf-rd-foot">Счёт этого матча не вёлся: он перенесён из таблицы, известен только победитель.</p>
@@ -336,15 +337,14 @@ function HeadToHead({ h, a, b }: { h: Matchup["headToHead"]; a: string; b: strin
 
 /* ---------- страница ---------- */
 
-/** Страница матча в новом дизайне: шапка с табло, пики-баны, раунды, рейтинг и личные встречи. */
+/** Страница матча в новом дизайне: шапка с табло, раунды с заходами, рейтинг и личные встречи. */
 export async function SurfaceMatch({ id }: { id: string }) {
   const st = await getMatch(id);
   if (!st) notFound();
   const t = st.tournament;
-  const [{ items: highlights }, matchup, maps, beltData] = await Promise.all([
+  const [{ items: highlights }, matchup, beltData] = await Promise.all([
     getHighlights({ tournamentId: id, limit: 4 }),
     getMatchup(id),
-    getMaps(),
     getBelt(),
   ]);
 
@@ -368,8 +368,6 @@ export async function SurfaceMatch({ id }: { id: string }) {
   const sb = totalScore(st, b?.id);
   const mult = t.ratingMultiplier > 1 ? t.ratingMultiplier : 1;
   const title = finished ? "разбор матча" : live ? "матч в эфире" : show ? "шоу-матч" : "матч скоро";
-  const order = st.vetoOrder?.length ? st.vetoOrder : show ? vetoOrder(3) : [];
-  const allMaps = [...mapsAt(maps, t.startsAt)].sort((x, y) => x.sortOrder - y.sortOrder).map((m) => ({ code: m.code, name: m.name }));
   const h2h = matchup?.headToHead;
   const hasH2h = !!h2h && h2h.wins[0] + h2h.wins[1] + h2h.draws > 0;
   const showRounds = (finished || live) && rounds.length > 0;
@@ -380,7 +378,7 @@ export async function SurfaceMatch({ id }: { id: string }) {
   const beltLine = belt?.kind === "defend" ? `носитель пояса${belt.defenses ? ` · ★${belt.defenses}` : ""}` : undefined;
   const beltOther = sides.find((p) => p && p.userId !== holderId)?.name ?? "соперник";
   const beltBlock = belt && beltData ? <BeltMatch mark={belt} belt={beltData} id={id} other={beltOther} /> : null;
-  const paper = st.veto.length > 0 || showRounds || showElo || hasH2h || patches.length > 0 || !!beltBlock;
+  const paper = showRounds || showElo || hasH2h || patches.length > 0 || !!beltBlock;
 
   const streams = (
     <>
@@ -496,20 +494,12 @@ export async function SurfaceMatch({ id }: { id: string }) {
               )}
             </div>
           )}
-          {upcoming && (t.startsAt || order.length > 0) && (
+          {upcoming && t.startsAt && (
             <div className="sf-mh-extra">
-              {t.startsAt && (
-                <div className="sf-mh-cd">
-                  <p className="sf-eyebrow">До начала</p>
-                  <FlipCountdown to={t.startsAt} label="До начала матча" />
-                </div>
-              )}
-              {order.length > 0 && (
-                <div className="sf-mh-order">
-                  <p className="sf-eyebrow">Порядок выбора карт</p>
-                  <VetoOrder steps={order} />
-                </div>
-              )}
+              <div className="sf-mh-cd">
+                <p className="sf-eyebrow">До начала</p>
+                <FlipCountdown to={t.startsAt} label="До начала матча" />
+              </div>
             </div>
           )}
         </div>
@@ -519,7 +509,6 @@ export async function SurfaceMatch({ id }: { id: string }) {
         <section className="sf-sec sf-paper sf-grain">
           <div className="sf-wrap">
             {live && beltBlock}
-            {st.veto.length > 0 && <MatchVeto maps={allMaps} veto={st.veto} nameA={a?.name ?? "A"} nameB={b?.name ?? "B"} />}
             {showRounds && <Rounds st={st} rounds={rounds} sides={sides} finished={finished} />}
             {showElo && <EloBlock a={a} b={b} ca={ca} cb={cb} k={matchup?.season?.kFactor} mult={mult} />}
             {!live && beltBlock}

@@ -3,34 +3,11 @@ import type { CSSProperties, ReactNode } from "react";
 import { TelegramIcon, TwitchIcon, YouTubeIcon } from "@/components/icons";
 import { STREAM_URL, TELEGRAM_URL, YOUTUBE_URL } from "@/lib/links";
 import { isShowMatch, mapImage, matchSides, roundsLabel, stageLabel } from "@/lib/match";
-import type { LeaderboardRow, MatchState, Matchup, MatchupSide, Season, Tournament, VetoStep } from "@/lib/types";
+import type { LeaderboardRow, MatchState, Matchup, MatchupSide, Season, Tournament } from "@/lib/types";
 import { Stripes } from "@/components/surface/stripes";
 import { Arrow, ScheduleIcon, SecHead, TagStamps, signed } from "@/components/surface/ui";
 import { AnnounceBar, CountUp, FitLine, FlipCountdown, GrowOnView, Parallax, ShortCountdown, Tilt } from "@/components/surface/motion";
 import { dayMonth, hhmm, shortDate, splitTitle, weekdayDate, weekdayLong, winrate } from "@/components/surface/fmt";
-
-const ACT: Record<VetoStep["action"], string> = { ban: "бан", pick: "пик", rest: "остаток", vote: "чат" };
-
-/** Порядок ходов чипами в цветах сторон. */
-export function VetoOrder({ steps }: { steps: VetoStep[] }) {
-  return (
-    <div className="sf-fmt">
-      {steps.map((s, i) => (
-        <span key={i} style={{ display: "contents" }}>
-          <span className={s.side === "A" ? "pa" : s.side === "B" ? "pb" : "pn"}>
-            {ACT[s.action]}
-            {s.side ? ` ${s.side}` : ""}
-          </span>
-          {i < steps.length - 1 && (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden>
-              <path d="m9 6 6 6-6 6" />
-            </svg>
-          )}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 /** Шансы сторон по MMR полосой в цветах сторон. */
 export function Odds({ a, b, nameA, nameB, label }: { a: number; b: number; nameA: string; nameB: string; label: string }) {
@@ -55,17 +32,7 @@ export function Odds({ a, b, nameA, nameB, label }: { a: number; b: number; name
 
 /* ---------- герой ---------- */
 
-export function Hero({
-  season,
-  show,
-  showMatchup,
-  showOrder,
-}: {
-  season?: Season;
-  show?: Tournament;
-  showMatchup: Matchup | null;
-  showOrder: VetoStep[];
-}) {
+export function Hero({ season, show, showMatchup }: { season?: Season; show?: Tournament; showMatchup: Matchup | null }) {
   return (
     <Parallax className="sf-hero sf-night">
       <div className="sf-hero-bg" style={{ backgroundImage: `url(${mapImage("dam")})` }} aria-hidden />
@@ -88,7 +55,7 @@ export function Hero({
             ) : null}
           </h1>
           <p className="sf-lead">
-            Матчи 1×1 и 2×2 по ARC Raiders в прямом эфире. Пики и баны карт, задания и рейтинг по MMR. Участвуй в лиге, получи звание
+            Матчи 1×1 и 2×2 по ARC Raiders в прямом эфире. Задания, киллы и рейтинг по MMR. Участвуй в лиге, получи звание
             чемпиона и выиграй призы.
           </p>
           <div className="sf-hero-actions">
@@ -114,14 +81,14 @@ export function Hero({
             <span>бесплатное участие</span>
           </div>
         </div>
-        <NextCard show={show} matchup={showMatchup} order={showOrder} />
+        <NextCard show={show} matchup={showMatchup} />
       </div>
     </Parallax>
   );
 }
 
 /** Анонс ближайшего шоу-матча. Идущий матч и кнопки организатора живут отдельно: обычный матч может идти, пока шоу-матч ещё впереди. */
-function NextCard({ show, matchup, order }: { show?: Tournament; matchup: Matchup | null; order: VetoStep[] }) {
+function NextCard({ show, matchup }: { show?: Tournament; matchup: Matchup | null }) {
   if (show?.startsAt) {
     const [a, b] = splitTitle(show.title);
     const [sa, sb] = matchup?.sides ?? [];
@@ -150,7 +117,7 @@ function NextCard({ show, matchup, order }: { show?: Tournament; matchup: Matchu
           )}
           <div>
             <dt>Карты</dt>
-            <dd>{order.map((s) => ACT[s.action]).join(" · ")}</dd>
+            <dd>выбирает игра</dd>
           </div>
           {sa?.mmr && sb?.mmr ? (
             <div>
@@ -297,7 +264,7 @@ function GeneratedPoster({ t }: { t: Tournament }) {
         <FitLine>{b || "—"}</FitLine>
       </div>
       <div className="sf-p-specs">
-        <span>Пики и баны</span>
+        <span>Соло против сквадов</span>
         <span>{roundsLabel(t.totalRounds)}</span>
         <span>Бонусные задания</span>
       </div>
@@ -318,7 +285,7 @@ function GeneratedPoster({ t }: { t: Tournament }) {
   );
 }
 
-export function ShowSection({ t, matchup, order }: { t: Tournament; matchup: Matchup | null; order: VetoStep[] }) {
+export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | null }) {
   const [a, b] = splitTitle(t.title);
   const [sa, sb] = matchup?.sides ?? [];
   const chance = sa?.winChance != null && sb?.winChance != null ? [sa.winChance, sb.winChance] : null;
@@ -380,10 +347,6 @@ export function ShowSection({ t, matchup, order }: { t: Tournament; matchup: Mat
               })}
             </div>
             {chance && <Odds a={chance[0]} b={chance[1]} nameA={a} nameB={b} label="шансы по MMR" />}
-            <div>
-              <p className="sf-eyebrow">Порядок выбора карт</p>
-              <VetoOrder steps={order} />
-            </div>
             <div className="sf-btn-row">
               <a className="sf-btn sf-btn-amber" href={STREAM_URL} target="_blank" rel="noopener noreferrer">
                 <TwitchIcon />

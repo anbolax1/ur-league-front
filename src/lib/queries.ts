@@ -215,7 +215,7 @@ export function getCurrentMatch(): Promise<CurrentMatchResponse> {
   return safe("matches/current", serverFetch<CurrentMatchResponse>("/matches/current"), { current: null, last: null });
 }
 
-/** Матч целиком: стороны, пики-баны, задания и счёт по раундам. null - если матча нет. */
+/** Матч целиком: стороны, заходы, задания и счёт по раундам. null - если матча нет. */
 export async function getMatch(id: string): Promise<MatchState | null> {
   try {
     return await serverFetch<MatchState>(`/tournaments/${encodeURIComponent(id)}/match`);

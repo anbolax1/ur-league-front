@@ -5,12 +5,15 @@ import { dayMonth } from "@/components/surface/fmt";
 
 const norm = (s: string) => s.toLowerCase().replace(/ё/g, "е").trim();
 
-/** Пример для «двух рейдов»: недавний матч из двух карт со счётом. */
+/** Пример для «раундов и заходов»: недавний матч из двух раундов со счётом и картами всех четырёх заходов. */
 function pickExample(finished: Tournament[], maps: MapInfo[]): HowExample | null {
   const code = (name: string) => maps.find((m) => norm(m.name) === norm(name))?.code;
-  const m = finished.find((t) => (t.roundMaps?.length ?? 0) === 2 && (t.score?.length ?? 0) === 2 && t.score!.some((s) => s.points > 0));
+  const m = finished.find((t) => (t.roundMaps?.length ?? 0) === 4 && (t.score?.length ?? 0) === 2 && t.score!.some((s) => s.points > 0));
   if (!m) return null;
   const [x, y] = m.score!;
+  // Карты заходов идут по раундам, сторона A первой: у раунда две карты или одна, если они совпали.
+  const heats = m.roundMaps!;
+  const rounds = [0, 2].map((i) => ({ name: heats[i] === heats[i + 1] ? heats[i] : `${heats[i]} · ${heats[i + 1]}`, code: code(heats[i]) }));
   return {
     id: m.id,
     a: x.name,
@@ -18,7 +21,7 @@ function pickExample(finished: Tournament[], maps: MapInfo[]): HowExample | null
     sa: x.points,
     sb: y.points,
     win: x.winner ? 0 : y.winner ? 1 : -1,
-    maps: m.roundMaps!.map((name) => ({ name, code: code(name) })),
+    maps: rounds,
     date: dayMonth(m.startsAt),
     mult: m.ratingMultiplier,
   };

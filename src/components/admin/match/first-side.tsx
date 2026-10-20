@@ -2,18 +2,14 @@
 
 import type { Participant } from "@/lib/types";
 
-/** Кто первым ходит в пиках-банах (сторона A): ведущий ставит его по жребию на эфире. Ходы записаны за
-    сторонами, поэтому сделанные переходят вместе со стороной. */
+/** Кто заходит в раунде первым (сторона A): ведущий ставит его по жребию на эфире. */
 export function FirstSide({
   sides,
   busy,
-  moved,
   onPick,
 }: {
   sides: [Participant | null, Participant | null];
   busy: boolean;
-  /** Ходы уже сделаны. */
-  moved?: boolean;
   onPick: (participantId: string) => void;
 }) {
   const [a, b] = sides;
@@ -22,7 +18,7 @@ export function FirstSide({
   const both = [a, b].sort((x, y) => x.name.localeCompare(y.name, "ru"));
   return (
     <div className="space-y-1.5">
-      <span className="field-label block">Первым ходит</span>
+      <span className="field-label block">Первым заходит</span>
       <div className="seg flex-wrap">
         {both.map((p) => (
           <button
@@ -37,7 +33,6 @@ export function FirstSide({
           </button>
         ))}
       </div>
-      {moved && <span className="block text-xs text-muted">Сделанные ходы перейдут вместе со стороной</span>}
     </div>
   );
 }

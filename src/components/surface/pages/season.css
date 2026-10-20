@@ -3,11 +3,6 @@
    полосы (--sn-*), а не напрямую из палитры.
    ============================================================ */
 
-.sn-page {
-  --sn-ban: #c4382a;
-  --sn-pick: #008f86;
-  --sn-rest: #b3a48c;
-}
 .sn-page .sf-night {
   --sn-fg: var(--sf-cream);
   --sn-fg2: var(--sf-cream-2);
@@ -994,48 +989,7 @@
     grid-template-columns: 1fr;
   }
 }
-
 /* ---------- карты ---------- */
-.sn-veto {
-  display: grid;
-  gap: 10px;
-}
-.sn-veto-row {
-  display: grid;
-  grid-template-columns: 170px minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-}
-.sn-veto-row .nm {
-  font: 800 13px/1.2 var(--sf-ff-c);
-  letter-spacing: 0.02em;
-}
-.sn-veto-row .bar {
-  display: flex;
-  gap: 2px;
-  height: 22px;
-}
-.sn-veto-row .bar i {
-  display: flex;
-  align-items: center;
-  min-width: 18px;
-  padding-left: 8px;
-  border-radius: 3px;
-  font: 800 12px/1 var(--sf-ff-c);
-  font-style: normal;
-  color: #fff;
-  overflow: hidden;
-}
-.sn-veto-row .bar .ban {
-  background: var(--sn-ban);
-}
-.sn-veto-row .bar .pick {
-  background: var(--sn-pick);
-}
-.sn-veto-row .bar .rest {
-  background: var(--sn-rest);
-  color: var(--sf-ink);
-}
 .sn-maps-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1123,10 +1077,6 @@
 @media (max-width: 600px) {
   .sn-maps-grid {
     grid-template-columns: 1fr;
-  }
-  .sn-veto-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
   }
 }
 

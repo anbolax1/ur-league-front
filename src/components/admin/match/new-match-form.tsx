@@ -25,7 +25,7 @@ const PLAYER_TYPES: Array<[PlayerType, string]> = [
   ["pvpve", "PvPvE"],
 ];
 
-/** Кто станет стороной A (первой ходит в пиках-банах), как решит сервер: меньше MMR, при равном - меньше матчей
+/** Кто станет стороной A (заходит в раунде первой), как решит сервер: меньше MMR, при равном - меньше матчей
     в прошлых сезонах; при полном равенстве сервер бросит жребий, здесь стороны остаются в порядке выбора. */
 function orderSides(a: MatchPlayer, b: MatchPlayer): { sides: [MatchPlayer, MatchPlayer]; why: "mmr" | "games" | "coin" } {
   if (a.mmr !== b.mmr) return { sides: a.mmr < b.mmr ? [a, b] : [b, a], why: "mmr" };
@@ -122,7 +122,7 @@ function defaultShowTime(): string {
   return `${tomorrow.slice(0, 10)}T20:00`;
 }
 
-/** Новый матч: стороны, тип игроков и ×2 - и сразу к пикам-банам; шоу-матч - в расписание на дату. */
+/** Новый матч: стороны, тип игроков и ×2 - и сразу в пульт; шоу-матч - в расписание на дату. */
 export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: string; belt?: Belt | null }) {
   const router = useRouter();
   const [format, setFormat] = React.useState<MatchFormat>(liveMatchId ? "show" : "match");
@@ -295,7 +295,7 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
                 className={`seg-btn ${show && n === 2 ? "opacity-50" : ""}`}
                 aria-pressed={roundCount === n}
                 disabled={show && n === 2}
-                title={show ? "У шоу-матча всегда три раунда" : n === 3 ? "Пики-баны как в шоу-матче" : undefined}
+                title={show ? "У шоу-матча всегда три раунда" : n === 3 ? "Три раунда, как в шоу-матче" : undefined}
                 onClick={() => setRounds(n)}
               >
                 <span>{n}</span>
@@ -441,14 +441,9 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
               : "Название соберётся из ников, матч сразу станет текущим"}
           </div>
           {note && <div className="text-xs text-gold">{note}</div>}
-          {roundCount === 3 && (
-            <div className="text-xs text-muted">
-              Пики-баны на три раунда: бан A → бан B → пик A → пик B, карту 3-го раунда выбирает чат
-            </div>
-          )}
         </div>
         <button type="button" className="btn btn-primary" disabled={!sideA || !sideB || busy || !!createdId} onClick={create}>
-          <span>{busy ? "Создаём…" : show ? "Запланировать шоу-матч →" : "Создать и перейти к пикам →"}</span>
+          <span>{busy ? "Создаём…" : show ? "Запланировать шоу-матч →" : "Создать и перейти в пульт →"}</span>
         </button>
       </Panel>
 

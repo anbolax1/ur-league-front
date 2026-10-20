@@ -134,31 +134,8 @@
 .sf-mh-extra .sf-mh-cd {
   flex: 1 1 300px;
 }
-.sf-mh-extra .sf-mh-order {
-  flex: 1 1 280px;
-}
 .sf-mh-extra .sf-eyebrow {
   margin-bottom: 10px;
-}
-
-/* пики и баны */
-.sf-veto-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px 24px;
-  margin-bottom: 24px;
-}
-.sf-veto-head .sf-h-mid {
-  margin: 0;
-}
-.sf-tile .lab i {
-  font-style: normal;
-  opacity: 0.75;
-}
-.sf-vlog .sf-k {
-  justify-self: start;
 }
 
 /* раунды */

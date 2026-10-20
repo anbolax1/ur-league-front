@@ -1,14 +1,12 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { hasScore, mapImage, matchSides, roundScore, taskTitle, totalScore } from "@/lib/match";
-import type { MatchState, Participant, VetoAction } from "@/lib/types";
+import { hasScore, mapImage, matchSides, roundMapCode, roundMapsLabel, roundScore, taskTitle, totalScore } from "@/lib/match";
+import type { MatchState, Participant } from "@/lib/types";
 import { SecHead } from "@/components/surface/ui";
 import { CountUp, FitBoard } from "@/components/surface/motion";
 import { RoundCard, type RoundTaskView } from "@/components/surface/round-card";
 import { MmrMove } from "@/components/surface/home-parts";
 import { dayMonth } from "@/components/surface/fmt";
-
-const ACT: Record<string, string> = { ban: "бан", pick: "пик", rest: "остаток", vote: "чат" };
 
 /** Задания раунда обеих сторон с итогом: выполнил сам, выполнил соперник или нет. */
 export function roundTasks(st: MatchState, round: number, sides: [Participant | null, Participant | null]): RoundTaskView[] {
@@ -26,26 +24,7 @@ export function roundTasks(st: MatchState, round: number, sides: [Participant | 
     }));
 }
 
-/** Ходы пиков-банов строкой плашек. */
-export function VetoChips({ veto }: { veto: VetoAction[] }) {
-  if (!veto.length) return null;
-  return (
-    <ol className="sf-veto-chips" aria-label="Пики и баны">
-      {veto.map((v) => (
-        <li key={v.seq}>
-          <span className={`sf-k ${v.action}`}>
-            {ACT[v.action]}
-            {v.side ? ` ${v.side}` : ""}
-          </span>
-          {v.action === "ban" ? <s>{v.mapName}</s> : <span>{v.mapName}</span>}
-          {v.roundNumber ? <span className="s">→ Р{v.roundNumber}</span> : null}
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-/** Последний сыгранный матч: табло, раунды с заданиями и пики-баны. */
+/** Последний сыгранный матч: табло и раунды с заходами и заданиями. */
 export function LastMatch({ st }: { st: MatchState }) {
   const t = st.tournament;
   const sides = matchSides(st);
@@ -55,7 +34,7 @@ export function LastMatch({ st }: { st: MatchState }) {
   const scored = hasScore(st);
   const winner = (t.participants ?? []).find((p) => p.id === t.winnerParticipantId);
   const changes = new Map((t.mmrChanges ?? []).map((c) => [c.participantId, c]));
-  const rounds = [...(t.rounds ?? [])].filter((r) => r.status !== "pending" || r.map).sort((x, y) => x.number - y.number);
+  const rounds = [...(t.rounds ?? [])].filter((r) => r.status !== "pending").sort((x, y) => x.number - y.number);
   const ca = a ? changes.get(a.id) : undefined;
   const cb = b ? changes.get(b.id) : undefined;
   const eyebrow = ["Последний матч", dayMonth(t.startsAt), t.ratingMultiplier > 1 ? `рейтинг ×${t.ratingMultiplier}` : ""].filter(Boolean).join(" · ");
@@ -66,7 +45,7 @@ export function LastMatch({ st }: { st: MatchState }) {
         <SecHead
           id="last-t"
           eyebrow={eyebrow}
-          title="последний рейд"
+          title="последний матч"
           action={winner ? <span className="sf-stamp win">Победа {winner.name}</span> : <span className="sf-stamp">Ничья</span>}
         />
         <FitBoard className="sf-board">
@@ -110,8 +89,8 @@ export function LastMatch({ st }: { st: MatchState }) {
               <RoundCard
                 key={r.id}
                 n={r.number}
-                map={r.map}
-                image={mapImage(r.mapCode)}
+                map={roundMapsLabel(st, r.number, sides) || "карты не отмечены"}
+                image={mapImage(roundMapCode(st, r.number, sides))}
                 scoreA={roundScore(st, r.number, a?.id)}
                 scoreB={roundScore(st, r.number, b?.id)}
                 scored={scored && r.status !== "pending"}
@@ -120,7 +99,6 @@ export function LastMatch({ st }: { st: MatchState }) {
             ))}
           </div>
         )}
-        <VetoChips veto={st.veto} />
         <div className="sf-last-foot">
           <span className="sf-mono">{st.tasks.length ? "Нажми на раунд, чтобы увидеть задания" : ""}</span>
           <Link className="sf-btn sf-btn-ink" href={`/tournament/${t.id}`}>

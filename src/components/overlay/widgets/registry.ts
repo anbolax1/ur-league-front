@@ -9,7 +9,6 @@ import { BonusTasksWidget } from "./bonus-tasks-widget";
 import { TasksV2Widget } from "./tasks-v2-widget";
 import { TextWidget } from "./text-widget";
 import { LogoWidget } from "./logo-widget";
-import { VetoWidget } from "./veto-widget";
 import type { WidgetProps } from "./types";
 
 /** Реестр виджетов оверлея: тип → компонент. Единый источник для /overlay,
@@ -24,7 +23,6 @@ export const WIDGET_REGISTRY: Record<WidgetType, ComponentType<WidgetProps>> = {
   tasksV2: TasksV2Widget,
   text: TextWidget,
   logo: LogoWidget,
-  veto: VetoWidget,
 };
 
 /** Русские названия типов (меню «+ добавить виджет», список «Слои»). */
@@ -38,7 +36,6 @@ export const WIDGET_LABELS: Record<WidgetType, string> = {
   tasksV2: "Задания V2",
   text: "Текст",
   logo: "Логотип",
-  veto: "Пики-баны",
 };
 
 /** Порядок типов в меню добавления. */
@@ -50,7 +47,6 @@ export const WIDGET_ORDER: WidgetType[] = [
   "roundTasks",
   "bonusTasks",
   "tasksV2",
-  "veto",
   "text",
   "logo",
 ];

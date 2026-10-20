@@ -5,8 +5,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { mapImage, vetoOrder } from "@/lib/match";
-import type { MapInfo, VetoStep } from "@/lib/types";
+import { mapImage } from "@/lib/match";
+import type { MapInfo } from "@/lib/types";
 import { signed } from "@/components/surface/ui";
 
 export interface HowExample {
@@ -74,25 +74,24 @@ function Tween({ value, format = String, ms = 380, replay = 0 }: { value: number
   return <>{format(shown)}</>;
 }
 
-interface PbStep {
-  act: VetoStep["action"];
-  side: "A" | "B" | "";
+interface HeatStep {
+  round: number;
+  side: "A" | "B";
   code: string;
-  round?: number;
 }
 
-const pbLabel = (s: PbStep) =>
-  s.act === "ban" ? `бан ${s.side}` : s.act === "pick" ? `пик ${s.side} · Р${s.round}` : `${s.act === "vote" ? "чат" : "остаток"} · Р${s.round}`;
+/** Пример - обычный матч на два раунда: четыре захода, в каждом раунде сначала A, потом B. */
+const HEATS: Array<Omit<HeatStep, "code">> = [
+  { round: 1, side: "A" },
+  { round: 1, side: "B" },
+  { round: 2, side: "A" },
+  { round: 2, side: "B" },
+];
 
-/** Порядок ходов словами: «бан A → бан B → пик A …». */
-const orderText = (order: VetoStep[]) =>
-  order.map((s) => (s.action === "rest" ? "остаток" : s.action === "vote" ? "чат" : `${s.action === "ban" ? "бан" : "пик"} ${s.side}`)).join(" → ");
+/** Какие карты пула выпадают в примере по заходам: вразнобой, как в игре. */
+const HEAT_PICK = [0, 1, 1, 0];
 
-/** Пример - обычный матч на два раунда. */
-const ORDER2 = vetoOrder(2);
-
-/** Какие карты пула берёт пример по ходам: выбор вперемешку, а не подряд по списку. */
-const PB_PICK = [1, 2, 3, 5, 4, 6, 0];
+const heatLabel = (s: HeatStep) => `Р${s.round} · ${s.side}`;
 
 const ICON_REPLAY = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden>
@@ -101,9 +100,9 @@ const ICON_REPLAY = (
 );
 
 const TASKS = [
-  { b: "Своё задание", s: "общее или на карту раунда", v: 2, r: "-2deg" },
+  { b: "Своё задание", s: "общее или на карту захода", v: 2, r: "-2deg" },
   { b: "Задание соперника", s: "выполнил чужое", v: 1, r: "1.5deg" },
-  { b: "Протокол", s: "до 15-й минуты рейда", v: 1, r: "-1deg" },
+  { b: "Протокол", s: "задание на время", v: 1, r: "-1deg" },
   { b: "Килл", s: "по счётчику игры, вводит ведущий", v: 3, r: "2deg" },
   { b: "Легендарное задание", s: "один раз навсегда", v: 10, r: "-1.5deg", leg: true },
 ];
@@ -123,8 +122,8 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
   const [cycle, setCycle] = React.useState(0);
   const stepRef = React.useRef(0);
 
-  // состояние сцен: сколько ходов показано, какой рейд идёт, видно ли счёт, сколько карточек
-  const [pbN, setPbN] = React.useState(6);
+  // состояние сцен: сколько заходов показано, какой раунд идёт, видно ли счёт, сколько карточек
+  const [hN, setHN] = React.useState(HEATS.length);
   const [rdAct, setRdAct] = React.useState(-1);
   const [rdScore, setRdScore] = React.useState(true);
   const [rdReplay, setRdReplay] = React.useState(0);
@@ -132,19 +131,17 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
   const [t3N, setT3N] = React.useState(TASKS.length);
   const [calcReplay, setCalcReplay] = React.useState(0);
 
-  const pb = React.useMemo<PbStep[]>(() => {
-    if (maps.length < ORDER2.length) return [];
-    const idx = [...PB_PICK, ...maps.map((_, i) => i)].filter((i, k, all) => i < maps.length && all.indexOf(i) === k);
-    return ORDER2.map((s, k) => ({ act: s.action, side: s.side, code: maps[idx[k]].code, round: s.round }));
-  }, [maps]);
+  const heats = React.useMemo<HeatStep[]>(
+    () => (maps.length ? HEATS.map((h, k) => ({ ...h, code: maps[HEAT_PICK[k] % maps.length].code })) : []),
+    [maps],
+  );
   const mapName = (code: string) => maps.find((x) => x.code === code)?.name ?? code;
-  const unused = maps.length - ORDER2.length;
-  const tileCols = maps.length > 6 ? Math.ceil(maps.length / 2) : 3;
+  const mapsList = maps.map((m) => m.name).join(" или ");
 
   /** Сцена этапа i в положении p (0..1): дискретное - через состояние, плавное - прямо в стили. */
   const render = React.useCallback(
     (i: number, p: number) => {
-      if (i === 0) setPbN(Math.min(pb.length, Math.floor(p * (pb.length + 1))));
+      if (i === 0) setHN(Math.min(heats.length, Math.floor(p * (heats.length + 1))));
       if (i === 1) {
         const w = [clamp01(p / 0.4), clamp01((p - 0.42) / 0.4)];
         lineRefs.current.forEach((el, j) => el && (el.style.width = `${(w[j] * 100).toFixed(1)}%`));
@@ -158,7 +155,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
       }
       if (i === 2) setT3N(Math.min(TASKS.length, Math.floor(p * (TASKS.length + 1))));
     },
-    [pb.length],
+    [heats.length],
   );
 
   const activate = React.useCallback(
@@ -190,7 +187,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
       track.style.height = "";
       if (scrollyRef.current) {
         // вне режима прокрутки сцены видны целиком
-        setPbN(pb.length);
+        setHN(heats.length);
         setT3N(TASKS.length);
         lineRefs.current.forEach((el) => el && (el.style.width = "100%"));
         setRdAct(-1);
@@ -200,7 +197,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
     }
     scrollyRef.current = want;
     setScrolly(want);
-  }, [reduce, pb.length]);
+  }, [reduce, heats.length]);
 
   React.useEffect(() => {
     layout();
@@ -242,7 +239,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
     onScroll();
     addEventListener("scroll", onScroll, { passive: true });
     return () => removeEventListener("scroll", onScroll);
-  }, [scrolly, render, activate, pb.length]);
+  }, [scrolly, render, activate, heats.length]);
 
   const scrollToStep = (i: number) => {
     const track = trackRef.current, sticky = stickyRef.current;
@@ -338,7 +335,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
   const cls = ["sf-how", scrolly ? "scrolly" : "", running ? "playing" : ""].join(" ");
   const howStyle = { "--how-dur": `${AUTO_MS}ms` } as React.CSSProperties;
 
-  const titles = ["пики и баны", "два рейда", "задания и очки", "рейтинг эло"];
+  const titles = ["карта захода", "раунды и заходы", "задания и очки", "рейтинг эло"];
 
   return (
     <div className={`sf-how-track ${scrolly ? "on" : ""}`} ref={trackRef}>
@@ -385,21 +382,20 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
               </p>
             </div>
             <div className="sf-how-texts">
-              <Panel i={0} step={step} title="пики и баны">
+              <Panel i={0} step={step} title="карта захода">
                 <p>
-                  Карты выбирают по очереди: <b>{orderText(ORDER2)}</b> — первую карту берёт B, вторую A
-                  {unused > 0 ? `, ${unused === 1 ? "оставшаяся не играется" : `оставшиеся ${unused} не играются`}` : ""}. Сторона A — меньший MMR, при
-                  равном — кто меньше играл в прошлых сезонах, у двух новичков — жребий. В шоу-матче: бан A, бан B, пик A, пик B, третью карту выбирает
-                  чат.
+                  Ведущий собирает группу с игроком и запускает <b>Ultimate Royale</b>, карту выбирает игра{mapsList ? ` — ${mapsList}` : ""}. Ведущий
+                  выбывает в первые минуты и наблюдает, а игрок один бьётся против сквадов. Выпавшую карту ведущий отмечает в пульте, и игрок сразу
+                  получает задание на неё.
                 </p>
                 <Link className="sf-more" href={example ? `/tournament/${example.id}` : "/archive"}>
-                  Пики и баны сыгранного матча <Arr />
+                  Заходы сыгранного матча <Arr />
                 </Link>
               </Panel>
-              <Panel i={1} step={step} title="два рейда">
+              <Panel i={1} step={step} title="раунды и заходы">
                 <p>
-                  Матч — это <b>два раунда, один раунд — один рейд</b>. В первом все заходят с бесплатным набором, во втором — со своим снаряжением.
-                  Около часа эфира на матч.
+                  Матч — это <b>два раунда</b>, шоу-матч — три. В раунде у каждой стороны свой заход: сначала A, потом B. Сторона A — меньший MMR,
+                  при равном — кто меньше играл в прошлых сезонах, у двух новичков — жребий. Заход длится от пары минут до получаса.
                 </p>
                 <Link className="sf-more" href="/archive">
                   Результаты матчей <Arr />
@@ -407,7 +403,8 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
               </Panel>
               <Panel i={2} step={step} title="задания и очки">
                 <p>
-                  Перед каждым раундом у игрока <b>два задания и протокол</b>. Каждый килл ведущий отмечает в пульте — это 3 очка. Легендарное задание даёт{" "}
+                  Перед каждым раундом у игрока <b>задание и протокол</b>, а когда игра покажет карту, — ещё задание на неё. Каждый килл ведущий
+                  отмечает в пульте — это 3 очка. Легендарное задание даёт{" "}
                   <b>+10</b>, но выполнить его можно один раз навсегда. Побеждает тот, кто набрал больше за матч.
                 </p>
                 <Link className="sf-more" href="/rules">
@@ -427,45 +424,40 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
           </div>
 
           <div className="sf-how-arts">
-            {/* 1. пики и баны */}
-            <div className={`sf-how-art ${step === 0 ? "is-on" : ""} ${pbN >= pb.length ? "is-done" : ""}`} inert={step !== 0} role="group" aria-label="Пример пиков и банов">
-              <div className="sf-pb-grid" style={{ "--cols": tileCols } as React.CSSProperties}>
-                {maps.map((m) => {
-                  const k2 = pb.findIndex((s) => s.code === m.code);
-                  const s = k2 >= 0 && k2 < pbN ? pb[k2] : null;
-                  const now = s && k2 === pbN - 1 && pbN < pb.length;
-                  const left = pb.length > 0 && k2 < 0 && pbN >= pb.length;
+            {/* 1. карта захода */}
+            <div className={`sf-how-art ${step === 0 ? "is-on" : ""} ${hN >= heats.length ? "is-done" : ""}`} inert={step !== 0} role="group" aria-label="Пример: карты заходов">
+              <div className="sf-pb-grid" style={{ "--cols": 2 } as React.CSSProperties}>
+                {heats.map((s, k) => {
+                  const shown = k < hN;
+                  const now = shown && k === hN - 1 && hN < heats.length;
                   return (
-                    <div key={m.code} className={`sf-pb-t ${s ? s.act : ""} ${now ? "now" : ""} ${left ? "left" : ""}`}>
+                    <div key={k} className={`sf-pb-t ${shown ? "pick" : "left"} ${now ? "now" : ""}`}>
                       {/* eslint-disable-next-line @next/next/no-img-element -- превью карты */}
-                      <img src={mapImage(m.code)} alt="" loading="lazy" />
-                      <span className="sf-pb-tag" style={s?.side ? ({ "--sd": `var(--sf-${s.side.toLowerCase()})` } as React.CSSProperties) : undefined}>
-                        {s ? pbLabel(s) : left ? "не играется" : ""}
+                      {shown && <img src={mapImage(s.code)} alt="" loading="lazy" />}
+                      <span className="sf-pb-tag" style={{ "--sd": `var(--sf-${s.side.toLowerCase()})` } as React.CSSProperties}>
+                        {heatLabel(s)}
                       </span>
-                      <span className="sf-pb-nm">{m.name}</span>
+                      <span className="sf-pb-nm">{shown ? mapName(s.code) : "карту выберет игра"}</span>
                     </div>
                   );
                 })}
               </div>
               <div className="sf-pb-cap">
                 <span>
-                  {pbN >= pb.length && pb.length ? (
+                  {hN >= heats.length && heats.length ? (
                     <>
                       Итог:{" "}
-                      {pb
-                        .filter((s) => s.round)
-                        .sort((x, y) => (x.round ?? 0) - (y.round ?? 0))
-                        .map((s, j) => (
-                          <React.Fragment key={s.code}>
-                            {j ? ", " : ""}раунд {s.round} — <b>{mapName(s.code)}</b>
-                          </React.Fragment>
-                        ))}
+                      {[1, 2].map((r, j) => (
+                        <React.Fragment key={r}>
+                          {j ? ", " : ""}раунд {r} — <b>{heats.filter((s) => s.round === r).map((s) => mapName(s.code)).join(" и ")}</b>
+                        </React.Fragment>
+                      ))}
                     </>
-                  ) : pbN === 0 ? (
-                    "Пример: обычный матч, два раунда"
+                  ) : hN === 0 ? (
+                    "Пример: обычный матч, два раунда — четыре захода"
                   ) : (
                     <>
-                      Ход {pbN} из {pb.length}: <b>{pbLabel(pb[pbN - 1])}</b>
+                      Заход {hN} из {heats.length}: <b>{heatLabel(heats[hN - 1])} — {mapName(heats[hN - 1].code)}</b>
                     </>
                   )}
                 </span>
@@ -483,8 +475,8 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
               </div>
             </div>
 
-            {/* 2. два рейда */}
-            <div className={`sf-how-art ${step === 1 ? "is-on" : ""} ${rdScore ? "is-done" : ""}`} inert={step !== 1} role="group" aria-label="Пример матча из двух рейдов">
+            {/* 2. раунды и заходы */}
+            <div className={`sf-how-art ${step === 1 ? "is-on" : ""} ${rdScore ? "is-done" : ""}`} inert={step !== 1} role="group" aria-label="Пример матча из двух раундов">
               <button type="button" className="sf-again" onClick={() => (setAuto(false), play(1))}>
                 {ICON_REPLAY}Ещё раз
               </button>
@@ -498,9 +490,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
                           {m.code && <img src={mapImage(m.code)} alt="" loading="lazy" />}
                         </div>
                         <figcaption>
-                          <small>
-                            Раунд {j + 1} · {j ? "своё снаряжение" : "бесплатный набор"}
-                          </small>
+                          <small>Раунд {j + 1}</small>
                           <b>{m.name}</b>
                         </figcaption>
                         <span className="sf-rd2-line">

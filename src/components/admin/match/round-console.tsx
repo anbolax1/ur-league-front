@@ -6,8 +6,9 @@ import { CheckIcon } from "@/components/icons";
 import {
   CROSS_POINTS,
   KNOCK_POINTS,
-  loadoutLabel,
+  heatOf,
   roundBreakdown,
+  roundMapsLabel,
   roundScore,
   taskDescription,
   taskKindLabel,
@@ -15,7 +16,7 @@ import {
   totalScore,
   type RoundBreakdown,
 } from "@/lib/match";
-import type { CatalogLegendary, MatchLogEntry, MatchState, Participant, Round, RoundBonusTask } from "@/lib/types";
+import type { CatalogLegendary, MapInfo, MatchLogEntry, MatchState, Participant, Round, RoundBonusTask } from "@/lib/types";
 
 /** Цвета сторон как на табло: A - оранжевая, B - бирюзовая. */
 const SIDE_STYLE = [
@@ -61,6 +62,7 @@ export function OverlayStatus({ online }: { online: boolean }) {
 
 function RoundCard({ st, r, now, sides }: { st: MatchState; r: Round; now: boolean; sides: [Participant | null, Participant | null] }) {
   const [a, b] = sides;
+  const maps = roundMapsLabel(st, r.number, sides);
   return (
     <div
       className={`flex items-center justify-between gap-3 rounded-md px-3.5 py-2.5 ${
@@ -72,9 +74,7 @@ function RoundCard({ st, r, now, sides }: { st: MatchState; r: Round; now: boole
           Раунд {r.number}
           {now ? " · идёт" : r.status === "finished" ? " · сыгран" : " · впереди"}
         </div>
-        <div className="truncate text-sm">
-          {r.map || "—"} <span className="text-xs text-muted">· {loadoutLabel(st.tournament, r.number)}</span>
-        </div>
+        <div className="truncate text-sm">{maps || (r.status === "pending" ? "карты выберет игра" : "карты не отмечены")}</div>
       </div>
       <span className={`flex-none font-display text-lg tnum ${r.status === "pending" ? "text-muted" : ""}`}>
         {r.status === "pending" ? "—" : `${roundScore(st, r.number, a?.id)} : ${roundScore(st, r.number, b?.id)}`}
@@ -271,22 +271,47 @@ export function MatchLog({ log, onUndo }: { log: MatchLogEntry[]; onUndo: () => 
           ))}
         </ol>
       ) : (
-        <p className="text-sm text-muted">Пока пусто — здесь появятся зачёты, ручные очки и легендарки.</p>
+        <p className="text-sm text-muted">Пока пусто — здесь появятся карты заходов, киллы, зачёты, ручные очки и легендарки.</p>
       )}
     </Panel>
   );
 }
 
-/** Идущий раунд: табло с ходом матча и панели сторон с очками и заданиями. */
+/** Карта захода: игра выбирает её сама, ведущий отмечает выпавшую - после этого выдаётся задание на карту. */
+function HeatMap({ maps, code, name, onPick }: { maps: MapInfo[]; code?: string; name: string; onPick: (mapCode: string) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <span className="field-label block">Карта захода</span>
+      <div className="seg flex-wrap" role="group" aria-label={`Карта захода ${name}`}>
+        {maps.map((m) => (
+          <button
+            key={m.code}
+            type="button"
+            className="seg-btn"
+            aria-pressed={code === m.code}
+            onClick={() => code !== m.code && onPick(m.code)}
+          >
+            <span>{m.name}</span>
+          </button>
+        ))}
+      </div>
+      {!code && <p className="text-xs text-muted">Игра покажет карту на старте — отметьте её, и выдастся задание на карту.</p>}
+    </div>
+  );
+}
+
+/** Идущий раунд: табло с ходом матча и панели сторон с картой захода, очками и заданиями. */
 export function RoundConsole({
   st,
   sides,
+  maps,
   legendary,
   focusId,
   online,
   saving,
   actions,
   onFocus,
+  onMap,
   onMark,
   onReroll,
   onKnock,
@@ -295,6 +320,7 @@ export function RoundConsole({
 }: {
   st: MatchState;
   sides: [Participant | null, Participant | null];
+  maps: MapInfo[];
   legendary: CatalogLegendary[];
   focusId: string | null;
   online: boolean;
@@ -303,6 +329,7 @@ export function RoundConsole({
   /** Кнопки хода матча: следующий раунд, завершение, отмена. */
   actions: React.ReactNode;
   onFocus: (participantId: string) => void;
+  onMap: (participantId: string, mapCode: string) => void;
   onMark: (id: string, by: "owner" | "opponent" | "none") => void;
   onReroll: (id: string) => void;
   onKnock: (participantId: string, delta: 1 | -1) => void;
@@ -342,7 +369,7 @@ export function RoundConsole({
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-[var(--border)] bg-surface-2/50 px-5 py-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="field-label">Оверлей показывает рейд</span>
+            <span className="field-label">В кадре заход</span>
             <div className="seg">
               {sides.map((p) =>
                 p ? (
@@ -374,6 +401,7 @@ export function RoundConsole({
           const tasks = st.tasks.filter((t) => t.roundNumber === round && t.participantId === p.id);
           const done = tasks.filter((t) => t.completedBy === p.id).length;
           const parts = roundBreakdown(st, round, p.id);
+          const heat = heatOf(st, round, p.id);
           return (
             <Panel key={p.id} className={`flex flex-col border-t-[3px] ${style.edge}`}>
               <div className="space-y-3 p-4">
@@ -381,12 +409,18 @@ export function RoundConsole({
                   <div className="flex min-w-0 items-center gap-2.5 pt-1">
                     <SideTag i={side} />
                     <h3 className="truncate font-display text-lg uppercase">{p.name}</h3>
+                    {focusId === p.id && (
+                      <span className="badge badge-glad flex-none">
+                        <span>В кадре</span>
+                      </span>
+                    )}
                   </div>
                   <div className="flex-none text-right">
                     <span className="field-label">Раунд {round}</span>
                     <div className={`font-display text-4xl leading-none tnum ${style.text}`}>{roundScore(st, round, p.id)}</div>
                   </div>
                 </div>
+                <HeatMap maps={maps} code={heat?.mapCode} name={p.name} onPick={(code) => onMap(p.id, code)} />
                 <ScoreParts parts={parts} onManual={(delta, label) => onPoints(p.id, delta, label)} />
                 {/* Отступ справа - под скос кнопки, чтобы её угол не вылезал за край плиток с очками. */}
                 <div className="flex items-center gap-3 pr-1.5">
@@ -425,7 +459,7 @@ export function RoundConsole({
                     <TaskRow key={t.id} t={t} owner={p} opponent={opp} onMark={onMark} onReroll={onReroll} />
                   ))
                 ) : (
-                  <p className="text-sm text-muted">Задания раунда не выданы — пул каталога пуст для этой карты и типа игроков.</p>
+                  <p className="text-sm text-muted">Задания раунда не выданы — в каталоге не нашлось подходящих.</p>
                 )}
               </div>
 

@@ -1155,17 +1155,6 @@
   vertical-align: 1px;
   animation: sf-blink 1.2s ease-in-out infinite;
 }
-.sf-live .sf-veto-chips {
-  margin-top: 20px;
-}
-.sf-night .sf-veto-chips li {
-  background: var(--sf-night-2);
-  border-color: var(--sf-cream-line);
-  color: var(--sf-cream);
-}
-.sf-night .sf-veto-chips s {
-  color: var(--sf-cream-2);
-}
 .sf-live-foot {
   display: flex;
   flex-wrap: wrap;
@@ -1628,37 +1617,6 @@
   flex-basis: 0;
   transition: flex-grow 1s;
 }
-.sf-fmt {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-.sf-fmt span {
-  font: 700 12px/1 var(--sf-ff-c);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 7px 9px;
-  border-radius: 2px;
-  border: 1px solid var(--sf-cream-line);
-}
-.sf-fmt span.pa {
-  border-color: var(--sf-a);
-  color: var(--sf-a);
-}
-.sf-fmt span.pb {
-  border-color: var(--sf-b);
-  color: var(--sf-b);
-}
-.sf-fmt span.pn {
-  border-color: var(--sf-cream-2);
-  color: var(--sf-cream-2);
-}
-.sf-fmt svg {
-  width: 12px;
-  height: 12px;
-  opacity: 0.5;
-}
 .sf-btn-row {
   display: flex;
   flex-wrap: wrap;
@@ -1896,6 +1854,11 @@ a.sf-side-name:hover {
   inset: 0;
   overflow: hidden;
 }
+/* У заходов на разных картах - обе картинки пополам. */
+.sf-duo.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
 .sf-duo img {
   width: 100%;
   height: 100%;
@@ -2018,24 +1981,6 @@ a.sf-side-name:hover {
   opacity: 1;
   color: var(--sf-amber);
 }
-.sf-veto-chips {
-  list-style: none;
-  margin: 28px 0 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.sf-veto-chips li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 3px;
-  font: 600 12px/1.2 var(--sf-ff-d);
-  border: 1px solid var(--sf-ink-line);
-  background: var(--sf-paper-2);
-}
 .sf-k {
   font: 700 10px/1 var(--sf-ff-m);
   letter-spacing: 0.06em;
@@ -2045,29 +1990,11 @@ a.sf-side-name:hover {
   color: var(--sf-paper);
   white-space: nowrap;
 }
-.sf-k.ban {
-  background: var(--sf-loss-ink);
-}
-.sf-k.pick {
-  background: var(--sf-ink);
-}
-.sf-k.rest {
-  background: var(--sf-ink-2);
-}
-.sf-k.vote {
-  background: var(--sf-chat);
-}
 .sf-k.pr {
   background: var(--sf-deep);
 }
 .sf-k.leg {
   background: #9a5b00;
-}
-.sf-veto-chips .s {
-  font: 700 10px/1 var(--sf-ff-m);
-}
-.sf-veto-chips s {
-  color: var(--sf-ink-2);
 }
 .sf-last-foot {
   display: flex;
@@ -2552,7 +2479,7 @@ a.sf-side-name:hover {
 .sf-how.scrolly .sf-again {
   display: none;
 }
-/* 1. пики и баны: число колонок задаёт разметка (--cols), неполный последний ряд стоит по центру */
+/* 1. карта захода: число колонок задаёт разметка (--cols), неполный последний ряд стоит по центру */
 .sf-pb-grid {
   --gap: 8px;
   flex: 1;
@@ -2621,52 +2548,14 @@ a.sf-side-name:hover {
   border-radius: 50%;
   background: var(--sd, transparent);
 }
-.sf-pb-t.ban img {
-  filter: grayscale(1) brightness(0.35);
-}
-.sf-pb-t.ban::before {
-  content: "";
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  top: 47%;
-  height: 3px;
-  z-index: 3;
-  background: var(--sf-loss);
-  transform: rotate(-24deg);
-  transform-origin: left;
-  animation: sf-pbstrike 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-@keyframes sf-pbstrike {
-  from {
-    transform: rotate(-24deg) scaleX(0);
-  }
-  to {
-    transform: rotate(-24deg) scaleX(1);
-  }
-}
-.sf-pb-t.ban .sf-pb-tag {
-  background: rgba(19, 9, 24, 0.9);
-  color: var(--sf-loss);
-  box-shadow: inset 0 0 0 1px var(--sf-loss);
-  opacity: 1;
-  transform: none;
-}
 .sf-pb-t.pick {
   box-shadow: inset 0 0 0 3px var(--sf-amber);
 }
-.sf-pb-t.pick .sf-pb-tag,
-.sf-pb-t.rest .sf-pb-tag {
+.sf-pb-t.pick .sf-pb-tag {
   background: var(--sf-amber);
   color: var(--sf-ink);
   opacity: 1;
   transform: none;
-}
-.sf-pb-t.rest {
-  box-shadow: inset 0 0 0 3px var(--sf-cream);
-}
-.sf-pb-t.rest .sf-pb-tag {
-  background: var(--sf-cream);
 }
 .sf-pb-t.left img {
   filter: grayscale(0.8) brightness(0.5);
@@ -3863,158 +3752,6 @@ a.sf-tr:hover,
     max-width: 420px;
   }
 }
-.sf-veto-wrap {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: clamp(20px, 3vw, 40px);
-  align-items: start;
-}
-/* Плитки карт матча: число колонок задаёт разметка (--cols), неполный последний ряд стоит по центру. */
-.sf-tiles {
-  --gap: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--gap);
-}
-.sf-tile {
-  flex: 0 0 calc((100% - (var(--cols, 3) - 1) * var(--gap)) / var(--cols, 3));
-  position: relative;
-  aspect-ratio: 16 / 10;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #000;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.sf-tile img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: filter 0.4s;
-}
-.sf-tile .nm {
-  position: absolute;
-  left: 10px;
-  bottom: 9px;
-  font: 800 14px/1.05 var(--sf-ff-c);
-  text-transform: uppercase;
-  color: var(--sf-cream);
-  text-shadow: 0 1px 6px #000;
-  z-index: 2;
-  max-width: calc(100% - 20px);
-}
-.sf-tile .lab {
-  position: absolute;
-  top: 9px;
-  left: 9px;
-  z-index: 2;
-  font: 700 10px/1 var(--sf-ff-m);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 5px 6px;
-  border-radius: 2px;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.3s, transform 0.3s;
-}
-.sf-tile::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.7), transparent 55%);
-}
-.sf-tile.ban img {
-  filter: grayscale(1) brightness(0.35);
-}
-.sf-tile.ban::before {
-  content: "";
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  top: 48%;
-  height: 4px;
-  background: var(--sf-b);
-  transform: rotate(-22deg);
-  z-index: 3;
-  animation: sf-pbstrike 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.sf-tile.ban .lab {
-  background: var(--sf-b);
-  color: var(--sf-ink);
-  opacity: 1;
-  transform: none;
-}
-.sf-tile.pick {
-  box-shadow: inset 0 0 0 3px var(--sf-amber), 0 12px 30px -16px rgba(241, 170, 28, 0.8);
-}
-.sf-tile.pick .lab {
-  background: var(--sf-amber);
-  color: var(--sf-ink);
-  opacity: 1;
-  transform: none;
-}
-.sf-tile.rest {
-  box-shadow: inset 0 0 0 3px var(--sf-ink);
-}
-.sf-tile.rest .lab {
-  background: var(--sf-ink);
-  color: var(--sf-paper);
-  opacity: 1;
-  transform: none;
-}
-.sf-tile.vote {
-  box-shadow: inset 0 0 0 3px var(--sf-chat), 0 12px 30px -16px color-mix(in srgb, var(--sf-chat) 80%, transparent);
-}
-.sf-tile.vote .lab {
-  background: var(--sf-chat);
-  color: var(--sf-paper);
-  opacity: 1;
-  transform: none;
-}
-.sf-tile.left img {
-  filter: grayscale(0.8) brightness(0.55);
-}
-.sf-tile.now {
-  transform: scale(1.04);
-  z-index: 4;
-}
-.sf-vlog {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-.sf-vlog li {
-  display: grid;
-  grid-template-columns: 28px auto minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 3px;
-  background: var(--sf-paper-2);
-  transition: background-color 0.3s, opacity 0.3s;
-}
-.sf-vlog li.off {
-  opacity: 0.35;
-}
-.sf-vlog li.now {
-  background: var(--sf-amber);
-}
-.sf-vlog .i {
-  font: 900 18px/1 var(--sf-ff-cc);
-  color: var(--sf-ink-2);
-}
-.sf-vlog b {
-  font: 700 15px/1.2 var(--sf-ff-d);
-}
-.sf-vlog small {
-  display: block;
-  font: 600 10px/1.2 var(--sf-ff-m);
-  color: var(--sf-ink-2);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
 .sf-rdetail {
   display: grid;
   gap: 16px;
@@ -4110,9 +3847,6 @@ a.sf-tr:hover,
   font-size: 14px;
 }
 @media (max-width: 860px) {
-  .sf-veto-wrap {
-    grid-template-columns: 1fr;
-  }
   .sf-rd {
     grid-template-columns: 1fr;
   }
@@ -4122,11 +3856,6 @@ a.sf-tr:hover,
   .sf-rd-col + .sf-rd-col {
     border-left: 0;
     border-top: 1px solid var(--sf-ink-line);
-  }
-}
-@media (max-width: 760px) {
-  .sf-tiles {
-    --cols: 2 !important;
   }
 }
 .sf-elo {

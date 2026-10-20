@@ -11,24 +11,22 @@ import { StatusPill } from "@/components/ui/pill";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ArrowLeftIcon, CheckIcon } from "@/components/icons";
 import { OverlayStage } from "@/components/overlay/overlay-stage";
-import { VetoBoard } from "@/components/admin/match/veto-board";
+import { ReadyPanel } from "@/components/admin/match/ready-panel";
 import { MatchLog, OverlayStatus, RoundConsole } from "@/components/admin/match/round-console";
 import { MatchResult } from "@/components/admin/match/match-result";
 import { ScheduledPanel } from "@/components/admin/match/scheduled-panel";
 import { putShowPreview } from "@/components/admin/match/show-preview";
 import { PreviewBgSwitch, type PreviewBg } from "@/components/overlay/preview-bg";
-import type { CatalogLegendary, LiveState, MapInfo, MatchState } from "@/lib/types";
+import type { CatalogLegendary, LiveState, MapInfo, MatchState, Participant } from "@/lib/types";
 
 type Confirm = "finish" | "early" | "cancel" | null;
 
-const STEPS = ["Стороны", "Пики-баны", "Матч", "Итог"];
-const SHOW_STEPS = ["Анонс", "Пики-баны", "Матч", "Итог"];
+const STEPS = ["Стороны", "Заходы", "Итог"];
+const SHOW_STEPS = ["Анонс", "Стороны", "Заходы", "Итог"];
 
-function stepIndex(stage: MatchState["stage"]): number {
-  if (stage === "scheduled") return 0;
-  if (stage === "veto" || stage === "ready") return 1;
-  if (stage === "round") return 2;
-  return 3;
+function stepIndex(stage: MatchState["stage"], show: boolean): number {
+  const at = stage === "scheduled" ? 0 : stage === "ready" ? 1 : stage === "round" ? 2 : 3;
+  return show ? at : Math.max(0, at - 1);
 }
 
 /** Что сейчас видят зрители; во время раунда связь с оверлеем показана на табло, здесь не повторяем. */
@@ -70,7 +68,7 @@ function conflictMatchId(e: unknown): string {
   }
 }
 
-/** Пульт матча: пики-баны, раунды с заданиями обеих сторон и итог на одной странице. */
+/** Пульт матча: раунды с заходами и заданиями обеих сторон и итог на одной странице. */
 export function MatchConsole({
   initial,
   maps,
@@ -98,8 +96,11 @@ export function MatchConsole({
   const sides = matchSides(st);
   const [a, b] = sides;
   const total = st.tournament.rounds?.length ?? 2;
-  const focusId =
-    feed.state?.tournamentId === id ? (feed.state?.currentParticipantId ?? a?.id ?? null) : (a?.id ?? null);
+  // Чей заход идёт, присылает сервер вместе с матчем: кнопка хода не зависит от связи с оверлеем.
+  const focusId = st.focus ?? a?.id ?? null;
+  const order = sides.filter((p): p is Participant => !!p);
+  const heatAt = order.findIndex((p) => p.id === focusId);
+  const nextSide = heatAt >= 0 && heatAt < order.length - 1 ? order[heatAt + 1] : null;
   // Пояс лиги считает сервер для оверлея: пульт показывает то же, что видят зрители на табло.
   const liveBelt = feed.state?.tournamentId === id ? (feed.state.belt ?? null) : null;
   const beltHolder = sides.find((p) => p && p.id === liveBelt?.holderParticipantId)?.name;
@@ -213,6 +214,18 @@ export function MatchConsole({
   }
 
   const lastRound = st.currentRound >= total;
+  const finishNext = lastRound && !nextSide;
+  const nextLabel = nextSide ? `Следующий заход: ${nextSide.name} →` : lastRound ? "Завершить матч" : "Следующий раунд →";
+
+  // Ход матча одной кнопкой: заходы сторон по очереди, потом следующий раунд, после последнего - итог.
+  // Второй щелчок двойного нажатия отбрасываем: подпись кнопки к нему уже сменилась на следующий шаг.
+  function nextStep(e: React.MouseEvent) {
+    if (e.detail > 1) return;
+    if (nextSide) void step(() => api.post<MatchState>(`/tournaments/${id}/focus`, { participantId: nextSide.id }));
+    else if (lastRound) setConfirm("finish");
+    else void run(`/tournaments/${id}/rounds/next`);
+  }
+
   const scoreA = totalScore(st, a?.id);
   const scoreB = totalScore(st, b?.id);
   const leader = scoreA === scoreB ? null : scoreA > scoreB ? a : b;
@@ -224,7 +237,7 @@ export function MatchConsole({
         ? ({ status: "live", label: "В эфире" } as const)
         : st.stage === "scheduled"
           ? ({ status: "soon", label: "Запланирован" } as const)
-          : ({ status: "soon", label: "Пики-баны" } as const);
+          : ({ status: "soon", label: "Готов" } as const);
 
   if (gone) {
     return (
@@ -260,7 +273,7 @@ export function MatchConsole({
 
       <ol className="flex flex-wrap gap-2" aria-label="Шаги матча">
         {(show ? SHOW_STEPS : STEPS).map((label, i) => {
-          const cur = stepIndex(st.stage);
+          const cur = stepIndex(st.stage, show);
           const done = i < cur;
           return (
             <li
@@ -292,16 +305,12 @@ export function MatchConsole({
         />
       )}
 
-      {(st.stage === "veto" || st.stage === "ready") && (
+      {st.stage === "ready" && (
         <>
-          <VetoBoard
+          <ReadyPanel
             st={st}
-            maps={maps}
             sides={sides}
             busy={busy}
-            onPick={(code) => run(`/tournaments/${id}/veto`, { mapCode: code })}
-            onUndo={() => run(`/tournaments/${id}/veto/undo`)}
-            onManual={(codes) => run(`/tournaments/${id}/maps`, { maps: codes })}
             onFirst={(pid) => run(`/tournaments/${id}/first`, { participantId: pid })}
             onStart={() => run(`/tournaments/${id}/rounds/next`)}
           />
@@ -317,6 +326,7 @@ export function MatchConsole({
         <RoundConsole
           st={st}
           sides={sides}
+          maps={maps}
           legendary={legendary}
           focusId={focusId}
           online={!!feed.state}
@@ -326,23 +336,18 @@ export function MatchConsole({
               <button type="button" className="btn btn-danger btn-sm" disabled={busy} onClick={() => setConfirm("cancel")}>
                 <span>Отменить матч</span>
               </button>
-              {!lastRound && (
+              {!finishNext && (
                 <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => setConfirm("early")}>
                   <span>Завершить досрочно</span>
                 </button>
               )}
-              {lastRound ? (
-                <button type="button" className="btn btn-primary" disabled={busy} onClick={() => setConfirm("finish")}>
-                  <span>Завершить матч</span>
-                </button>
-              ) : (
-                <button type="button" className="btn btn-primary" disabled={busy} onClick={() => run(`/tournaments/${id}/rounds/next`)}>
-                  <span>Следующий раунд →</span>
-                </button>
-              )}
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={nextStep}>
+                <span>{nextLabel}</span>
+              </button>
             </>
           }
           onFocus={(pid) => act(`/tournaments/${id}/focus`, { participantId: pid })}
+          onMap={(pid, code) => act(`/tournaments/${id}/heat/map`, { participantId: pid, mapCode: code }, `map:${pid}`)}
           onMark={(asg, by) => act(`/round-bonus-tasks/${asg}/mark`, { by }, `task:${asg}`)}
           onReroll={(asg) => act(`/round-bonus-tasks/${asg}/reroll`, undefined, `task:${asg}`)}
           onKnock={(pid, delta) => act(`/tournaments/${id}/knocks`, { participantId: pid, delta })}

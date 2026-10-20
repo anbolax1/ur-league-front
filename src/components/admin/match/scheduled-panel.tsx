@@ -7,14 +7,7 @@ import { FirstSide } from "@/components/admin/match/first-side";
 import { MAX_PRIZE, PreviewImage, PreviewPicker, type PreviewSource } from "@/components/admin/match/show-preview";
 import { fmtDate, fmtTime } from "@/lib/format";
 import { roundsLabel } from "@/lib/match";
-import type { MatchState, Participant, VetoStep } from "@/lib/types";
-
-function stepText(s: VetoStep): string {
-  if (s.action === "ban") return `бан ${s.side}`;
-  if (s.action === "pick") return `пик ${s.side}`;
-  if (s.action === "vote") return "выбор чата";
-  return "остаток";
-}
+import type { MatchState, Participant } from "@/lib/types";
 
 /** Запланированный шоу-матч: когда начнётся, кто играет, приз и картинка анонса; отсюда его выводят
     в эфир или переносят. */
@@ -173,8 +166,8 @@ export function ScheduledPanel({
           </div>
 
           <p className="text-sm text-muted">
-            {roundsLabel(t.rounds?.length ?? t.totalRounds)}. Пики-баны: {st.vetoOrder.map(stepText).join(" → ")}. Анонс уже
-            виден на главной и в расписании.
+            {roundsLabel(t.rounds?.length ?? t.totalRounds)}, в каждом стороны заходят по очереди. Анонс уже виден на главной и в
+            расписании.
           </p>
         </div>
       </div>

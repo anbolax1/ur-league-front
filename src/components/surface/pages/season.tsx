@@ -531,9 +531,7 @@ function UpsetsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
 
 function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   const S = recap.summary;
-  const maps = recap.maps.filter((m) => m.rounds > 0 || m.ban + m.pick + m.rest > 0);
-  const byBan = [...maps].sort((a, b) => b.ban - a.ban);
-  const byPick = [...maps].sort((a, b) => b.pick - a.pick);
+  const maps = recap.maps.filter((m) => m.rounds > 0);
   const per = (m: (typeof maps)[number], v: number) => (m.rounds ? v / (2 * m.rounds) : 0);
   const solid = maps.filter((m) => m.rounds >= 5);
   const mostKn = [...solid].sort((a, b) => per(b, b.knocks) - per(a, a.knocks))[0];
@@ -543,69 +541,19 @@ function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
     <Sec
       id="maps"
       tone={tone}
-      eyebrow="Пики, баны и что происходит на карте"
+      eyebrow="Что происходит на карте"
       title="карты"
       lead={
         <>
-          Пики-баны и раунды записаны у {pl(S.vetoed || S.detailed, W_MATCH)}: {pl(rounds, W_ROUND)}.
-          {S.vetoed > 0 && byBan[0] && ` ${byBan[0].name} банили в ${pc(byBan[0].ban, S.vetoed)}% матчей, а ${byPick[0].name} выбирали чаще остальных.`}
+          Раунды записаны у {pl(S.detailed, W_MATCH)}: {pl(rounds, W_ROUND)}.
         </>
       }
     >
-      {S.vetoed > 0 && (
-        <>
-          <p className="sn-panel-title">
-            <span>Что делали с картой в пиках и банах</span>
-            <span>{pl(S.vetoed, W_MATCH)}</span>
-          </p>
-          <div className="sn-legend">
-            <span>
-              <i className="sn-sw" style={{ background: "var(--sn-ban)" }} />
-              бан
-            </span>
-            <span>
-              <i className="sn-sw" style={{ background: "var(--sn-pick)" }} />
-              пик на раунд
-            </span>
-            <span>
-              <i className="sn-sw" style={{ background: "var(--sn-rest)" }} />
-              осталась и ушла в последний раунд
-            </span>
-          </div>
-          <div className="sn-veto">
-            {byBan.map((m) => {
-              const tot = m.ban + m.pick + m.rest || 1;
-              return (
-                <div key={m.code} className="sn-veto-row">
-                  <span className="nm">{m.name}</span>
-                  <span className="bar">
-                    {(
-                      [
-                        ["ban", m.ban, "бан"],
-                        ["pick", m.pick, "пик"],
-                        ["rest", m.rest, "осталась"],
-                      ] as const
-                    ).map(([k, v, label]) =>
-                      v > 0 ? (
-                        <i key={k} className={k} style={{ flexGrow: v / tot }} title={`${m.name}: ${label} - ${v} из ${S.vetoed}, ${pc(v, S.vetoed)}%`}>
-                          {v}
-                        </i>
-                      ) : null,
-                    )}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
       <div className="sn-maps-grid">
         {[...maps]
           .sort((a, b) => b.rounds - a.rounds)
           .map((m) => {
             const st: string[] = [];
-            if (S.vetoed && m === byBan[0]) st.push("бан №1");
-            if (S.vetoed && m === byPick[0]) st.push("любимый пик");
             if (m === mostKn) st.push("больше всего киллов");
             if (m === quiet) st.push("тише всех");
             return (
@@ -627,14 +575,6 @@ function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                     <dt>Сыграно раундов</dt>
                     <dd>{m.rounds}</dd>
                   </div>
-                  {S.vetoed > 0 && (
-                    <div>
-                      <dt>Бан / играли</dt>
-                      <dd>
-                        {pc(m.ban, S.vetoed)}%<small>/ {pc(m.pick + m.rest, S.vetoed)}%</small>
-                      </dd>
-                    </div>
-                  )}
                   <div>
                     <dt>Очков за раунд</dt>
                     <dd>{f1(per(m, m.points))}</dd>
@@ -1054,7 +994,7 @@ function HowSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   const items = [
     "Цифры - из базы сайта и обновляются после каждого матча сезона.",
     S.detailed < S.matches
-      ? `${pl(S.matches - S.detailed, W_MATCH)} перенесены из таблицы организатора: там есть итог и одна карта. Пики-баны, счёт по раундам, задания и киллы есть у ${pl(S.detailed, W_MATCH)}.`
+      ? `${pl(S.matches - S.detailed, W_MATCH)} перенесены из таблицы организатора: там есть итог и одна карта. Счёт по раундам, задания и киллы есть у ${pl(S.detailed, W_MATCH)}.`
       : "",
     `MMR - Эло с K=${sn.kFactor}, у всех старт ${S.startMmr}. Жетон ×2 удваивает изменение.${corr ? ` ${dLong(corr.at)} рейтинг сверили с официальной таблицей у ${pl(corr.players, W_PLAYER)}.` : ""}`,
     "Шанс на победу - ожидаемый результат Эло по MMR обоих игроков прямо перед матчем.",
@@ -1086,8 +1026,8 @@ function HowSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   );
 }
 
-/** Страница итогов сезона: что было, кто выиграл и как. Разделы без данных (у старых сезонов нет пиков-банов
-    и заданий) пропускаются, полосы ночь/бумага чередуются по оставшимся. */
+/** Страница итогов сезона: что было, кто выиграл и как. Разделы без данных (у старых сезонов нет заданий)
+    пропускаются, полосы ночь/бумага чередуются по оставшимся. */
 export function SurfaceSeason({ recap, no }: { recap: SeasonRecap; no: string }) {
   if (!recap.players.length) {
     return (
