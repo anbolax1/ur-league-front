@@ -259,7 +259,7 @@ export function ProfilePatches({
             </section>
           )}
 
-          <p className="pt-note">Ноки считаются в матчах, где их записали: в пульте эфира или на arcarena.</p>
+          <p className="pt-note">Киллы считаются в матчах, где их записали в пульте.</p>
         </div>
       </div>
     </section>

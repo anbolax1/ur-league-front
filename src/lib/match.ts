@@ -71,18 +71,18 @@ export function roundKnocks(st: MatchState, round: number, participantId: string
 /** Очки за чужое задание - столько же даёт сервер (ContractCrossPoints). */
 export const CROSS_POINTS = 1;
 
-/** Очки за нок рейдера - столько же даёт сервер (KnockPoints). */
+/** Очки за килл - столько же даёт сервер (KnockPoints). */
 export const KNOCK_POINTS = 3;
 
 export interface RoundBreakdown {
   tasks: number;
   cross: number;
   knocks: number; // штук, по KNOCK_POINTS очков
-  manual: number; // без очков за ноки
+  manual: number; // без очков за киллы
   legendary: number;
 }
 
-/** Из чего сложились очки стороны в раунде: свои задания, задания соперника, ноки, ручные и легендарки. */
+/** Из чего сложились очки стороны в раунде: свои задания, задания соперника, киллы, ручные и легендарки. */
 export function roundBreakdown(st: MatchState, round: number, participantId: string): RoundBreakdown {
   const knocks = roundKnocks(st, round, participantId);
   const manual = manualPoints(st, round, participantId) - knocks * KNOCK_POINTS;
@@ -98,7 +98,7 @@ export function roundBreakdown(st: MatchState, round: number, participantId: str
   return out;
 }
 
-/** Разбивка очков раунда словами для страницы матча: «задания +4 · 2 нока +6». */
+/** Разбивка очков раунда словами для страницы матча: «задания +4 · 2 килла +6». */
 export function breakdownParts(b: RoundBreakdown): string[] {
   return [
     b.tasks ? `задания +${b.tasks}` : "",

@@ -7,13 +7,13 @@ import { pluralKnocks } from "@/lib/format";
 export const PATCH_GROUPS: Array<{ name: string; codes: PatchCode[] }> = [
   { name: "Рейтинг", codes: ["top1", "belt", "regicide"] },
   { name: "Матчи", codes: ["streak", "flawless", "david", "comeback", "double", "photo", "shutout", "revenge"] },
-  { name: "Ноки и карты", codes: ["hunter", "clear", "topknock", "pacifist", "king"] },
+  { name: "Киллы и карты", codes: ["hunter", "clear", "topknock", "pacifist", "king"] },
   { name: "Сезон", codes: ["first", "final", "marathon", "veteran"] },
 ];
 
 export const PATCH_ORDER: PatchCode[] = PATCH_GROUPS.flatMap((g) => g.codes);
 
-/** Ступени «Охотника»: ноков за сезон. */
+/** Ступени «Охотника»: киллов за сезон. */
 export const HUNTER_TIERS = [10, 25, 50];
 /** «Неудержимый» и «Марафонец»: сколько нужно, для полоски «сколько осталось». */
 export const STREAK_GOAL = 5;
@@ -43,10 +43,10 @@ export const PATCH_INFO: Record<PatchCode, PatchInfo> = {
   photo: { name: "Фотофиниш", rule: "победа в одно очко", about: "Матч выигран с разницей ровно в одно очко." },
   shutout: { name: "Всухую", rule: "соперник без единого очка", about: "Победа, а у соперника за матч ни одного очка." },
   revenge: { name: "Реванш", rule: "обыграл того, кому проигрывал", about: "Победа над тем, кто раньше в сезоне обыграл тебя." },
-  hunter: { name: "Охотник", rule: "10, 25 и 50 ноков за сезон", about: "Ноки за сезон, три ступени: 10, 25 и 50." },
-  clear: { name: "Зачистка", rule: "8 ноков за один рейд", about: "Восемь ноков или больше за один рейд." },
-  topknock: { name: "Главный охотник", rule: "больше всех ноков за сезон", about: "Больше всех ноков за сезон.", seasonEnd: true },
-  pacifist: { name: "Пацифист", rule: "победа без единого нока", about: "Ноки в матче были, но у победителя - ни одного." },
+  hunter: { name: "Охотник", rule: "10, 25 и 50 киллов за сезон", about: "Киллы за сезон, три ступени: 10, 25 и 50." },
+  clear: { name: "Зачистка", rule: "8 киллов за один заход", about: "Восемь киллов или больше за один заход." },
+  topknock: { name: "Главный охотник", rule: "больше всех киллов за сезон", about: "Больше всех киллов за сезон.", seasonEnd: true },
+  pacifist: { name: "Пацифист", rule: "победа без единого килла", about: "Киллы в матче были, но у победителя - ни одного." },
   king: { name: "Король карты", rule: "больше всех побед на карте", about: "Больше всех побед в матчах на карте, минимум три.", seasonEnd: true },
   first: { name: "Первый рейд", rule: "играл в первый день сезона", about: "Матч в первый игровой день сезона. Шоу-матчи не в счёт." },
   final: { name: "Последний аккорд", rule: "победа в последний день сезона", about: "Победа в последний игровой день сезона. Шоу-матчи не в счёт." },

@@ -166,7 +166,7 @@ function TaskRow({
   );
 }
 
-/** Из чего сложились очки стороны в раунде, кроме ноков; ручные правятся прямо здесь, на месте своего числа. */
+/** Из чего сложились очки стороны в раунде, кроме киллов; ручные правятся прямо здесь, на месте своего числа. */
 function ScoreParts({
   parts,
   onManual,
@@ -395,8 +395,8 @@ export function RoundConsole({
                     className="flex h-11 w-11 flex-none items-center justify-center rounded-md bg-surface-2 text-lg text-muted shadow-[inset_0_0_0_1px_var(--border)] transition hover:text-fg disabled:cursor-not-allowed disabled:opacity-30"
                     disabled={parts.knocks <= 0}
                     onClick={() => onKnock(p.id, -1)}
-                    title={parts.knocks > 0 ? "Снять ошибочный нок" : "Ноков нет - снимать нечего"}
-                    aria-label="Снять нок"
+                    title={parts.knocks > 0 ? "Снять ошибочный килл" : "Киллов нет - снимать нечего"}
+                    aria-label="Снять килл"
                   >
                     −
                   </button>
@@ -404,9 +404,9 @@ export function RoundConsole({
                     type="button"
                     className={`btn min-h-[44px] flex-1 ${style.knock}`}
                     onClick={() => onKnock(p.id, 1)}
-                    title={`Нок рейдера: +${KNOCK_POINTS} очка`}
+                    title={`Килл: +${KNOCK_POINTS} очка`}
                   >
-                    <span>Нок{parts.knocks > 0 ? ` · ${parts.knocks}` : ""}</span>
+                    <span>Килл{parts.knocks > 0 ? ` · ${parts.knocks}` : ""}</span>
                   </button>
                 </div>
               </div>

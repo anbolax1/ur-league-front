@@ -13,7 +13,7 @@ interface Colors {
   acc: string;
 }
 
-/** Форма - по группе нашивки: рейтинг - щит, матчи - круг, ноки и карты - шестиугольник, сезон - квадрат. */
+/** Форма - по группе нашивки: рейтинг - щит, матчи - круг, киллы и карты - шестиугольник, сезон - квадрат. */
 const LOOK: Record<PatchCode, Colors & { shape: Shape }> = {
   top1: { shape: "shield", base: "#1c0f22", rim: "#f1aa1c", ink: "#f1aa1c", acc: "#ece2d0" },
   belt: { shape: "shield", base: "#7a1626", rim: "#f1aa1c", ink: "#1a0e1e", acc: "#f1aa1c" },

@@ -29,17 +29,17 @@ export function pointsLabel(n: number): string {
   return `${n} ${pluralPoints(n)}`;
 }
 
-/** Склонение «нок / нока / ноков» по числу. */
+/** Склонение «килл / килла / киллов» по числу. */
 export function pluralKnocks(n: number): string {
   const a = Math.abs(n) % 100;
   const b = a % 10;
-  if (a > 10 && a < 20) return "ноков";
-  if (b === 1) return "нок";
-  if (b >= 2 && b <= 4) return "нока";
-  return "ноков";
+  if (a > 10 && a < 20) return "киллов";
+  if (b === 1) return "килл";
+  if (b >= 2 && b <= 4) return "килла";
+  return "киллов";
 }
 
-/** «1 нок», «4 нока», «12 ноков». */
+/** «1 килл», «4 килла», «12 киллов». */
 export function knocksLabel(n: number): string {
   return `${n} ${pluralKnocks(n)}`;
 }

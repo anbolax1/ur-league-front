@@ -37,7 +37,7 @@ function Segs({ wins, losses }: { wins: number; losses: number }) {
   );
 }
 
-/** Сводка по картам, соперникам и нокам за несколько сезонов: одинаковые записи складываются. */
+/** Сводка по картам, соперникам и киллам за несколько сезонов: одинаковые записи складываются. */
 export function mergeAnalytics(list: SeasonAnalytics[]): SeasonAnalytics {
   const maps = new Map<string, MapStat>();
   const opps = new Map<string, OpponentStat>();
@@ -80,14 +80,14 @@ export function mergeAnalytics(list: SeasonAnalytics[]): SeasonAnalytics {
   return { maps: [...maps.values()].sort(byGames), opponents: [...opps.values()].sort(byGames), knocks };
 }
 
-/** Ноки игрока: среднее - только по матчам, где ноки записаны, иначе нули занизили бы его. */
+/** Киллы игрока: среднее - только по матчам, где киллы записаны, иначе нули занизили бы его. */
 function Knocks({ k, all }: { k: KnockStats; all: boolean }) {
   return (
     <div className="pf-knocks">
-      <h3 className="sf-h-mid">ноки<span className="sf-dot">.</span></h3>
+      <h3 className="sf-h-mid">киллы<span className="sf-dot">.</span></h3>
       <dl className="sf-stats">
         <div>
-          <dt>Ноков</dt>
+          <dt>Киллов</dt>
           <dd>{k.knocks}</dd>
           <dd className="pf-sub">{all ? "за все сезоны" : "за сезон"}</dd>
         </div>
@@ -95,18 +95,18 @@ function Knocks({ k, all }: { k: KnockStats; all: boolean }) {
           <dt>В среднем за матч</dt>
           <dd>{fmtAverage(k.knocks, k.matches)}</dd>
           <dd className="pf-sub">
-            {k.matches} {matchesWord(k.matches)} с ноками
+            {k.matches} {matchesWord(k.matches)} с киллами
           </dd>
         </div>
         <div>
           <dt>Рекорд за матч</dt>
           <dd>{k.best}</dd>
           <dd className="pf-sub">
-            {k.bestMatch ? <Link href={`/tournament/${k.bestMatch}`}>против {k.bestOpponent}</Link> : "ноков пока не было"}
+            {k.bestMatch ? <Link href={`/tournament/${k.bestMatch}`}>против {k.bestOpponent}</Link> : "киллов пока не было"}
           </dd>
         </div>
       </dl>
-      <p className="pf-hint">Считаются матчи, где ноки записаны хотя бы одному игроку.</p>
+      <p className="pf-hint">Считаются матчи, где киллы записаны хотя бы одному игроку.</p>
     </div>
   );
 }

@@ -191,7 +191,7 @@ function Hero({ recap, no, nav }: { recap: SeasonRecap; no: string; nav: Array<[
           </div>
           {S.knocks > 0 && (
             <div>
-              <dt>Ноков</dt>
+              <dt>Киллов</dt>
               <dd>
                 <CountUp value={S.knocks} />
                 <small>в матчах, где их записывали</small>
@@ -347,7 +347,7 @@ function FinalSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                         <i style={{ flex: 1, background: "var(--sf-cream-2)" }} />
                       </div>
                       <div className="rk">
-                        ноки {r.knocks[w]}:{r.knocks[l]} · после раунда {after[k][0]}:{after[k][1]}
+                        киллы {r.knocks[w]}:{r.knocks[l]} · после раунда {after[k][0]}:{after[k][1]}
                       </div>
                     </div>
                   </div>
@@ -606,7 +606,7 @@ function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
             const st: string[] = [];
             if (S.vetoed && m === byBan[0]) st.push("бан №1");
             if (S.vetoed && m === byPick[0]) st.push("любимый пик");
-            if (m === mostKn) st.push("больше всего ноков");
+            if (m === mostKn) st.push("больше всего киллов");
             if (m === quiet) st.push("тише всех");
             return (
               <article key={m.code} className="sn-mcard">
@@ -640,7 +640,7 @@ function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                     <dd>{f1(per(m, m.points))}</dd>
                   </div>
                   <div>
-                    <dt>Ноков за раунд</dt>
+                    <dt>Киллов за раунд</dt>
                     <dd>{f1(per(m, m.knocks))}</dd>
                   </div>
                   <div className="wide">
@@ -657,7 +657,7 @@ function MapsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
             );
           })}
       </div>
-      <p className="sn-cap">Очки, ноки и задания - у одной стороны за сыгранный раунд.</p>
+      <p className="sn-cap">Очки, киллы и задания - у одной стороны за сыгранный раунд.</p>
     </Sec>
   );
 }
@@ -668,7 +668,7 @@ function RoundsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   const cmp: Array<[string, number, number, (v: number) => string, string]> = r2
     ? [
         ["Очки", side(r1, r1.points), side(r2, r2.points), f1, `${r1.rounds} и ${r2.rounds} раундов`],
-        ["Ноки", side(r1, r1.knocks), side(r2, r2.knocks), f1, "нок - 3 очка"],
+        ["Киллы", side(r1, r1.knocks), side(r2, r2.knocks), f1, "килл - 3 очка"],
         ["Задания выполнены", pc(r1.tasksDone, r1.tasksOffered), pc(r2.tasksDone, r2.tasksOffered), (v) => `${Math.round(v)}%`, `${r1.tasksDone} из ${r1.tasksOffered} и ${r2.tasksDone} из ${r2.tasksOffered}`],
       ]
     : [];
@@ -689,11 +689,11 @@ function RoundsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
       id="rounds"
       tone={tone}
       eyebrow="Первый раунд против второго"
-      title="раунды и ноки"
+      title="раунды и киллы"
       lead={
         r2 ? (
           <>
-            В первом раунде играют с бесплатным набором, во втором - со своим снаряжением. Во втором раунде ноков {knockGrow >= 0 ? `на ${knockGrow}% больше` : `на ${-knockGrow}% меньше`}, а
+            В первом раунде играют с бесплатным набором, во втором - со своим снаряжением. Во втором раунде киллов {knockGrow >= 0 ? `на ${knockGrow}% больше` : `на ${-knockGrow}% меньше`}, а
             заданий выполняют {pc(r2.tasksDone, r2.tasksOffered) < pc(r1.tasksDone, r1.tasksOffered) ? "реже" : "не реже"}.
           </>
         ) : undefined
@@ -765,7 +765,7 @@ function RoundsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
           {recap.knockers.length > 0 && (
             <>
               <p className="sn-panel-title">
-                <span>Больше всех ноков</span>
+                <span>Больше всех киллов</span>
                 <span>за матч</span>
               </p>
               <div className="sn-hbars">
@@ -1054,11 +1054,11 @@ function HowSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   const items = [
     "Цифры - из базы сайта и обновляются после каждого матча сезона.",
     S.detailed < S.matches
-      ? `${pl(S.matches - S.detailed, W_MATCH)} перенесены из таблицы организатора: там есть итог и одна карта. Пики-баны, счёт по раундам, задания и ноки есть у ${pl(S.detailed, W_MATCH)}.`
+      ? `${pl(S.matches - S.detailed, W_MATCH)} перенесены из таблицы организатора: там есть итог и одна карта. Пики-баны, счёт по раундам, задания и киллы есть у ${pl(S.detailed, W_MATCH)}.`
       : "",
     `MMR - Эло с K=${sn.kFactor}, у всех старт ${S.startMmr}. Жетон ×2 удваивает изменение.${corr ? ` ${dLong(corr.at)} рейтинг сверили с официальной таблицей у ${pl(corr.players, W_PLAYER)}.` : ""}`,
     "Шанс на победу - ожидаемый результат Эло по MMR обоих игроков прямо перед матчем.",
-    "Раунд считается сыгранным, если он начался, даже при счёте 0:0. Ноки - только в матчах, где их записывали.",
+    "Раунд считается сыгранным, если он начался, даже при счёте 0:0. Киллы - только в матчах, где их записывали.",
     "Победы и поражения - как в таблице лидеров: ×2 из таблицы организатора идёт за два матча.",
   ].filter(Boolean);
   return (

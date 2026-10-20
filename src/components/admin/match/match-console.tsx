@@ -113,7 +113,7 @@ export function MatchConsole({
           ? `за пояс: ${beltHolder} защищает${liveBelt.defenses ? `, ★${liveBelt.defenses}` : ""}`
           : "за ничей пояс";
 
-  // Запросы к матчу уходят строго по одному, в порядке нажатий: иначе «Нок» и «Следующий раунд»
+  // Запросы к матчу уходят строго по одному, в порядке нажатий: иначе «Килл» и «Следующий раунд»
   // сервер мог бы обработать наоборот, а ответ на старый запрос перетёр бы новый счёт.
   const enqueue = React.useCallback(<T,>(task: () => Promise<T>): Promise<T> => {
     const next = queue.current.then(task);
@@ -180,7 +180,7 @@ export function MatchConsole({
 
   const run = (path: string, body?: unknown) => step(() => api.post<MatchState>(path, body));
 
-  // Зачёт кнопки не гасит: два нока подряд - это два нажатия «Нок». Повтор по тому же заданию, пока первый
+  // Зачёт кнопки не гасит: два килла подряд - это два нажатия «Килл». Повтор по тому же заданию, пока первый
   // запрос не вернулся, отбрасываем - иначе задание попало бы в журнал дважды.
   async function act(path: string, body?: unknown, key?: string) {
     if (key && inFlight.current.has(key)) return null;

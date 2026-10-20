@@ -225,18 +225,18 @@ export interface OpponentStat {
   losses: number;
 }
 
-/** Разбивка матчей одного сезона по картам и соперникам и ноки игрока. */
+/** Разбивка матчей одного сезона по картам и соперникам и киллы игрока. */
 export interface SeasonAnalytics {
   maps: MapStat[];
   opponents: OpponentStat[];
   knocks: KnockStats;
 }
 
-/** Ноки игрока за сезон - только по матчам, где ноки записаны хотя бы одной стороне. */
+/** Киллы игрока за сезон - только по матчам, где киллы записаны хотя бы одной стороне. */
 export interface KnockStats {
   matches: number;
   knocks: number;
-  best: number; // больше всего ноков за один матч
+  best: number; // больше всего киллов за один матч
   bestMatch?: string;
   bestOpponent?: string;
 }
@@ -624,7 +624,7 @@ export interface PlayerStats {
   duoPlayed: number;
   streakKind: "win" | "loss" | "";
   streakLen: number;
-  basePoints: number; // ручные очки раунда вместе с ноками
+  basePoints: number; // ручные очки раунда вместе с киллами
   contractPoints: number; // задания и протоколы: свои по очкам каталога, чужие по 1
   legendaryPoints: number; // легендарки (10 каждая)
   favoriteMap: string;
@@ -921,7 +921,7 @@ export interface RoundScore {
   points: number;
 }
 
-/** Сколько ноков у стороны за раунд. */
+/** Сколько киллов у стороны за раунд. */
 export interface RoundKnocks {
   roundNumber: number;
   participantId: string;
@@ -950,7 +950,7 @@ export interface MatchState {
   tasks: RoundBonusTask[];
   legendary: LegendaryCompletion[];
   scores: RoundScore[];
-  manual: RoundScore[]; // вместе с очками за ноки
+  manual: RoundScore[]; // вместе с очками за киллы
   knocks: RoundKnocks[];
   log: MatchLogEntry[];
   /** Нашивки, полученные в этом матче. */
