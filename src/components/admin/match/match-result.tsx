@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Panel } from "@/components/ui/card";
 import { TrophyIcon } from "@/components/icons";
-import { roundMapsLabel, roundScore, totalScore } from "@/lib/match";
+import { roundMapsLabel, roundPlacesLabel, roundScore, totalScore } from "@/lib/match";
 import type { MatchState, Participant } from "@/lib/types";
 
 /** Итог матча: победитель, счёт по раундам и изменение MMR. */
@@ -38,7 +38,12 @@ export function MatchResult({ st, sides }: { st: MatchState; sides: [Participant
           {rounds.map((r) => (
             <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-md bg-surface-2 px-3 py-2.5">
               <span className="font-display text-[0.68rem] uppercase text-primary-2">Раунд {r.number}</span>
-              <span className="min-w-0 flex-1 text-sm">{roundMapsLabel(st, r.number, sides) || "карты не отмечены"}</span>
+              <span className="min-w-0 flex-1 text-sm">
+                {roundMapsLabel(st, r.number, sides) || "карты не отмечены"}
+                {roundPlacesLabel(st, r.number, sides) && (
+                  <span className="text-xs text-muted"> · {roundPlacesLabel(st, r.number, sides)}</span>
+                )}
+              </span>
               <span className="font-display tnum">
                 {r.status === "pending" ? "не сыгран" : `${roundScore(st, r.number, a?.id)} : ${roundScore(st, r.number, b?.id)}`}
               </span>

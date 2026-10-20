@@ -9,6 +9,7 @@ import {
   heatOf,
   roundBreakdown,
   roundMapsLabel,
+  roundPlacesLabel,
   roundScore,
   taskDescription,
   taskKindLabel,
@@ -63,6 +64,7 @@ export function OverlayStatus({ online }: { online: boolean }) {
 function RoundCard({ st, r, now, sides }: { st: MatchState; r: Round; now: boolean; sides: [Participant | null, Participant | null] }) {
   const [a, b] = sides;
   const maps = roundMapsLabel(st, r.number, sides);
+  const places = roundPlacesLabel(st, r.number, sides);
   return (
     <div
       className={`flex items-center justify-between gap-3 rounded-md px-3.5 py-2.5 ${
@@ -74,7 +76,10 @@ function RoundCard({ st, r, now, sides }: { st: MatchState; r: Round; now: boole
           Раунд {r.number}
           {now ? " · идёт" : r.status === "finished" ? " · сыгран" : " · впереди"}
         </div>
-        <div className="truncate text-sm">{maps || (r.status === "pending" ? "карты выберет игра" : "карты не отмечены")}</div>
+        <div className="truncate text-sm">
+          {maps || (r.status === "pending" ? "карты выберет игра" : "карты не отмечены")}
+          {places && <span className="text-xs text-muted"> · {places}</span>}
+        </div>
       </div>
       <span className={`flex-none font-display text-lg tnum ${r.status === "pending" ? "text-muted" : ""}`}>
         {r.status === "pending" ? "—" : `${roundScore(st, r.number, a?.id)} : ${roundScore(st, r.number, b?.id)}`}
@@ -271,7 +276,7 @@ export function MatchLog({ log, onUndo }: { log: MatchLogEntry[]; onUndo: () => 
           ))}
         </ol>
       ) : (
-        <p className="text-sm text-muted">Пока пусто — здесь появятся карты заходов, киллы, зачёты, ручные очки и легендарки.</p>
+        <p className="text-sm text-muted">Пока пусто — здесь появятся карты и места заходов, киллы, зачёты, ручные очки и легендарки.</p>
       )}
     </Panel>
   );
@@ -300,7 +305,34 @@ function HeatMap({ maps, code, name, onPick }: { maps: MapInfo[]; code?: string;
   );
 }
 
-/** Идущий раунд: табло с ходом матча и панели сторон с картой захода, очками и заданиями. */
+/** Место стороны в матче PUBG по экрану итогов захода: очков не даёт, идёт в статистику и «чикены». */
+function HeatPlace({ place, name, onPick }: { place?: number | null; name: string; onPick: (place: number | null) => void }) {
+  const id = React.useId();
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <label className="field-label" htmlFor={id}>
+        Место в матче
+      </label>
+      <select
+        id={id}
+        className="input min-h-[44px] w-auto py-0"
+        value={place ?? ""}
+        onChange={(e) => onPick(e.target.value ? Number(e.target.value) : null)}
+        aria-label={`Место ${name} в матче`}
+      >
+        <option value="">—</option>
+        {Array.from({ length: 16 }, (_, i) => i + 1).map((n) => (
+          <option key={n} value={n}>
+            {n === 1 ? "1 — чикен" : n}
+          </option>
+        ))}
+      </select>
+      <span className="text-xs text-muted">по экрану итогов захода, очков не даёт</span>
+    </div>
+  );
+}
+
+/** Идущий раунд: табло с ходом матча и панели сторон с картой и местом захода, очками и заданиями. */
 export function RoundConsole({
   st,
   sides,
@@ -312,6 +344,7 @@ export function RoundConsole({
   actions,
   onFocus,
   onMap,
+  onPlace,
   onMark,
   onReroll,
   onKnock,
@@ -330,6 +363,7 @@ export function RoundConsole({
   actions: React.ReactNode;
   onFocus: (participantId: string) => void;
   onMap: (participantId: string, mapCode: string) => void;
+  onPlace: (participantId: string, place: number | null) => void;
   onMark: (id: string, by: "owner" | "opponent" | "none") => void;
   onReroll: (id: string) => void;
   onKnock: (participantId: string, delta: 1 | -1) => void;
@@ -421,6 +455,7 @@ export function RoundConsole({
                   </div>
                 </div>
                 <HeatMap maps={maps} code={heat?.mapCode} name={p.name} onPick={(code) => onMap(p.id, code)} />
+                <HeatPlace place={heat?.place} name={p.name} onPick={(place) => onPlace(p.id, place)} />
                 <ScoreParts parts={parts} onManual={(delta, label) => onPoints(p.id, delta, label)} />
                 {/* Отступ справа - под скос кнопки, чтобы её угол не вылезал за край плиток с очками. */}
                 <div className="flex items-center gap-3 pr-1.5">

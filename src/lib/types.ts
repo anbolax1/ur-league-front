@@ -617,6 +617,11 @@ export interface PlayerStats {
   legendaryPoints: number; // легендарки (10 каждая)
   favoriteMap: string;
   favoriteMapRounds: number;
+  /** Места в заходах (1-16): сколько заходов с местом, лучшее, среднее и чикены - первые места. */
+  placedHeats: number;
+  bestPlace: number;
+  avgPlace: number;
+  chickens: number;
 }
 
 /** Публичный профиль игрока: GET /api/players/{login} (B6). */
@@ -879,7 +884,7 @@ export interface MatchLogEntry {
   id: string;
   roundNumber: number;
   participantId?: string | null;
-  kind: "task" | "points" | "knock" | "legendary" | "map";
+  kind: "task" | "points" | "knock" | "legendary" | "map" | "place";
   text: string;
   delta: number;
   createdAt: string;
@@ -904,12 +909,14 @@ export type MatchStage = "scheduled" | "ready" | "round" | "finished";
 
 export type MatchFormat = "match" | "show";
 
-/** Заход стороны в раунде: карта, которую выбрала игра; пусто - ещё не отмечена. */
+/** Заход стороны в раунде: карта, которую выбрала игра, и место в матче PUBG; пусто - ещё не отмечены. */
 export interface Heat {
   roundNumber: number;
   participantId: string;
   mapCode?: string;
   map?: string;
+  /** 1-16 по экрану итогов захода. */
+  place?: number | null;
 }
 
 /** Матч целиком: GET /api/tournaments/{id}/match. */

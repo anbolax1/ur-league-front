@@ -12,6 +12,7 @@ import {
   isShowMatch,
   mapImage,
   matchSides,
+  placeLabel,
   roundBreakdown,
   roundMapsLabel,
   roundScore,
@@ -127,8 +128,8 @@ function BoardSide({
 /* ---------- раунды ---------- */
 
 function SideColumn({ st, round, p, other }: { st: MatchState; round: number; p: Participant; other: Participant | null }) {
-  const map = heatOf(st, round, p.id)?.map;
-  const parts = [map ? `карта ${map}` : "", ...breakdownParts(roundBreakdown(st, round, p.id))].filter(Boolean);
+  const heat = heatOf(st, round, p.id);
+  const parts = [heat?.map ? `карта ${heat.map}` : "", placeLabel(heat?.place), ...breakdownParts(roundBreakdown(st, round, p.id))].filter(Boolean);
   const tasks = st.tasks.filter((x) => x.roundNumber === round && x.participantId === p.id);
   const legendary = st.legendary.filter((l) => l.roundNumber === round && l.participantId === p.id);
   const score = roundScore(st, round, p.id);

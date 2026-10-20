@@ -38,6 +38,19 @@ export function roundMapCode(st: MatchState, round: number, sides: [Participant 
   return "";
 }
 
+/** Место в матче PUBG: «3-е место», первое - чикен. */
+export function placeLabel(place?: number | null): string {
+  if (!place) return "";
+  return place === 1 ? "1-е место, чикен" : `${place}-е место`;
+}
+
+/** Места заходов раунда по сторонам: «места 1 · 6»; пусто - не записаны. */
+export function roundPlacesLabel(st: MatchState, round: number, sides: [Participant | null, Participant | null]): string {
+  const places = sides.map((p) => heatOf(st, round, p?.id)?.place ?? null);
+  if (places.every((x) => !x)) return "";
+  return `места ${places.map((x) => x || "—").join(" · ")}`;
+}
+
 /** Карты заходов из списка матчей «Эрангель 3 · Мирамар 1»: чаще сыгранная первой. */
 export function heatMapsSummary(maps: string[]): string {
   const count = new Map<string, number>();
