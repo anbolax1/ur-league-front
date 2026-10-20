@@ -453,7 +453,7 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
                         </React.Fragment>
                       ))}
                     </>
-                  ) : hN === 0 ? (
+                  ) : hN === 0 || !heats[hN - 1] ? (
                     "Пример: обычный матч, два раунда — четыре захода"
                   ) : (
                     <>
