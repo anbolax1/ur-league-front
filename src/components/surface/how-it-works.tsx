@@ -86,6 +86,7 @@ const MAP_DONE = ROLL_FLIPS + 2;
 const MAP_TASK: Record<string, string> = {
   erangel: "Высадиться у школы и сделать килл в здании",
   miramar: "Высадиться в Пекадо и выжить 5 минут",
+  rondo: "Высадиться на заводе NEOX и сделать два килла",
 };
 
 /** Шаг сцены карты в положении p: смены карты, затем «выпала», «отмечена», «задание выдано». */
@@ -145,7 +146,8 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
   const [t3N, setT3N] = React.useState(TASKS.length);
   const [calcReplay, setCalcReplay] = React.useState(0);
 
-  const mapsList = maps.map((m) => m.name).join(" или ");
+  const mapNames = maps.map((m) => m.name);
+  const mapsList = mapNames.length > 1 ? `${mapNames.slice(0, -1).join(", ")} или ${mapNames[mapNames.length - 1]}` : (mapNames[0] ?? "");
   const landed = maps.length ? rollTo % maps.length : -1;
   const rd = example ?? {
     a: "Сторона A",
