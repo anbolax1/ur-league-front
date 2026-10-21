@@ -127,7 +127,7 @@ npm run build
 
 ## Выкладка на прод
 
-Сайт лиги открыт на `brouhub.ru`: nginx отдаёт страницы этого фронта (:3010), а `/api`
+Сайт лиги открыт на `zolotoyarena.pro`: nginx отдаёт страницы этого фронта (:3010), а `/api`
 передаёт Go API (:8090). Выкладка автоматическая: push в `main` — GitHub Actions проверяет код,
 собирает сайт и выкладывает его на сервер (`.github/workflows/deploy.yml`). `NEXT_PUBLIC_API_BASE`
 вшивается при сборке из `.env.production`. Настройка сервера — `deploy/DEPLOY.md` в корне `UR_League`.

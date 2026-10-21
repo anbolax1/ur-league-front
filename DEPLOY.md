@@ -1,6 +1,6 @@
 # Деплой фронтенда (обновление)
 
-Прод: `brouhub.ru` → Next.js (standalone) лиги на VPS `155.212.133.147`, порт `3010`, под
+Прод: `zolotoyarena.pro` → Next.js (standalone) лиги на VPS `155.212.133.147`, порт `3010`, под
 пользователем `admin2` (systemd --user сервис `ur-front`). За nginx + Let's Encrypt;
 `/api` nginx передаёт бэкенду лиги (:8090).
 
@@ -52,7 +52,7 @@ ssh admin2@$VPS '
 ## Проверка
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" https://brouhub.ru            # 200
+curl -s -o /dev/null -w "%{http_code}\n" https://zolotoyarena.pro            # 200
 ssh admin2@$VPS 'systemctl --user is-active ur-front'             # active
 ```
 Открой сайт и сделай **жёсткий refresh** (Ctrl+Shift+R) — на всякий случай.
@@ -74,7 +74,7 @@ ssh admin2@$VPS 'rm -rf ~/ur-front_old'
 ## Что вшивается при сборке (build-time)
 
 - `NEXT_PUBLIC_API_BASE=/api` — из `.env.production` (коммитится, значение публичное). API на том
-  же домене, что и страница: `/api` на brouhub.ru nginx передаёт бэкенду лиги.
+  же домене, что и страница: `/api` на zolotoyarena.pro nginx передаёт бэкенду лиги.
   Абсолютный адрес сюда не вписывать: сайт на втором домене останется без данных и входа.
 - Рантайм-переменные (`PORT`, `HOSTNAME`, `INTERNAL_API_URL`) — в systemd-юните на сервере, не в сборке.
 
