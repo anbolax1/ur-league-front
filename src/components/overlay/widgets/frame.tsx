@@ -23,3 +23,11 @@ export function WidgetFrame({
     </div>
   );
 }
+
+/** Высота бокса виджета на сцене. Заданная высота у «Счёта» с полосой шанса - минимальная: полоса добавляет
+    строку под табло, и фиксированная высота обрезала бы её. */
+export function boxHeight(inst: WidgetInstance, stageH = 1080): CSSProperties {
+  if (!inst.h) return {};
+  const h = inst.h * stageH;
+  return inst.type === "scoreboard" && inst.showChanceBar ? { minHeight: h } : { height: h };
+}

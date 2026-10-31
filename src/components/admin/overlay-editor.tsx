@@ -9,6 +9,7 @@ import { DEFAULT_LAYOUT, makeWidget, WIDGET_SPOTS } from "@/components/overlay/d
 import { GameZonesLayer, PreviewBgLayer, PreviewBgSwitch, type PreviewBg } from "@/components/overlay/preview-bg";
 import { accentVars } from "@/components/overlay/accent";
 import { WIDGET_LABELS, WIDGET_ORDER, WIDGET_REGISTRY } from "@/components/overlay/widgets/registry";
+import { boxHeight } from "@/components/overlay/widgets/frame";
 
 const DEFAULT_PAD = 48; // отступ от края при выравнивании, px сцены (по умолчанию)
 const SNAP = 10; // порог прилипания, px сцены
@@ -555,7 +556,7 @@ export function OverlayEditor({
                   transform: `translate(${w.x * STAGE_W}px, ${w.y * STAGE_H}px)${w.scale !== 1 ? ` scale(${w.scale})` : ""}`,
                   transformOrigin: "top left",
                   width: w.w ? w.w * STAGE_W : undefined,
-                  height: w.h ? w.h * STAGE_H : undefined,
+                  ...boxHeight(w),
                   zIndex: w.z,
                   visibility: hidden && !selected ? "hidden" : undefined,
                   outline: selected ? `2px ${hidden ? "dashed" : "solid"} var(--accent)` : "1px dashed rgba(255,255,255,0.28)",

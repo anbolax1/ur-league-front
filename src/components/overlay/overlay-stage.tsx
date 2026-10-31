@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import type { LiveState, OverlayLayout } from "@/lib/types";
 import { DEFAULT_LAYOUT } from "./default-layout";
 import { WIDGET_REGISTRY } from "./widgets/registry";
+import { boxHeight } from "./widgets/frame";
 import { PatchToasts } from "./patch-toasts";
 import { PreviewBgLayer, type PreviewBg } from "./preview-bg";
 import { accentVars } from "./accent";
@@ -98,7 +99,7 @@ export function OverlayStage({
             left: inst.x * STAGE_W,
             top: inst.y * STAGE_H,
             width: inst.w ? inst.w * STAGE_W : undefined,
-            height: inst.h ? inst.h * STAGE_H : undefined,
+            ...boxHeight(inst),
             transform: inst.scale && inst.scale !== 1 ? `scale(${inst.scale})` : undefined,
             transformOrigin: "top left",
             zIndex: inst.z,
