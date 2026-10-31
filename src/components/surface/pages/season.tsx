@@ -441,6 +441,16 @@ function UpsetsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
       `${winnerName(recap, big)} › ${loserName(recap, big)}`,
       `${dLong(big.at)}${big.show ? ", шоу-матч" : ""}${big.mult > 1 ? `, жетон ×${big.mult}` : ""}`,
     ]);
+  const bmk = recap.bestMatchKnock;
+  if (bmk) {
+    const m = recap.matches[bmk.match];
+    records.push(["Рекорд киллов за матч", pl(bmk.knocks, W_KNOCK), nameOf(recap, bmk.player), `против ${nameOf(recap, m.p.find((p) => p !== bmk.player) ?? 0)}, ${dLong(m.at)}`]);
+  }
+  const bhk = recap.bestKnock;
+  if (bhk) {
+    const m = recap.matches[bhk.match];
+    records.push(["Рекорд киллов за заход", pl(bhk.knocks, W_KNOCK), nameOf(recap, bhk.player), `против ${nameOf(recap, m.p.find((p) => p !== bhk.player) ?? 0)}, ${dLong(m.at)}`]);
+  }
   if (peakNC) records.push([`Пик не ${recap.live ? "лидера" : "чемпиона"}`, String(peakNC.peak), peakNC.login, `${dLong(peakNC.peakAt)}; итог ${peakNC.mmr}`]);
   if (ls > 0) records.push(["Серия поражений", `${ls} подряд`, lsAll.map((p) => p.login).join(", "), "Длиннее не было ни у кого"]);
   return (
