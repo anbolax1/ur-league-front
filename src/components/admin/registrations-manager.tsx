@@ -9,27 +9,23 @@ import { registrationMatches } from "@/lib/display";
 import { fmtDate } from "@/lib/format";
 import type { Registration } from "@/lib/types";
 
-const PREVIEW = 30;
-
-/** Статистика из анкеты одной строкой; что игрок не указал, пропускается. */
-function formKnown(r: Registration): string {
-  const parts = [
-    r.kd != null ? `K/D ${r.kd}` : "",
-    r.matches != null ? `${r.matches} матчей` : "",
-    r.wins != null ? `${r.wins} побед` : "",
-    r.kills != null ? `${r.kills} убийств` : "",
-  ].filter(Boolean);
-  return parts.join(" · ") || "статистика не указана";
+/** Показатель из анкеты: подпись сверху, число снизу; «—», если игрок не указал. */
+function Stat({ label, value }: { label: string; value?: number | null }) {
+  return (
+    <div className="min-w-0 rounded-md bg-surface-2 px-2.5 py-1.5">
+      <div className="text-[0.62rem] uppercase tracking-wide text-muted">{label}</div>
+      <div className="font-display text-base tnum">{value != null ? value : "—"}</div>
+    </div>
+  );
 }
 
-/** Общий пул заявок: кто подал раньше - выше. В матч игроков ставят в форме нового матча,
-    здесь лишние заявки только отклоняют. */
+/** Общий пул заявок: сверху «Без очереди», дальше кто подал раньше. Показываются все заявки без ограничения.
+    В матч игроков ставят в форме нового матча, здесь лишние заявки только отклоняют. */
 export function RegistrationsManager() {
   const [regs, setRegs] = React.useState<Registration[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [busyId, setBusyId] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
-  const [showAll, setShowAll] = React.useState(false);
 
   React.useEffect(() => {
     let active = true;
@@ -61,9 +57,7 @@ export function RegistrationsManager() {
   }
 
   const filtered = regs.filter((r) => registrationMatches(r, query));
-  const visible = showAll ? filtered : filtered.slice(0, PREVIEW);
-  const hidden = filtered.length - visible.length;
-  // позиция в очереди по времени подачи (стабильна при фильтре)
+  // позиция в очереди по порядку пула (стабильна при поиске)
   const posOf = new Map(regs.map((r, i) => [r.id, i + 1]));
 
   return (
@@ -72,17 +66,19 @@ export function RegistrationsManager() {
         <div className="space-y-1">
           <h2 className="text-2xl">Заявки (пул)</h2>
           <p className="text-sm text-muted">
-            Общий список желающих сыграть. Кто подал раньше — выше, а с жетоном «Без очереди» — выше всех
-            до конца игрового дня. Игроки из заявок стоят первыми в форме нового матча — выбери их там.
+            Общий список желающих сыграть. Кто подал раньше — выше, а с жетоном «Без очереди» — выше всех до конца игрового дня. Игроки из
+            заявок стоят первыми в форме нового матча — выбери их там.
           </p>
         </div>
-        <span className="whitespace-nowrap text-sm text-muted">Всего: {regs.length}</span>
+        <span className="whitespace-nowrap text-sm text-muted">
+          {query && filtered.length !== regs.length ? `Найдено ${filtered.length} из ${regs.length}` : `Всего: ${regs.length}`}
+        </span>
       </div>
 
       {!loading && regs.length > 0 && (
         <input
           className="input max-w-md"
-          placeholder="Поиск по нику или игровому ID…"
+          placeholder="Поиск по нику, игровому ID, рангу или времени…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -95,80 +91,62 @@ export function RegistrationsManager() {
       ) : !filtered.length ? (
         <Panel className="px-5 py-10 text-center text-muted">Ничего не найдено.</Panel>
       ) : (
-        <div className="panel overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-left text-xs uppercase tracking-wide text-muted">
-                <th className="px-4 py-3">#</th>
-                <th className="px-4 py-3">Игрок</th>
-                <th className="px-4 py-3">Игровой ID и ник</th>
-                <th className="px-4 py-3">Анкета</th>
-                <th className="px-4 py-3">Удобное время</th>
-                <th className="px-4 py-3">Подал</th>
-                <th className="px-4 py-3 text-right">Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((r) => (
-                <tr key={r.id} className="border-b border-[var(--border)] last:border-0">
-                  <td className="px-4 py-3 text-muted tnum">{posOf.get(r.id)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={r.userDisplayName || r.userLogin} src={r.userAvatarUrl} size="sm" />
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="truncate font-display text-sm uppercase">{r.userDisplayName || r.userLogin || "—"}</span>
-                          {r.priority && <span className="badge badge-champ"><span>Без очереди</span></span>}
-                        </div>
-                        {r.userLogin && <div className="truncate text-xs text-muted">@{r.userLogin}</div>}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="tnum">{r.gameId || "—"}</div>
-                    {r.gameNick && <div className="text-xs text-muted">{r.gameNick}</div>}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div>{r.rank || "—"}</div>
-                    <div className="text-xs text-muted tnum">{formKnown(r)}</div>
-                  </td>
-                  <td className="px-4 py-3 text-muted">{[r.playTime, r.note].filter(Boolean).join(" · ") || "—"}</td>
-                  <td className="px-4 py-3 text-xs text-muted">{fmtDate(r.createdAt)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-sm"
-                        disabled={busyId === r.id}
-                        onClick={() => decline(r.id)}
-                      >
-                        <span>Отклонить</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {hidden > 0 && (
-            <button
-              type="button"
-              className="w-full border-t border-[var(--border)] px-5 py-3 text-center text-xs uppercase tracking-wide text-muted hover:text-fg"
-              onClick={() => setShowAll(true)}
-            >
-              Показать ещё {hidden}
-            </button>
-          )}
-          {showAll && filtered.length > PREVIEW && (
-            <button
-              type="button"
-              className="w-full border-t border-[var(--border)] px-5 py-3 text-center text-xs uppercase tracking-wide text-muted hover:text-fg"
-              onClick={() => setShowAll(false)}
-            >
-              Свернуть
-            </button>
-          )}
-        </div>
+        <ul className="grid gap-3 lg:grid-cols-2">
+          {filtered.map((r) => (
+            <li key={r.id} className="panel space-y-3 p-4">
+              <div className="flex items-start gap-3">
+                <span className="w-7 flex-none pt-1 text-right font-display text-lg tnum text-muted">{posOf.get(r.id)}</span>
+                <Avatar name={r.userDisplayName || r.userLogin} src={r.userAvatarUrl} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="truncate font-display uppercase">{r.userDisplayName || r.userLogin || "—"}</span>
+                    {r.priority && (
+                      <span className="badge badge-champ">
+                        <span>Без очереди</span>
+                      </span>
+                    )}
+                    {r.rank && (
+                      <span className="badge badge-org">
+                        <span>{r.rank}</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="truncate text-xs text-muted">
+                    {r.userLogin ? `@${r.userLogin} · ` : ""}подана {fmtDate(r.createdAt)}
+                  </div>
+                </div>
+                <button type="button" className="btn btn-danger btn-sm flex-none" disabled={busyId === r.id} onClick={() => decline(r.id)}>
+                  <span>Отклонить</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="min-w-0 rounded-md bg-surface-2 px-2.5 py-1.5">
+                  <div className="text-[0.62rem] uppercase tracking-wide text-muted">Игровой ник</div>
+                  <div className="truncate">{r.gameNick || "—"}</div>
+                </div>
+                <div className="min-w-0 rounded-md bg-surface-2 px-2.5 py-1.5">
+                  <div className="text-[0.62rem] uppercase tracking-wide text-muted">PUBG Mobile ID</div>
+                  <div className="truncate tnum">{r.gameId || "—"}</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2">
+                <Stat label="K/D" value={r.kd} />
+                <Stat label="Матчей" value={r.matches} />
+                <Stat label="Побед" value={r.wins} />
+                <Stat label="Убийств" value={r.kills} />
+              </div>
+
+              {(r.playTime || r.note) && (
+                <p className="text-sm text-muted">
+                  <span className="text-[0.62rem] uppercase tracking-wide">Удобное время: </span>
+                  {[r.playTime, r.note].filter(Boolean).join(" · ")}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

@@ -44,7 +44,8 @@ export function PlayerPicker({
   // Сегодня без очереди - первыми среди заявок.
   const pool = players.filter((p) => applicants.has(p.id) && shown(p)).sort((a, b) => Number(!!b.priority) - Number(!!a.priority));
   const rest = players.filter((p) => !applicants.has(p.id) && shown(p));
-  const items = [...pool, ...rest].slice(0, 8);
+  // Все заявки видны целиком (список прокручивается), остальных игроков - первые восемь.
+  const items = [...pool, ...rest.slice(0, 8)];
   const exact = players.some((p) => p.login.toLowerCase() === query || (p.displayName || "").toLowerCase() === query);
   const canCreate = !!onCreate && query.length >= 2 && !exact;
 
