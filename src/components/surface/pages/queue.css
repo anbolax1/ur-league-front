@@ -286,19 +286,19 @@
 }
 .qu-row.next {
   border-left-color: var(--sf-amber);
-  background: #fff3d3;
+  background: rgba(242, 169, 0, 0.12);
 }
 .qu-row.invited {
   border-left-color: var(--sf-deep);
-  background: #e4ecfb;
+  background: rgba(91, 149, 255, 0.14);
 }
 .qu-row.ready {
   border-left-color: var(--sf-win-ink);
-  background: #e2f3e8;
+  background: rgba(61, 220, 132, 0.12);
 }
 .qu-row.performing {
   border-left-color: var(--sf-loss-ink);
-  background: #fbe5e1;
+  background: rgba(238, 90, 66, 0.14);
 }
 .qu-row.skipped {
   border-left-style: dashed;
@@ -412,6 +412,7 @@ a.qu-name:hover {
 }
 .qu-badge.next {
   background: var(--sf-amber);
+  color: var(--sf-on-amber);
 }
 .qu-badge.invited {
   background: var(--sf-deep);
