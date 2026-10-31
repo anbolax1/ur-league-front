@@ -2,8 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth";
+import { roleAtLeast } from "@/lib/roles";
+
+/** Разделы, открытые модератору: остальное кабинета только для организатора. */
+const MODERATOR_LINKS = [{ href: "/admin/moderation", label: "Проверка" }];
 
 const LINKS = [
+  { href: "/admin/moderation", label: "Проверка" },
   { href: "/admin/matches", label: "Матчи" },
   { href: "/admin/news", label: "Новости" },
   { href: "/admin/overlay", label: "Оверлей" },
@@ -20,12 +26,14 @@ const SOON: string[] = [];
 
 export function AdminSidebar() {
   const pathname = usePathname() || "/admin";
+  const { user } = useAuth();
+  const links = roleAtLeast(user?.role, "superadmin") ? LINKS : MODERATOR_LINKS;
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <aside className="w-full flex-none lg:w-52">
       <nav className="flex flex-row gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
-        {LINKS.map((l) => (
+        {links.map((l) => (
           <Link
             key={l.href}
             href={l.href}

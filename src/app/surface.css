@@ -858,7 +858,11 @@
   }
 }
 .sf-live-poster img {
+  display: block;
   width: 100%;
+  height: auto;
+  max-height: min(70vh, 600px);
+  object-fit: contain;
   box-shadow: 0 30px 60px -30px #000, 0 0 0 1px var(--sf-cream-line);
 }
 @media (max-width: 900px) {
@@ -1051,19 +1055,31 @@
   z-index: -1;
   background: linear-gradient(0deg, rgba(8, 11, 18, 0.94) 0%, rgba(8, 11, 18, 0.35) 48%, rgba(8, 11, 18, 0.05) 100%);
 }
+/* Баннер любого формата (16:9, 9:16, квадрат) виден целиком; пустые поля добирает размытая копия картинки. */
 .sf-poster-in.is-img {
-  aspect-ratio: 1;
+  aspect-ratio: auto;
+  display: grid;
+  place-items: center;
   background: #000;
 }
 .sf-poster-in.is-img::after {
   display: none;
 }
-.sf-poster-in.is-img img {
+.sf-poster-in.is-img::before,
+.sch-show-art.is-img::before {
+  content: "";
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  inset: -24px;
+  z-index: -1;
+  background: var(--poster) center / cover no-repeat;
+  filter: blur(24px) brightness(0.55);
+}
+.sf-poster-in.is-img img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(78vh, 680px);
 }
 .sf-p-top {
   position: absolute;
@@ -2858,6 +2874,28 @@ a.sf-side-name:hover {
 .sf-foot nav a:hover {
   color: var(--sf-amber);
 }
+.sf-foot nav.sf-socials {
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 16px;
+}
+.sf-socials a {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-height: 0;
+  border: 1px solid var(--sf-line-2);
+  color: var(--sf-cream-2);
+  transition: color 0.2s, border-color 0.2s, transform 0.2s;
+}
+.sf-socials a:hover {
+  border-color: var(--sf-amber);
+  transform: translateY(-2px);
+}
+.sf-socials svg {
+  width: 18px;
+  height: 18px;
+}
 .sf-legal {
   display: flex;
   flex-wrap: wrap;
@@ -3285,7 +3323,11 @@ a.sf-tr:hover,
   align-items: start;
 }
 .sf-head-art img {
+  display: block;
   width: 100%;
+  height: auto;
+  max-height: min(70vh, 640px);
+  object-fit: contain;
   box-shadow: 0 30px 60px -30px #000, 0 0 0 1px var(--sf-cream-line);
 }
 @media (max-width: 900px) {
@@ -3719,6 +3761,10 @@ a.sf-tr:hover,
 }
 .sf-chart-box .pt.w {
   fill: var(--sf-ink);
+}
+.sf-chart-box .pt.r {
+  fill: var(--sf-deep);
+  stroke: var(--sf-ink);
 }
 .sf-chart-box .pt.c {
   fill: var(--sf-amber);

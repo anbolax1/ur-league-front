@@ -17,6 +17,7 @@ import { MatchResult } from "@/components/admin/match/match-result";
 import { ScheduledPanel } from "@/components/admin/match/scheduled-panel";
 import { putShowPreview } from "@/components/admin/match/show-preview";
 import { PreviewBgSwitch, type PreviewBg } from "@/components/overlay/preview-bg";
+import { DoubleTokens, doubleNames } from "@/components/admin/match/double-tokens";
 import type { CatalogLegendary, LiveState, MapInfo, MatchState, Participant } from "@/lib/types";
 
 type Confirm = "finish" | "early" | "cancel" | null;
@@ -229,6 +230,9 @@ export function MatchConsole({
   const scoreA = totalScore(st, a?.id);
   const scoreB = totalScore(st, b?.id);
   const leader = scoreA === scoreB ? null : scoreA > scoreB ? a : b;
+  // После всех заходов счёт равный: исход решает дуэль до первого килла, победителю - «Ручные +1».
+  const duel = st.log.some((e) => e.kind === "duel");
+  const duelOffer = finishNext && st.stage === "round" && !leader && !duel;
   const show = isShowMatch(st.tournament);
   const pill =
     st.stage === "finished"
@@ -263,6 +267,11 @@ export function MatchConsole({
             {show && <span className="chip chip-cyan"><span>Шоу-матч</span></span>}
             <span className="chip"><span>{st.tournament.mode}</span></span>
             {st.tournament.ratingMultiplier === 2 && <span className="chip chip-cyan"><span>рейтинг ×2</span></span>}
+            {doubleNames(st).map((n) => (
+              <span key={n} className="chip chip-cyan">
+                <span>жетон ×2 · {n}</span>
+              </span>
+            ))}
             {beltLabel && <span className="badge badge-champ"><span>{beltLabel}</span></span>}
             <span>{stageLabel(st.stage, st.currentRound || 1, total)}</span>
           </div>
@@ -304,6 +313,10 @@ export function MatchConsole({
         />
       )}
 
+      {(st.stage === "scheduled" || st.stage === "ready") && (
+        <DoubleTokens st={st} sides={sides} busy={busy} onToggle={(userId, on) => run(`/tournaments/${id}/double`, { userId, on })} />
+      )}
+
       {st.stage === "ready" && (
         <>
           <ReadyPanel
@@ -340,6 +353,18 @@ export function MatchConsole({
                   <span>Завершить досрочно</span>
                 </button>
               )}
+              {duelOffer && (
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={busy}
+                  title="Счёт равный: оба игрока выходят с ведущим и играют до первого килла"
+                  onClick={() => void run(`/tournaments/${id}/duel`)}
+                >
+                  <span>Дуэль до первого килла</span>
+                </button>
+              )}
+              {duel && finishNext && <span className="text-sm text-muted">Дуэль: победителю «Ручные +1», затем завершить матч</span>}
               <button type="button" className="btn btn-primary" disabled={busy} onClick={nextStep}>
                 <span>{nextLabel}</span>
               </button>
@@ -392,7 +417,7 @@ export function MatchConsole({
         message={
           confirm === "cancel"
             ? "Матч удалится, рейтинг не изменится. Игроки из заявок вернутся в пул."
-            : `Счёт ${scoreA} : ${scoreB} — ${leader ? `побеждает ${leader.name}` : "ничья, MMR не меняется"}. MMR посчитается сразу.`
+            : `Счёт ${scoreA} : ${scoreB} — ${leader ? `побеждает ${leader.name}` : "ничья, MMR не меняется. Если дуэли ещё не было - сначала «Дуэль до первого килла»"}. MMR посчитается сразу.`
         }
         confirmLabel={confirm === "cancel" ? "Отменить матч" : "Завершить"}
         danger={confirm === "cancel"}

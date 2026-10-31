@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AuthProvider } from "@/lib/auth";
-import { getMe } from "@/lib/queries";
+import { getHiddenPlayers, getMe } from "@/lib/queries";
+import { HiddenPlayersProvider } from "@/components/surface/player-link";
 import { SurfaceShell } from "@/components/surface/shell";
 
 /* Общий «хром» публичной витрины: навбар + футер + контекст авторизации.
@@ -11,10 +12,12 @@ import { SurfaceShell } from "@/components/surface/shell";
 export const dynamic = "force-dynamic";
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const user = await getMe();
+  const [user, hidden] = await Promise.all([getMe(), getHiddenPlayers()]);
   return (
     <AuthProvider initialUser={user}>
-      <SurfaceShell>{children}</SurfaceShell>
+      <HiddenPlayersProvider logins={hidden}>
+        <SurfaceShell>{children}</SurfaceShell>
+      </HiddenPlayersProvider>
     </AuthProvider>
   );
 }

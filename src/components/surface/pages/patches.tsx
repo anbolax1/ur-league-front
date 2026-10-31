@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProfileLink } from "@/components/surface/player-link";
 import { getPatchCatalog, getSeasons } from "@/lib/queries";
 import type { PatchCode, PatchStat } from "@/lib/types";
 import { PatchArt } from "@/components/surface/patch-art";
@@ -58,10 +59,10 @@ function Card({ stat, players }: { stat: PatchStat; players: number }) {
         {stat.holders > 0 && (
           <span className="pt-cat-who">
             {shown.map((h) => (
-              <Link key={h.login} className={h.provisional ? "prov" : undefined} href={`/profile/${h.login}`} title={h.provisional ? "претендент: закрепится в конце сезона" : undefined}>
+              <ProfileLink key={h.login} className={h.provisional ? "prov" : undefined} login={h.login} title={h.provisional ? "претендент: закрепится в конце сезона" : undefined}>
                 {h.displayName}
                 {stat.code === "hunter" ? ` ${ROMAN[h.tier]}` : ""}
-              </Link>
+              </ProfileLink>
             ))}
             {more > 0 && <span>+{more}</span>}
           </span>

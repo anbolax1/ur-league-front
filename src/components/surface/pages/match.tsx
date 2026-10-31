@@ -1,7 +1,10 @@
 import "./match.css";
+import { ProfileLink } from "@/components/surface/player-link";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBelt, getHighlights, getMatch, getMatchup } from "@/lib/queries";
+import { getBelt, getChanceTrail, getHighlights, getMatch, getMatchup } from "@/lib/queries";
+import { chancePercents } from "@/lib/chance";
+import { MatchFlow } from "@/components/surface/match-flow";
 import {
   breakdownParts,
   CROSS_POINTS,
@@ -71,7 +74,11 @@ function BoardSide({
   return (
     <div className={`sf-side ${i === 1 ? "b" : ""}`}>
       <span className="sf-corner" style={{ background: SIDE_COLOR[i] }} />
-      {href ? (
+      {solo && href ? (
+        <ProfileLink className="sf-side-name" login={players[0].login}>
+          {name}
+        </ProfileLink>
+      ) : href ? (
         <Link className="sf-side-name" href={href}>
           {name}
         </Link>
@@ -88,7 +95,7 @@ function BoardSide({
         <div className="sf-side-roster">
           {players.map((pl) => (
             <span key={pl.userId}>
-              <Link href={`/profile/${pl.login}`}>{pl.displayName || pl.login}</Link>
+              <ProfileLink login={pl.login}>{pl.displayName || pl.login}</ProfileLink>
               <TagChips tags={pl.tags} />
             </span>
           ))}
@@ -98,6 +105,7 @@ function BoardSide({
         change ? (
           <span className="sf-side-mmr sf-tnum">
             <MmrMove {...change} />
+            {side?.double ? <span className="sf-side-line">жетон ×2</span> : null}
           </span>
         ) : p ? (
           <span className="sf-side-line">Рейтинг не менялся</span>
@@ -112,6 +120,7 @@ function BoardSide({
           {side.winGain ? (
             <span className="sf-side-line sf-tnum">
               на кону <b className="sf-up">+{side.winGain}</b> за победу, <b className="sf-down">−{side.lossDrop}</b> за поражение
+              {side.double ? " · жетон ×2" : ""}
             </span>
           ) : null}
         </>
@@ -241,7 +250,25 @@ function Rounds({ st, rounds, sides, finished }: { st: MatchState; rounds: Round
 
 /* ---------- что дал матч ---------- */
 
-function EloBlock({ a, b, ca, cb, k, mult }: { a: Participant; b: Participant; ca: ParticipantMmr; cb: ParticipantMmr; k?: number; mult: number }) {
+function EloBlock({
+  a,
+  b,
+  ca,
+  cb,
+  k,
+  mult,
+  da,
+  db,
+}: {
+  a: Participant;
+  b: Participant;
+  ca: ParticipantMmr;
+  cb: ParticipantMmr;
+  k?: number;
+  mult: number;
+  da: boolean;
+  db: boolean;
+}) {
   const eA = 1 / (1 + Math.pow(10, (cb.before - ca.before) / 400));
   const pa = Math.round(eA * 100);
   const draw = ca.delta === 0 && cb.delta === 0;
@@ -249,9 +276,19 @@ function EloBlock({ a, b, ca, cb, k, mult }: { a: Participant; b: Participant; c
   const eW = winA ? eA : 1 - eA;
   const gain = Math.abs(winA ? ca.delta : cb.delta);
   // Формулу показываем, только если она сходится с начислением: перенесённые матчи могли считаться иначе.
-  const formulaOk = !draw && !!k && Math.round(k * (1 - eW)) * mult === gain;
+  // Жетон ×2 удваивает и выигрыш, и проигрыш только своей стороне.
+  const [wDouble, lDouble] = winA ? [da, db] : [db, da];
+  const wMult = mult * (wDouble ? 2 : 1);
+  const formulaOk = !draw && !!k && Math.round(k * (1 - eW)) * wMult === gain;
   const e2 = (v: number) => v.toFixed(2).replace(".", ",");
-  const formula = formulaOk ? `${mult > 1 ? `${mult} × ` : ""}${k} × (1 − ${e2(eW)}) = ${gain}.` : "";
+  const factors = [mult > 1 ? `${mult}` : "", wDouble ? "2 (жетон)" : ""].filter(Boolean).join(" × ");
+  const formula = formulaOk ? `${factors ? `${factors} × ` : ""}${k} × (1 − ${e2(eW)}) = ${gain}.` : "";
+  const lossNote =
+    wDouble === lDouble
+      ? "Сколько получил победитель, столько потерял проигравший."
+      : lDouble
+        ? "С жетоном ×2 проигрыш тоже вдвое."
+        : "Жетон ×2 был у соперника, проигрыш без удвоения.";
   const fav = pa > 50 ? a.name : pa < 50 ? b.name : "";
   const cell = (p: Participant, c: ParticipantMmr, isWinner: boolean) => (
     <div>
@@ -259,7 +296,7 @@ function EloBlock({ a, b, ca, cb, k, mult }: { a: Participant; b: Participant; c
       <dd className={c.delta > 0 ? "sf-up" : c.delta < 0 ? "sf-down" : ""}>{signed(c.delta)}</dd>
       <p>
         {c.before} → {c.after}.{" "}
-        {draw ? "Ничья: рейтинг не менялся." : isWinner ? formula : "Сколько получил победитель, столько потерял проигравший."}
+        {draw ? "Ничья: рейтинг не менялся." : isWinner ? formula : lossNote}
       </p>
     </div>
   );
@@ -271,12 +308,13 @@ function EloBlock({ a, b, ca, cb, k, mult }: { a: Participant; b: Participant; c
       </h2>
       <dl className="sf-elo">
         <div>
-          <dt>Шансы перед матчем</dt>
+          <dt>Ожидание по рейтингу</dt>
           <dd className="sf-tnum">
             {pa}% : {100 - pa}%
           </dd>
           <p>
-            {a.name} {ca.before} против {b.name} {cb.before}. {fav ? `Фаворитом был ${fav}.` : "Шансы были равны."}
+            {a.name} {ca.before} против {b.name} {cb.before}. {fav ? `По рейтингу выше был ${fav}.` : "Рейтинг был равный."} Из этого ожидания считается
+            MMR за матч.
           </p>
         </div>
         {cell(a, ca, winA)}
@@ -339,10 +377,11 @@ export async function SurfaceMatch({ id }: { id: string }) {
   const st = await getMatch(id);
   if (!st) notFound();
   const t = st.tournament;
-  const [{ items: highlights }, matchup, beltData] = await Promise.all([
+  const [{ items: highlights }, matchup, beltData, trail] = await Promise.all([
     getHighlights({ tournamentId: id, limit: 4 }),
     getMatchup(id),
     getBelt(),
+    st.tournament.status === "upcoming" ? Promise.resolve(null) : getChanceTrail(id),
   ]);
 
   const sides = matchSides(st);
@@ -360,7 +399,13 @@ export async function SurfaceMatch({ id }: { id: string }) {
   const ib = b ? info.get(b.id) : undefined;
   const ca = a ? changes.get(a.id) : undefined;
   const cb = b ? changes.get(b.id) : undefined;
-  const chance = ia?.winChance != null && ib?.winChance != null ? [ia.winChance, ib.winChance] : null;
+  // У идущего матча - шанс сейчас, у остальных - перед матчем.
+  const chance =
+    live && st.chance
+      ? chancePercents(st.chance.now)
+      : ia?.winChance != null && ib?.winChance != null
+        ? [ia.winChance, matchup?.drawChance ?? 0, ib.winChance]
+        : null;
   const sa = totalScore(st, a?.id);
   const sb = totalScore(st, b?.id);
   const mult = t.ratingMultiplier > 1 ? t.ratingMultiplier : 1;
@@ -375,7 +420,8 @@ export async function SurfaceMatch({ id }: { id: string }) {
   const beltLine = belt?.kind === "defend" ? `носитель пояса${belt.defenses ? ` · ★${belt.defenses}` : ""}` : undefined;
   const beltOther = sides.find((p) => p && p.userId !== holderId)?.name ?? "соперник";
   const beltBlock = belt && beltData ? <BeltMatch mark={belt} belt={beltData} id={id} other={beltOther} /> : null;
-  const paper = showRounds || showElo || hasH2h || patches.length > 0 || !!beltBlock;
+  const showFlow = !!trail && trail.points.length > 2 && !!a && !!b;
+  const paper = showFlow || showRounds || showElo || hasH2h || patches.length > 0 || !!beltBlock;
 
   return (
     <>
@@ -465,7 +511,16 @@ export async function SurfaceMatch({ id }: { id: string }) {
 
           {(chance || t.prize) && (
             <div className="sf-mh-extra">
-              {chance && <Odds a={chance[0]} b={chance[1]} nameA={a?.name ?? "A"} nameB={b?.name ?? "B"} label={finished ? "шансы перед матчем" : "шансы по MMR"} />}
+              {chance && (
+                <Odds
+                  a={chance[0]}
+                  b={chance[2]}
+                  draw={chance[1]}
+                  nameA={a?.name ?? "A"}
+                  nameB={b?.name ?? "B"}
+                  label={finished ? "шансы перед матчем" : "шанс на победу"}
+                />
+              )}
               {t.prize && (
                 <span className="sf-prize">
                   <small>приз</small>
@@ -489,8 +544,11 @@ export async function SurfaceMatch({ id }: { id: string }) {
         <section className="sf-sec sf-paper">
           <div className="sf-wrap">
             {live && beltBlock}
+            {showFlow && trail && a && b && <MatchFlow id={id} initial={trail} names={[a.name, b.name]} rounds={rounds.length || t.totalRounds} />}
             {showRounds && <Rounds st={st} rounds={rounds} sides={sides} finished={finished} />}
-            {showElo && <EloBlock a={a} b={b} ca={ca} cb={cb} k={matchup?.season?.kFactor} mult={mult} />}
+            {showElo && (
+              <EloBlock a={a} b={b} ca={ca} cb={cb} k={matchup?.season?.kFactor} mult={mult} da={!!ia?.double} db={!!ib?.double} />
+            )}
             {!live && beltBlock}
             {patches.length > 0 && <MatchPatches patches={patches} sides={sides} live={live} />}
             {hasH2h && h2h && <HeadToHead h={h2h} a={a?.name ?? "A"} b={b?.name ?? "B"} />}

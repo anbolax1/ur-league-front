@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { User } from "@/lib/types";
 import { useAuthForm } from "@/components/domain/auth-form";
 import { useClaimForm } from "@/components/domain/claim-form";
-import { useJoinRequest } from "@/components/domain/register-form";
+import { RANKS, useJoinRequest } from "@/components/domain/register-form";
 
 /** Вход или регистрация по логину и паролю. */
 export function SurfaceAuthForm({ mode, redirectTo }: { mode: "login" | "register"; redirectTo?: string }) {
@@ -133,11 +133,9 @@ export function SurfaceClaimForm({ token, login }: { token: string; login: strin
   );
 }
 
-/** Заявка в общий пул: игровой ID и ник берутся из профиля, здесь - только удобные даты. */
+/** Анкета заявки в общий пул: ник, ID, ранг и статистика из игры, удобное время. */
 export function SurfaceJoinForm({ user }: { user: User }) {
-  const gameId = (user.gameId ?? "").trim();
-  const gameNick = (user.gameNick ?? "").trim();
-  const f = useJoinRequest();
+  const f = useJoinRequest(user);
 
   if (f.status === "ok") {
     return (
@@ -166,39 +164,127 @@ export function SurfaceJoinForm({ user }: { user: User }) {
   return (
     <form className="au-form" onSubmit={f.onSubmit}>
       <p className="au-text">
-        Вошёл как <b>{user.displayName || user.login}</b>
+        Вошёл как <b>{user.displayName || user.login}</b>. Заполни анкету из своего профиля в PUBG Mobile — по ней ведущий подберёт тебе
+        состав и позовёт в группу.
+      </p>
+      <div className="au-pair">
+        <div className="sf-field">
+          <label className="sf-field-label" htmlFor="au-nick">
+            Игровой ник
+          </label>
+          <input
+            id="au-nick"
+            className="sf-input"
+            maxLength={32}
+            required
+            placeholder="Как тебя зовут в игре"
+            value={f.gameNick}
+            onChange={(e) => f.setGameNick(e.target.value)}
+          />
+        </div>
+        <div className="sf-field">
+          <label className="sf-field-label" htmlFor="au-gid">
+            PUBG Mobile ID
+          </label>
+          <input
+            id="au-gid"
+            className="sf-input"
+            inputMode="numeric"
+            required
+            placeholder="От 6 до 12 цифр"
+            aria-invalid={f.bad.gameId}
+            value={f.gameId}
+            onChange={(e) => f.setGameId(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="au-pair">
+        <div className="sf-field">
+          <label className="sf-field-label" htmlFor="au-rank">
+            Ранг
+          </label>
+          <select id="au-rank" className="sf-select" value={f.rank} onChange={(e) => f.setRank(e.target.value)}>
+            <option value="">Не указан</option>
+            {RANKS.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="sf-field">
+          <label className="sf-field-label" htmlFor="au-kd">
+            K/D
+          </label>
+          <input
+            id="au-kd"
+            className="sf-input"
+            inputMode="decimal"
+            placeholder="Например, 2,4"
+            aria-invalid={f.bad.kd}
+            value={f.kd}
+            onChange={(e) => f.setKd(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="au-trio">
+        <div className="sf-field">
+          <label className="sf-field-label" htmlFor="au-matches">
+            Матчей
+          </label>
+          <input
+            id="au-matches"
+            className="sf-input"
+            inputMode="numeric"
+            aria-invalid={f.bad.matches}
+            value={f.matches}
+            onChange={(e) => f.setMatches(e.target.value)}
+          />
+        </div>
+        <div className="sf-field">
+          <label className="sf-field-label" htmlFor="au-wins">
+            Побед
+          </label>
+          <input
+            id="au-wins"
+            className="sf-input"
+            inputMode="numeric"
+            aria-invalid={f.bad.wins}
+            value={f.wins}
+            onChange={(e) => f.setWins(e.target.value)}
+          />
+        </div>
+        <div className="sf-field">
+          <label className="sf-field-label" htmlFor="au-kills">
+            Убийств
+          </label>
+          <input
+            id="au-kills"
+            className="sf-input"
+            inputMode="numeric"
+            aria-invalid={f.bad.kills}
+            value={f.kills}
+            onChange={(e) => f.setKills(e.target.value)}
+          />
+        </div>
+      </div>
+      <p className={`sf-field-note${f.winsOverMatches ? " bad" : ""}`} role={f.winsOverMatches ? "alert" : undefined}>
+        {f.winsOverMatches
+          ? "Побед не может быть больше, чем матчей."
+          : "Матчи, победы и убийства — из статистики профиля за сезон или за всё время, как удобнее."}
       </p>
       <div className="sf-field">
-        <span className="sf-field-label">Игровой ID и ник</span>
-        {gameId ? (
-          <p className="au-text">
-            <b className="au-game">{gameId}</b>
-            {gameNick && (
-              <>
-                {" "}
-                · <b>{gameNick}</b>
-              </>
-            )}{" "}
-            · <Link href="/profile">изменить в профиле</Link>
-          </p>
-        ) : (
-          <p className="au-text">
-            Не указан — заявку можно подать и так. По ID ведущий позовёт тебя в группу в PUBG Mobile:{" "}
-            <Link href="/profile">добавь его в профиле</Link>, и он сам подставится в заявку.
-          </p>
-        )}
-      </div>
-      <div className="sf-field">
-        <label className="sf-field-label" htmlFor="au-note">
-          Удобные даты и пожелания
+        <label className="sf-field-label" htmlFor="au-time">
+          Удобное время игры
         </label>
         <textarea
-          id="au-note"
+          id="au-time"
           className="sf-input"
           rows={3}
-          placeholder="Например: могу по будням вечером и в выходные."
-          value={f.note}
-          onChange={(e) => f.setNote(e.target.value)}
+          maxLength={300}
+          placeholder="Например: будни после 19:00 по Москве, в выходные весь день."
+          value={f.playTime}
+          onChange={(e) => f.setPlayTime(e.target.value)}
         />
       </div>
       {f.status === "error" && (
@@ -206,7 +292,7 @@ export function SurfaceJoinForm({ user }: { user: User }) {
           {f.error}
         </p>
       )}
-      <button type="submit" className="sf-btn sf-btn-amber au-submit" disabled={f.status === "sending"}>
+      <button type="submit" className="sf-btn sf-btn-amber au-submit" disabled={f.status === "sending" || !f.valid}>
         {f.status === "sending" ? "Отправляем…" : "Подать заявку"}
       </button>
     </form>

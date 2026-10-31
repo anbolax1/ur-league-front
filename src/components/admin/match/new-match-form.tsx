@@ -176,6 +176,7 @@ function TeamCard({
                 <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
                   <span>MMR 1×1 {p.mmr}</span>
                   {applicants.has(p.id) && <span className="badge badge-org"><span>Из заявки</span></span>}
+                  {p.priority && <span className="badge badge-champ"><span>Без очереди</span></span>}
                   {p.isPlaceholder && <span className="badge badge-official"><span>Без входа</span></span>}
                 </div>
               </div>
@@ -210,7 +211,6 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
   const [first, setFirst] = React.useState<MatchPlayer | null>(null);
   const [second, setSecond] = React.useState<MatchPlayer | null>(null);
   const [teams, setTeams] = React.useState<[TeamDraft, TeamDraft]>(NO_TEAMS);
-  const [mult, setMult] = React.useState(1);
   const [rounds, setRounds] = React.useState<2 | 3>(2);
   const [prize, setPrize] = React.useState("");
   const [preview, choosePreview] = useChosenPreview();
@@ -297,7 +297,6 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
     try {
       const st = await api.post<MatchState>("/matches", {
         mode,
-        ratingMultiplier: mult,
         format,
         rounds: roundCount,
         startsAt: show ? `${startsAt}:00+03:00` : undefined,
@@ -389,16 +388,6 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
                 onClick={() => setRounds(n)}
               >
                 <span>{n}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <span className="field-label">Рейтинг</span>
-          <div className="seg">
-            {[1, 2].map((m) => (
-              <button key={m} type="button" className="seg-btn" aria-pressed={mult === m} onClick={() => setMult(m)}>
-                <span>×{m}</span>
               </button>
             ))}
           </div>
@@ -534,6 +523,7 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
             return (
               <button key={r.id} type="button" className="chip transition hover:brightness-125" onClick={() => put(p)}>
                 <span>{r.userDisplayName || r.userLogin}</span>
+                {r.priority && <span className="font-normal text-gold">без очереди</span>}
                 {r.note && <span className="font-normal text-muted">{r.note}</span>}
               </button>
             );
@@ -555,7 +545,7 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
           </div>
           <div className="text-sm text-muted">
             {show ? "Шоу-матч · " : ""}
-            {modeLabel(mode)} · {roundsLabel(roundCount)} · рейтинг ×{mult}
+            {modeLabel(mode)} · {roundsLabel(roundCount)}
             {show && prize.trim() ? ` · приз: ${prize.trim()}` : ""}
           </div>
           <div className="text-xs text-muted">

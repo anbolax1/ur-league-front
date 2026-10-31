@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import "./schedule.css";
 import { getCurrentMatch, getTournaments } from "@/lib/queries";
 import { isShowMatch, roundsLabel } from "@/lib/match";
@@ -16,7 +17,11 @@ function PastShow({ t }: { t: Tournament }) {
   const meta = [t.startsAt ? weekdayDate(t.startsAt) : "", roundsLabel(t.totalRounds), t.prize ? `приз ${t.prize}` : ""];
   return (
     <Link className="sch-show" href={`/tournament/${t.id}`}>
-      <span className="sch-show-art" aria-hidden>
+      <span
+        className={`sch-show-art${t.previewUrl ? " is-img" : ""}`}
+        style={t.previewUrl ? ({ "--poster": `url("${t.previewUrl}")` } as CSSProperties) : undefined}
+        aria-hidden
+      >
         {t.previewUrl && (
           // eslint-disable-next-line @next/next/no-img-element -- картинка из нашего хранилища медиа
           <img src={t.previewUrl} alt="" loading="lazy" />

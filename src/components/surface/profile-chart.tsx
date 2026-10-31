@@ -138,7 +138,7 @@ export function ProfileChart({ segments }: { segments: ChartSegment[] }) {
         {hp && hover !== null && <line className="guide" x1={X(hover)} x2={X(hover)} y1={pad.t} y2={pad.t + ih} />}
         {pts.map((p, i) =>
           i === end ? null : (
-            <circle key={i} className={`pt ${p.correction ? "c" : p.win ? "w" : ""}`} cx={X(i)} cy={Y(p.mmr)} r={n > 60 ? 2.6 : 3.4} />
+            <circle key={i} className={`pt ${p.correction ? "c" : p.reset ? "r" : p.win ? "w" : ""}`} cx={X(i)} cy={Y(p.mmr)} r={n > 60 ? 2.6 : 3.4} />
           ),
         )}
         <circle className="end" cx={X(end)} cy={Y(pts[end].mmr)} r={6.5} />
@@ -148,11 +148,13 @@ export function ProfileChart({ segments }: { segments: ChartSegment[] }) {
       </svg>
       {hp && hover !== null && (
         <div className="sf-tip" style={{ left: Math.max(90, Math.min(W - 90, X(hover))), top: Y(hp.mmr) }}>
-          {hp.correction ? (
+          {hp.correction || hp.reset ? (
             <>
               <small>{fullDate(hp.date)}</small>
               <b>{hp.mmr}</b> MMR
-              <small>сверка рейтинга {signed(hp.delta)}</small>
+              <small>
+                {hp.reset ? "сброс рейтинга жетоном" : "сверка рейтинга"} {signed(hp.delta)}
+              </small>
             </>
           ) : (
             <>

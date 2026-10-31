@@ -11,6 +11,17 @@ import type { Registration } from "@/lib/types";
 
 const PREVIEW = 30;
 
+/** Статистика из анкеты одной строкой; что игрок не указал, пропускается. */
+function formKnown(r: Registration): string {
+  const parts = [
+    r.kd != null ? `K/D ${r.kd}` : "",
+    r.matches != null ? `${r.matches} матчей` : "",
+    r.wins != null ? `${r.wins} побед` : "",
+    r.kills != null ? `${r.kills} убийств` : "",
+  ].filter(Boolean);
+  return parts.join(" · ") || "статистика не указана";
+}
+
 /** Общий пул заявок: кто подал раньше - выше. В матч игроков ставят в форме нового матча,
     здесь лишние заявки только отклоняют. */
 export function RegistrationsManager() {
@@ -61,8 +72,8 @@ export function RegistrationsManager() {
         <div className="space-y-1">
           <h2 className="text-2xl">Заявки (пул)</h2>
           <p className="text-sm text-muted">
-            Общий список желающих сыграть. Кто подал раньше — выше. Игроки из заявок стоят первыми
-            в форме нового матча — выбери их там.
+            Общий список желающих сыграть. Кто подал раньше — выше, а с жетоном «Без очереди» — выше всех
+            до конца игрового дня. Игроки из заявок стоят первыми в форме нового матча — выбери их там.
           </p>
         </div>
         <span className="whitespace-nowrap text-sm text-muted">Всего: {regs.length}</span>
@@ -91,7 +102,8 @@ export function RegistrationsManager() {
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Игрок</th>
                 <th className="px-4 py-3">Игровой ID и ник</th>
-                <th className="px-4 py-3">Удобные даты / пожелания</th>
+                <th className="px-4 py-3">Анкета</th>
+                <th className="px-4 py-3">Удобное время</th>
                 <th className="px-4 py-3">Подал</th>
                 <th className="px-4 py-3 text-right">Действия</th>
               </tr>
@@ -104,8 +116,9 @@ export function RegistrationsManager() {
                     <div className="flex items-center gap-3">
                       <Avatar name={r.userDisplayName || r.userLogin} src={r.userAvatarUrl} size="sm" />
                       <div className="min-w-0">
-                        <div className="truncate font-display text-sm uppercase">
-                          {r.userDisplayName || r.userLogin || "—"}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="truncate font-display text-sm uppercase">{r.userDisplayName || r.userLogin || "—"}</span>
+                          {r.priority && <span className="badge badge-champ"><span>Без очереди</span></span>}
                         </div>
                         {r.userLogin && <div className="truncate text-xs text-muted">@{r.userLogin}</div>}
                       </div>
@@ -115,7 +128,11 @@ export function RegistrationsManager() {
                     <div className="tnum">{r.gameId || "—"}</div>
                     {r.gameNick && <div className="text-xs text-muted">{r.gameNick}</div>}
                   </td>
-                  <td className="px-4 py-3 text-muted">{r.note || "—"}</td>
+                  <td className="px-4 py-3">
+                    <div>{r.rank || "—"}</div>
+                    <div className="text-xs text-muted tnum">{formKnown(r)}</div>
+                  </td>
+                  <td className="px-4 py-3 text-muted">{[r.playTime, r.note].filter(Boolean).join(" · ") || "—"}</td>
                   <td className="px-4 py-3 text-xs text-muted">{fmtDate(r.createdAt)}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end">

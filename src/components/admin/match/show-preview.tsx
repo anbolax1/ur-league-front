@@ -137,7 +137,7 @@ export function PreviewPicker({ busy, onPick }: { busy?: boolean; onPick: (src: 
         </label>
       )}
       <p className="text-xs text-muted">
-        JPG, PNG, WebP или GIF до {MAX_MB} МБ. По ссылке сайт сам скачает картинку и будет хранить у себя — анонс не
+        Любой формат кадра — 16:9, 9:16, квадрат: баннер на сайте виден целиком. JPG, PNG, WebP или GIF до {MAX_MB} МБ. По ссылке сайт сам скачает картинку и будет хранить у себя — анонс не
         пропадёт, даже когда ссылка Discord перестанет открываться.
       </p>
       {err && <p className="text-xs text-danger">{err}</p>}

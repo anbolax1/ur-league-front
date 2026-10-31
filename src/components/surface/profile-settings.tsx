@@ -4,7 +4,10 @@ import * as React from "react";
 import type { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { api, errorText } from "@/lib/api";
-import type { User, UserTag } from "@/lib/types";
+import type { ProfileChange, User, UserTag } from "@/lib/types";
+import { ProfileIdentity } from "@/components/surface/profile-identity";
+import { ProfileTokens } from "@/components/surface/profile-tokens";
+import type { TokenWallet } from "@/lib/types";
 
 // Игровой ID PUBG Mobile - одни цифры (пробелы, как на экране профиля в игре, не мешают).
 const GAME_ID_RE = /^\d{6,12}$/;
@@ -166,11 +169,23 @@ function TagToggles({ initial }: { initial: UserTag[] }) {
 }
 
 /** Настройки своего профиля под карточкой игрока. */
-export function ProfileSettings({ gameId, gameNick, tags }: { gameId: string; gameNick: string; tags: UserTag[] }) {
+export function ProfileSettings({
+  user,
+  changes,
+  tags,
+  wallet,
+}: {
+  user: User;
+  changes: ProfileChange[];
+  tags: UserTag[];
+  wallet?: TokenWallet;
+}) {
   return (
     <section className="pf-desk" aria-label="Настройки профиля">
-      <GameFields initialId={gameId} initialNick={gameNick} />
+      <ProfileIdentity user={user} changes={changes} />
+      <GameFields initialId={user.gameId ?? ""} initialNick={user.gameNick ?? ""} />
       <TagToggles initial={tags} />
+      <ProfileTokens wallet={wallet} />
     </section>
   );
 }

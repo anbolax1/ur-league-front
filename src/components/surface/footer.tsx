@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { TwitchIcon, YouTubeIcon } from "@/components/icons";
+import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
 import { Mark, Wordmark } from "@/components/surface/brand";
 
 /** Сезон для ссылки на его итоги: идущий, а между сезонами - последний. */
@@ -24,6 +26,11 @@ function more(season?: FooterSeason | null) {
   ];
 }
 
+const SOCIALS = [
+  { label: "Twitch", href: STREAM_URL, Icon: TwitchIcon },
+  { label: "YouTube", href: YOUTUBE_URL, Icon: YouTubeIcon },
+];
+
 export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {
   return (
     <footer className="sf-foot">
@@ -35,6 +42,13 @@ export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {
               <Wordmark />
             </Link>
             <p>Соло против сквадов в прямом эфире: матчи 1×1, 2×2 и 3×3, рейтинг MMR, шоу-матчи и пояс лиги.</p>
+            <nav className="sf-socials" aria-label="Соцсети">
+              {SOCIALS.map(({ label, href, Icon }) => (
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}>
+                  <Icon />
+                </a>
+              ))}
+            </nav>
           </div>
           <div>
             <h3>Лига</h3>

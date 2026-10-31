@@ -8,6 +8,7 @@ import { KillsWidget } from "./kills-widget";
 import { InFrameWidget } from "./in-frame-widget";
 import { TextWidget } from "./text-widget";
 import { LogoWidget } from "./logo-widget";
+import { ChanceWidget } from "./chance-widget";
 import type { WidgetProps } from "./types";
 
 /** Реестр виджетов оверлея: тип → компонент. Единый источник для /overlay,
@@ -21,6 +22,7 @@ export const WIDGET_REGISTRY: Record<WidgetType, ComponentType<WidgetProps>> = {
   inFrame: InFrameWidget,
   text: TextWidget,
   logo: LogoWidget,
+  chance: ChanceWidget,
 };
 
 /** Русские названия типов (меню «+ добавить виджет», список «Слои»). */
@@ -33,7 +35,8 @@ export const WIDGET_LABELS: Record<WidgetType, string> = {
   inFrame: "В кадре",
   text: "Текст",
   logo: "Логотип",
+  chance: "График шанса",
 };
 
 /** Порядок типов в меню добавления. */
-export const WIDGET_ORDER: WidgetType[] = ["scoreboard", "round", "standings", "tasksV2", "kills", "inFrame", "text", "logo"];
+export const WIDGET_ORDER: WidgetType[] = ["scoreboard", "chance", "round", "standings", "tasksV2", "kills", "inFrame", "text", "logo"];

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import "./profile.css";
-import { getMe, getMyRegistrations, getMyTags, getPlayer } from "@/lib/queries";
+import { getMe, getMyProfileChanges, getMyRegistrations, getMyTags, getPlayer } from "@/lib/queries";
 import type { Registration } from "@/lib/types";
 import { Arrow } from "@/components/surface/ui";
 import { ProfileSettings } from "@/components/surface/profile-settings";
@@ -79,8 +79,8 @@ export async function SurfaceMyProfile() {
   const user = await getMe();
   if (!user) return <SignIn />;
 
-  const [profile, regs, tags] = await Promise.all([getPlayer(user.login), getMyRegistrations(), getMyTags()]);
-  const settings = <ProfileSettings gameId={user.gameId ?? ""} gameNick={user.gameNick ?? ""} tags={tags} />;
+  const [profile, regs, tags, changes] = await Promise.all([getPlayer(user.login), getMyRegistrations(), getMyTags(), getMyProfileChanges()]);
+  const settings = <ProfileSettings user={user} changes={changes} tags={tags} wallet={profile?.tokens} />;
   const registrations = <MyRegistrations items={regs} />;
 
   if (!profile) {

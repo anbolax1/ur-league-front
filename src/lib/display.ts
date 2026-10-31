@@ -8,8 +8,8 @@ import { matchName } from "@/lib/format";
 /** Шаги записи на матч - одинаковые в обоих дизайнах. */
 export const JOIN_STEPS = [
   { n: 1, title: "Аккаунт", text: "Зарегистрируйся по логину и паролю — так заявка свяжется с твоим профилем." },
-  { n: 2, title: "Игровой ID в профиле", text: "Игровой ID и ник из PUBG Mobile задаются один раз в профиле — по ним ведущий позовёт тебя в группу, они подставятся в заявку." },
-  { n: 3, title: "Удобные даты", text: "Напиши, в какие даты можешь играть. Организатор позовёт тебя на матч." },
+  { n: 2, title: "Анкета игрока", text: "Игровой ник, PUBG Mobile ID, ранг, K/D, матчи, победы и убийства — ведущий подберёт состав и позовёт тебя в группу." },
+  { n: 3, title: "Удобное время", text: "Напиши, когда можешь играть. Организатор позовёт тебя на матч." },
 ];
 
 /** Статусы, которые понимает компонент StatusPill. */
@@ -43,7 +43,7 @@ export function tournamentPill(status: string): { status: PillStatus; label: str
 export function registrationMatches(r: Registration, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  return [r.userDisplayName, r.userLogin, r.gameId, r.gameNick, r.note]
+  return [r.userDisplayName, r.userLogin, r.gameId, r.gameNick, r.note, r.rank, r.playTime]
     .some((f) => (f ?? "").toLowerCase().includes(q));
 }
 
@@ -59,6 +59,8 @@ export function roleBadge(
   switch (role) {
     case "superadmin":
       return { kind: "org", label: "Организатор" };
+    case "moderator":
+      return { kind: "glad", label: "Модератор" };
     default:
       return { kind: "official", label: "Игрок" };
   }

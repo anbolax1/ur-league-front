@@ -29,6 +29,7 @@ export const WIDGET_SPOTS: Partial<Record<WidgetType, Partial<WidgetInstance>>> 
   kills: { x: 0.823, y: 0.389, w: 0.156 },
   inFrame: { x: 0.729, y: 0.656, w: 0.25 },
   round: { x: 0.823, y: 0.259, w: 0.156 },
+  chance: { x: 0.021, y: 0.2, w: 0.3 },
 };
 
 /** Дефолтная раскладка: счёт и задания слева под отрядом, киллы захода и «В кадре» справа под миникартой.

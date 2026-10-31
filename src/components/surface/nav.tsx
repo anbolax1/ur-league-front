@@ -30,14 +30,14 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 export function SurfaceNav({ live }: { live: NavLive | null }) {
-  const { user, isSuperadmin, refresh } = useAuth();
+  const { user, canModerate, refresh } = useAuth();
   const pathname = usePathname() || "/";
   const router = useRouter();
   // Меню открыто только на той странице, где его открыли: переход закрывает его сам.
   const [openAt, setOpenAt] = React.useState<string | null>(null);
   const open = openAt === pathname;
   const progress = React.useRef<HTMLDivElement>(null);
-  const links = isSuperadmin ? [...LINKS, { href: "/admin", label: "Кабинет" }] : LINKS;
+  const links = canModerate ? [...LINKS, { href: "/admin", label: "Кабинет" }] : LINKS;
 
   React.useEffect(() => {
     let tick = false;

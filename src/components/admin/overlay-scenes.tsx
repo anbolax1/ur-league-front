@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { DEFAULT_LAYOUT } from "@/components/overlay/default-layout";
 import { OverlayEditor } from "@/components/admin/overlay-editor";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { LiveState, OverlayLayout, OverlayPreset, WidgetType } from "@/lib/types";
+import type { LiveState, OverlayLayout, OverlayPreset, WidgetInstance, WidgetType } from "@/lib/types";
 
 const SAVE_DELAY = 500; // мс без правок до сохранения: перетаскивание и ползунки не шлют запрос на каждый шаг
 const RETRY_DELAY = 3000; // мс до повтора, если сервер не ответил
@@ -48,16 +48,35 @@ const SAMPLE_STATE: LiveState = {
   heatKills: 3,
   inFrame: [{ name: "Игрок A", gameNick: "PlayerA_UR" }],
   belt: { holderParticipantId: "sample-a", defenses: 2 },
+  chance: { a: 0.6, draw: 0.04, b: 0.4 },
+  chanceTrail: [
+    { a: 0.49, draw: 0.05, round: 1 },
+    { a: 0.62, draw: 0.05, round: 1 },
+    { a: 0.54, draw: 0.05, round: 1 },
+    { a: 0.46, draw: 0.05, round: 1 },
+    { a: 0.51, draw: 0.05, round: 1 },
+    { a: 0.6, draw: 0.04, round: 2 },
+  ],
 };
 
 /** Данные, которых в идущем матче может не быть: задания и протоколы сервер выдаёт с началом раунда. */
-const SAMPLE_PARTS: { types: WidgetType[]; missing: string; has: (s: LiveState) => boolean; part: Partial<LiveState> }[] = [
-  { types: ["tasksV2"], missing: "заданий", has: (s) => !!s.bonusTasks?.length, part: { bonusTasks: SAMPLE_STATE.bonusTasks } },
+const ofType = (...types: WidgetType[]) => (w: WidgetInstance) => types.includes(w.type);
+const SAMPLE_CHANCE: Partial<LiveState> = { chance: SAMPLE_STATE.chance, chanceTrail: SAMPLE_STATE.chanceTrail };
+const SAMPLE_PARTS: { uses: (w: WidgetInstance) => boolean; missing: string; has: (s: LiveState) => boolean; part: Partial<LiveState> }[] = [
+  { uses: ofType("tasksV2"), missing: "заданий", has: (s) => !!s.bonusTasks?.length, part: { bonusTasks: SAMPLE_STATE.bonusTasks } },
   {
-    types: ["tasksV2"],
+    uses: ofType("tasksV2"),
     missing: "протоколов",
     has: (s) => !!s.complications?.length || !!s.complication,
     part: { complications: SAMPLE_STATE.complications },
+  },
+  { uses: ofType("chance"), missing: "шанса на победу", has: (s) => !!s.chance, part: SAMPLE_CHANCE },
+  // После матча на табло остаётся только итог, поэтому и шанс под счётом в превью - из примера.
+  {
+    uses: (w) => w.type === "scoreboard" && (!!w.showChance || !!w.showChanceBar),
+    missing: "шанса на победу",
+    has: (s) => !!s.chance && s.stage !== "finished",
+    part: SAMPLE_CHANCE,
   },
 ];
 
@@ -76,10 +95,10 @@ function previewOf(state: LiveState | null, layout: OverlayLayout): { data: Live
       note: "Раунд сейчас не идёт: в превью пример с условными игроками. В OBS виден настоящий матч, а «Киллы захода» и «В кадре» - с началом захода.",
     };
   }
-  const shown = new Set(layout.widgets.filter((w) => w.visible).map((w) => w.type));
-  const gaps = SAMPLE_PARTS.filter((p) => !p.has(state) && p.types.some((t) => shown.has(t)));
+  const shown = layout.widgets.filter((w) => w.visible);
+  const gaps = SAMPLE_PARTS.filter((p) => !p.has(state) && shown.some(p.uses));
   const data = gaps.reduce<LiveState>((s, p) => ({ ...s, ...p.part }), state);
-  const names = gaps.map((p) => p.missing);
+  const names = [...new Set(gaps.map((p) => p.missing))];
   if (!names.length) return { data };
   const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} и ${names[names.length - 1]}` : names[0];
   return { data, note: `В матче пока нет ${list}: в превью они для примера. В OBS такие виджеты не видны, пока данных нет.` };

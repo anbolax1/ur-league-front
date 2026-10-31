@@ -19,6 +19,9 @@ import type {
   PlayerProfile,
   TeamProfile,
   ClaimInfo,
+  ChanceTrail,
+  PlayerModeration,
+  ProfileChange,
   Registration,
   RulesResponse,
   Season,
@@ -43,6 +46,16 @@ async function safe<T>(label: string, p: Promise<T>, fallback: T): Promise<T> {
     console.warn(`[queries] ${label}: бэкенд недоступен или ошибка — ${msg}`);
     return fallback;
   }
+}
+
+/** Журнал жетонов и матчи игрока для модератора. null - нет прав или бэкенд недоступен. */
+export function getPlayerModeration(userId: string): Promise<PlayerModeration | null> {
+  return safe(`moderation(${userId})`, serverGetOptional<PlayerModeration>(`/users/${encodeURIComponent(userId)}/moderation`, { auth: true }), null);
+}
+
+/** Логины удалённых игроков: на их страницы сайт не ссылается. */
+export function getHiddenPlayers(): Promise<string[]> {
+  return safe("hidden-players", serverFetch<string[]>(`/hidden-players`), []);
 }
 
 /** Список турниров (без participants/rounds). Опциональный фильтр по статусу. */
@@ -205,6 +218,11 @@ export function getMyRegistrations(): Promise<Registration[]> {
   );
 }
 
+/** Свои заявки на смену фото и ника (требует входа). [] - аноним/ошибка. */
+export function getMyProfileChanges(): Promise<ProfileChange[]> {
+  return safe("me/profile-changes", serverFetch<ProfileChange[]>("/me/profile-changes", { auth: true }), []);
+}
+
 /** Свои теги вместе со скрытыми - для настройки профиля. [] - аноним/ошибка. */
 export function getMyTags(): Promise<UserTag[]> {
   return safe("me/tags", serverFetch<UserTag[]>("/me/tags", { auth: true }), []);
@@ -229,6 +247,11 @@ export async function getMatch(id: string): Promise<MatchState | null> {
 /** Рейтинг сторон матча, что стоит на кону, и личные встречи. null - страница обойдётся без них. */
 export function getMatchup(id: string): Promise<Matchup | null> {
   return safe(`matchup(${id})`, serverFetch<Matchup>(`/tournaments/${encodeURIComponent(id)}/matchup`), null);
+}
+
+/** Как менялся шанс по ходу матча. null - графика не будет. */
+export function getChanceTrail(id: string): Promise<ChanceTrail | null> {
+  return safe(`chance(${id})`, serverFetch<ChanceTrail>(`/tournaments/${encodeURIComponent(id)}/chance`), null);
 }
 
 /** Справочник карт с превью. */

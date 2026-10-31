@@ -20,7 +20,7 @@ export function seasonStats(points: MmrPoint[], start: number): MmrStats {
   for (const p of points) {
     st.peakMmr = Math.max(st.peakMmr, p.mmr);
     st.currentMmr = p.mmr;
-    if (p.correction) continue;
+    if (p.correction || p.reset) continue;
     st.firstMatch ??= p.date;
     const w = Math.max(p.games || 1, 1);
     if (p.win) st.wins += w;

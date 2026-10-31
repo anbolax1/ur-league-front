@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProfileLink } from "@/components/surface/player-link";
 import type { ReactNode } from "react";
 import type { Belt, BeltPlayer, BeltReign } from "@/lib/types";
 import { BeltArt } from "@/components/surface/belt-art";
@@ -76,7 +77,7 @@ export function BeltStatus({ belt }: { belt: Belt }) {
               {leaders.map((l, i) => (
                 <span key={l.userId}>
                   {i > 0 && " или "}
-                  <Link href={`/profile/${l.login}`}>{holderName(l)}</Link>
+                  <ProfileLink login={l.login}>{holderName(l)}</ProfileLink>
                 </span>
               ))}
               . Выиграет лидер — пояс его, проиграет — пояс у того, кто его обыграл.
@@ -94,9 +95,9 @@ export function BeltStatus({ belt }: { belt: Belt }) {
     <div className="bl-status">
       <p className="sf-eyebrow">Носитель · {holderTag(cur)}</p>
       <div className="bl-who">
-        <Link className="bl-name" href={`/profile/${belt.holder.login}`}>
+        <ProfileLink className="bl-name" login={belt.holder.login}>
           {holderName(belt.holder)}
-        </Link>
+        </ProfileLink>
         <span className="bl-stamp">с {dayMonth(belt.since)}</span>
       </div>
       <dl className="bl-stats">
@@ -247,7 +248,7 @@ export function BeltProfile({ belt, userId }: { belt: Belt | null; userId: strin
 }
 
 function PlayerLink({ p }: { p: BeltPlayer }) {
-  return <Link href={`/profile/${p.login}`}>{holderName(p)}</Link>;
+  return <ProfileLink login={p.login}>{holderName(p)}</ProfileLink>;
 }
 
 /** «Берёт пояс уже 2-й раз» или «10-й носитель в истории лиги» - продолжение фразы о новом носителе. */

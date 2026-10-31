@@ -15,6 +15,8 @@ interface AuthValue {
   loading: boolean;
   /** Доступ к кабинету организатора (роль superadmin или выше). */
   isSuperadmin: boolean;
+  /** Кабинет открыт: организатору целиком, модератору - раздел проверки. */
+  canModerate: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -46,6 +48,7 @@ export function AuthProvider({
     user,
     loading,
     isSuperadmin: roleAtLeast(user?.role, "superadmin"),
+    canModerate: roleAtLeast(user?.role, "moderator"),
     refresh,
   };
 

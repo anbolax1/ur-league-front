@@ -48,12 +48,19 @@
   overflow: hidden;
   background: var(--sf-night) url("/show-art.jpg") 62% 45% / cover no-repeat;
 }
+/* Баннер любого формата виден целиком; поля добирает размытая копия (см. .sch-show-art.is-img::before). */
+.sch-show-art {
+  isolation: isolate;
+}
+.sch-show-art.is-img {
+  background: #000;
+}
 .sch-show-art img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 .sch-show-body {
   display: grid;

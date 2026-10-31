@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import "./profile.css";
-import { getBelt, getHighlights, getMaps, getPlayer, getSeasons } from "@/lib/queries";
+import { getBelt, getHighlights, getMaps, getMe, getPlayer, getPlayerModeration, getSeasons } from "@/lib/queries";
+import { roleAtLeast } from "@/lib/roles";
+import { ProfileModeration } from "@/components/surface/profile-moderation";
 import type { PlayerPatch, PlayerProfile, Season } from "@/lib/types";
 import { ArrowBack, TagStamps } from "@/components/surface/ui";
 import { SurfaceHighlights } from "@/components/surface/highlights";
@@ -132,7 +134,7 @@ export async function ProfileView({
   const { user, timeline1x1, history, teams } = profile;
   const [{ items: highlights }, seasons, maps, belt] = await Promise.all([getHighlights({ userId: user.id, limit: 4 }), getSeasons(), getMaps(), getBelt()]);
   const active = seasons.find((s) => s.status === "active");
-  const played = timeline1x1.some((p) => !p.correction);
+  const played = timeline1x1.some((p) => !p.correction && !p.reset);
   const name = user.displayName || user.login;
   const shown = firstProfileSeason(timeline1x1, seasons);
   const sewn = rarestPatches(profile, shown);
@@ -226,5 +228,11 @@ export async function ProfileView({
 export async function SurfaceProfile({ login }: { login: string }) {
   const profile = await getPlayer(login);
   if (!profile) return <NotFound login={login} />;
-  return <ProfileView profile={profile} eyebrow="Профиль игрока" back />;
+  // Модератору и организатору под карточкой открыты жетоны игрока.
+  const me = await getMe();
+  const moderation = me && roleAtLeast(me.role, "moderator") ? await getPlayerModeration(profile.user.id) : null;
+  const settings = moderation ? (
+    <ProfileModeration userId={profile.user.id} name={profile.user.displayName || profile.user.login} wallet={profile.tokens} initial={moderation} />
+  ) : undefined;
+  return <ProfileView profile={profile} eyebrow="Профиль игрока" back settings={settings} />;
 }

@@ -9,6 +9,7 @@ import { TagBadge } from "@/components/ui/tag-badge";
 import { StatusPill } from "@/components/ui/pill";
 import { SectionHead } from "@/components/ui/section-head";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { roleBadge } from "@/lib/display";
 import { fmtDate } from "@/lib/format";
 import type { PlayerProfile, Role, User, UserOverview } from "@/lib/types";
@@ -24,6 +25,13 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "wins", label: "Победы" },
   { key: "joined", label: "Регистрация" },
   { key: "name", label: "Имя" },
+];
+
+/** Роли, которые организатор выдаёт игрокам. */
+const ROLE_CHOICES: { role: Role; label: string }[] = [
+  { role: "user", label: "Игрок" },
+  { role: "moderator", label: "Модератор" },
+  { role: "superadmin", label: "Организатор" },
 ];
 
 function userName(u: UserOverview): string {
@@ -68,6 +76,10 @@ export function UsersManager({
   const { user: currentUser } = useAuth();
   const [roleBusyId, setRoleBusyId] = React.useState<string | null>(null);
   const [roleError, setRoleError] = React.useState<Record<string, string>>({});
+  // Удаление игрока с сайта: окно подтверждения и занятость.
+  const [toHide, setToHide] = React.useState<UserOverview | null>(null);
+  const [hideBusy, setHideBusy] = React.useState(false);
+  const [hideError, setHideError] = React.useState("");
   // Активация заглушек: ссылка доступа по userId.
   const [claimBusy, setClaimBusy] = React.useState<string | null>(null);
   const [claimLink, setClaimLink] = React.useState<Record<string, string>>({});
@@ -84,6 +96,20 @@ export function UsersManager({
       /* игнор */
     } finally {
       setClaimBusy(null);
+    }
+  }
+
+  async function setHidden(u: UserOverview, hidden: boolean) {
+    setHideBusy(true);
+    setHideError("");
+    try {
+      await api.patch<void>(`/users/${u.id}/hidden`, { hidden });
+      setItems((list) => list.map((it) => (it.id === u.id ? { ...it, hidden } : it)));
+      setToHide(null);
+    } catch (e) {
+      setHideError(errorText(e, "Не удалось сохранить."));
+    } finally {
+      setHideBusy(false);
     }
   }
 
@@ -144,7 +170,7 @@ export function UsersManager({
   async function toggle(u: UserOverview) {
     const next = openId === u.id ? null : u.id;
     setOpenId(next);
-    if (next && !profiles[u.id]) {
+    if (next && !profiles[u.id] && !u.hidden) {
       setProfiles((p) => ({ ...p, [u.id]: "loading" }));
       try {
         const prof = await api.get<PlayerProfile>(`/players/${encodeURIComponent(u.login)}`);
@@ -222,6 +248,7 @@ export function UsersManager({
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="truncate font-display uppercase">{userName(u)}</span>
+                                {u.hidden && <Badge kind="official">Удалён с сайта</Badge>}
                                 {(u.tags ?? []).map((t) => (
                                   <TagBadge
                                     key={t.id}
@@ -263,35 +290,60 @@ export function UsersManager({
                               <Badge kind={role.kind}>{role.label}</Badge>
                               {currentUser?.id === u.id ? (
                                 <span className="text-xs text-muted">это вы — вашу роль меняет другой организатор</span>
-                              ) : u.role === "superadmin" ? (
-                                <button
-                                  type="button"
-                                  className="btn btn-ghost btn-sm"
-                                  disabled={roleBusyId === u.id}
-                                  onClick={() => changeRole(u, "user")}
-                                >
-                                  <span>{roleBusyId === u.id ? "Меняем…" : "Снять права организатора"}</span>
-                                </button>
                               ) : (
-                                <button
-                                  type="button"
-                                  className="btn btn-cyan btn-sm"
-                                  disabled={roleBusyId === u.id}
-                                  onClick={() => changeRole(u, "superadmin")}
-                                >
-                                  <span>{roleBusyId === u.id ? "Меняем…" : "Назначить организатором"}</span>
-                                </button>
+                                <div className="seg" role="group" aria-label="Роль игрока">
+                                  {ROLE_CHOICES.map((r) => (
+                                    <button
+                                      key={r.role}
+                                      type="button"
+                                      className="seg-btn"
+                                      aria-pressed={u.role === r.role}
+                                      disabled={roleBusyId === u.id}
+                                      onClick={() => u.role !== r.role && changeRole(u, r.role)}
+                                    >
+                                      <span>{r.label}</span>
+                                    </button>
+                                  ))}
+                                </div>
                               )}
                               {roleError[u.id] && <span className="text-sm text-danger">{roleError[u.id]}</span>}
-                              <a
-                                href={`/profile/${u.login}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-ghost btn-sm ml-auto"
-                              >
-                                <span>Полная статистика ↗</span>
-                              </a>
+                              {!u.hidden && (
+                                <a
+                                  href={`/profile/${u.login}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="btn btn-ghost btn-sm ml-auto"
+                                >
+                                  <span>Полная статистика ↗</span>
+                                </a>
+                              )}
                             </div>
+                            {u.role !== "superadmin" && (
+                              <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-[var(--border)] pb-4">
+                                <span className="text-xs uppercase tracking-wide text-muted">Страница на сайте</span>
+                                {u.hidden ? (
+                                  <button type="button" className="btn btn-cyan btn-sm" disabled={hideBusy} onClick={() => setHidden(u, false)}>
+                                    <span>{hideBusy ? "…" : "Вернуть на сайт"}</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="btn btn-ghost btn-sm text-danger"
+                                    onClick={() => {
+                                      setHideError("");
+                                      setToHide(u);
+                                    }}
+                                  >
+                                    <span>Удалить с сайта</span>
+                                  </button>
+                                )}
+                                <span className="w-full text-xs text-muted">
+                                  {u.hidden
+                                    ? "Страница игрока, рейтинг и вход закрыты. Прошлые матчи остаются в истории с его ником, но перейти на игрока из них нельзя."
+                                    : "Закроет страницу игрока, уберёт его из рейтинга и выбора в матч, вход перестанет работать. История матчей останется с его ником. Удаление можно отменить."}
+                                </span>
+                              </div>
+                            )}
                             {u.isPlaceholder && (
                               <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-[var(--border)] pb-4">
                                 <span className="text-xs uppercase tracking-wide text-muted">Доступ игроку</span>
@@ -324,7 +376,7 @@ export function UsersManager({
                                 </span>
                               </div>
                             )}
-                            {prof === undefined || prof === "loading" ? (
+                            {u.hidden ? null : prof === undefined || prof === "loading" ? (
                               <p className="text-sm text-muted">Загрузка истории участия…</p>
                             ) : prof === "error" ? (
                               <p className="text-sm text-danger">Не удалось загрузить историю участия.</p>
@@ -396,6 +448,22 @@ export function UsersManager({
           hint={query ? "Измени запрос поиска." : "Здесь появятся зарегистрированные пользователи."}
         />
       )}
+
+      <ConfirmDialog
+        open={toHide !== null}
+        title="Удалить игрока с сайта?"
+        message={
+          <>
+            {toHide ? userName(toHide) : "Игрок"} пропадёт из рейтинга, его страница закроется, вход перестанет работать. Матчи останутся в
+            истории с его ником, но перейти на игрока из них будет нельзя. Вернуть можно в любой момент.
+          </>
+        }
+        confirmLabel="Удалить"
+        busy={hideBusy}
+        error={hideError}
+        onConfirm={() => toHide && setHidden(toHide, true)}
+        onCancel={() => setToHide(null)}
+      />
 
       {totalPages > 1 && (
         <div className="flex flex-wrap items-center justify-center gap-2">

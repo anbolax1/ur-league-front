@@ -6,6 +6,7 @@ import { CountUp, FitBoard } from "@/components/surface/motion";
 import { RoundCard } from "@/components/surface/round-card";
 import { roundTasks } from "@/components/surface/last-match";
 import { Odds } from "@/components/surface/home-parts";
+import { chancePercents } from "@/lib/chance";
 import { beltMarkLabel, matchBelt } from "@/components/surface/belt-lib";
 
 /** Где сторона в сезоне и что стоит на кону; части переносятся целиком. */
@@ -18,6 +19,7 @@ function Standing({ s }: { s?: MatchupSide }) {
       {s.winGain ? (
         <span>
           на кону <b className="sf-up">+{s.winGain}</b> / <b className="sf-down">−{s.lossDrop ?? 0}</b>
+          {s.double ? " · жетон ×2" : ""}
         </span>
       ) : null}
     </span>
@@ -37,7 +39,12 @@ export function LiveMatch({ st, matchup, organizer, belt = null }: { st: MatchSt
   const info = new Map((matchup?.sides ?? []).map((s) => [s.participantId, s]));
   const ia = a ? info.get(a.id) : undefined;
   const ib = b ? info.get(b.id) : undefined;
-  const chance = ia?.winChance != null && ib?.winChance != null ? [ia.winChance, ib.winChance] : null;
+  // Шанс прямо сейчас, а до первого захода - перед матчем.
+  const chance = st.chance
+    ? chancePercents(st.chance.now)
+    : ia?.winChance != null && ib?.winChance != null
+      ? [ia.winChance, matchup?.drawChance ?? 0, ib.winChance]
+      : null;
   const show = isShowMatch(t);
   const mark = matchBelt(belt, t, sides.flatMap((p) => (p?.userId ? [p.userId] : [])));
   const holder = mark?.kind === "defend" ? mark.holder.userId : "";
@@ -107,7 +114,7 @@ export function LiveMatch({ st, matchup, organizer, belt = null }: { st: MatchSt
             )}
             {(chance || t.prize) && (
               <div className="sf-live-foot">
-                {chance && <Odds a={chance[0]} b={chance[1]} nameA={a?.name ?? "A"} nameB={b?.name ?? "B"} label="шансы по MMR" />}
+                {chance && <Odds a={chance[0]} b={chance[2]} draw={chance[1]} nameA={a?.name ?? "A"} nameB={b?.name ?? "B"} label="шанс на победу" />}
                 {t.prize && (
                   <span className="sf-prize">
                     <small>приз</small>

@@ -1,7 +1,7 @@
 /* TS-типы, зеркалящие модели Go-бэкенда (backend/internal/models).
    Это копия контракта, НЕ импорт из бэкенда — проекты независимы. */
 
-export type Role = "user" | "superadmin";
+export type Role = "user" | "moderator" | "superadmin";
 export type TournamentMode = "1x1" | "2x2" | "3x3";
 export type TournamentStatus = "draft" | "upcoming" | "live" | "finished";
 export type ParticipantKind = "player" | "team";
@@ -23,6 +23,25 @@ export interface User {
   createdAt: string;
   /** Теги, тег роли первым. На сайте приходят только видимые, в кабинете - все. */
   tags?: UserTag[];
+  /** Удалён организатором: страницы и рейтинга нет. Приходит только в списке игроков кабинета. */
+  hidden?: boolean;
+}
+
+/** Заявка игрока на смену ника или фото; ждёт проверки модератора или организатора. */
+export interface ProfileChange {
+  id: string;
+  userId: string;
+  kind: "name" | "avatar";
+  /** Новый ник либо адрес фото. */
+  value: string;
+  status: "pending" | "approved" | "rejected";
+  /** Почему отклонили. */
+  reason: string;
+  createdAt: string;
+  decidedAt?: string | null;
+  userLogin?: string;
+  userDisplayName?: string;
+  userAvatarUrl?: string;
 }
 
 /** Тег игрока; visible - организатор показывает его на сайте, hiddenByUser - игрок сам убрал его из профиля. */
@@ -124,12 +143,21 @@ export interface Registration {
   gameNick: string;
   status: RegistrationStatus;
   note: string;
+  /** Анкета заявки: ранг и статистика игрока по его же словам. */
+  rank: string;
+  kd?: number | null;
+  matches?: number | null;
+  wins?: number | null;
+  kills?: number | null;
+  playTime: string;
   createdAt: string;
   decidedAt?: string | null;
   userLogin?: string;
   userDisplayName?: string;
   userAvatarUrl?: string;
   tournamentTitle?: string;
+  /** Сегодня без очереди: в пуле выше остальных. */
+  priority?: boolean;
 }
 
 export interface LeaderboardRow {
@@ -187,6 +215,8 @@ export interface MmrPoint {
   season?: string;
   /** Не матч, а сверка рейтинга с официальными цифрами. */
   correction?: boolean;
+  /** Не матч, а сброс рейтинга жетоном. */
+  reset?: boolean;
 }
 
 /** Сводная статистика по исходам (игрок 1×1 или команда 2×2). */
@@ -489,6 +519,12 @@ export interface LiveState {
   patchFlashes?: PatchFlash[];
   /** Матч идёт за пояс лиги: табло отмечает носителя, после матча - итог. */
   belt?: LiveBelt | null;
+  /** Шансы сторон (в порядке standings) и ничьей сейчас. */
+  chance?: Chance | null;
+  /** Как менялся шанс в этом матче: для графика шанса. */
+  chanceTrail?: ChanceDot[];
+  /** Счёт после всех заходов равный: стороны играют дуэль до первого килла. */
+  duel?: boolean;
 }
 
 /** Пояс лиги в идущем матче. */
@@ -513,7 +549,7 @@ export interface LiveBonus {
 }
 
 /** Типы виджетов модульного оверлея. */
-export type WidgetType = "scoreboard" | "round" | "standings" | "tasksV2" | "kills" | "inFrame" | "text" | "logo";
+export type WidgetType = "scoreboard" | "round" | "standings" | "tasksV2" | "kills" | "inFrame" | "text" | "logo" | "chance";
 
 /** Фон (вкл/выкл + прозрачность 0..1) — для виджета и для сцены целиком. */
 export interface OverlayBg {
@@ -547,6 +583,10 @@ export interface WidgetInstance {
   showPlace?: boolean;
   /** Табло: значок под ником носителя пояса лиги и «за пояс» по центру. */
   showBelt?: boolean;
+  /** Табло: шанс на победу под счётом сторон и шанс ничьей по центру. */
+  showChance?: boolean;
+  /** Табло: полоса шанса под счётом - доли сторон, их шансы по краям и шанс ничьей в подписи. */
+  showChanceBar?: boolean;
   /** Привязка к краю (tl|tc|tr|ml|c|mr|bl|bc|br); "" — свободно. При изменении глобального отступа привязанные виджеты сдвигаются. */
   anchor?: string;
   bg: OverlayBg;
@@ -638,6 +678,7 @@ export interface PlayerProfile {
   teams: TeamSummary[];
   /** Нашивки по сезонам: ключ - id сезона. */
   patches1x1?: Record<string, PatchSeason>;
+  tokens: TokenWallet;
 }
 
 /** Пользователь + агрегаты участия: GET /api/users/overview (кабинет, раздел «Пользователи»). */
@@ -707,6 +748,15 @@ export interface Season {
   startMmr: number;
   /** Номер для адреса страницы итогов /season/{номер}. */
   number?: number | null;
+  /** Призовой фонд сезона. */
+  prizes: SeasonPrizes;
+}
+
+/** Призы сезона: рубли за места по порядку, весь фонд (0 - сумма мест) и подпись под призами. */
+export interface SeasonPrizes {
+  pool: number;
+  places: number[];
+  note: string;
 }
 
 /* ---------- итоги сезона: /api/seasons/{номер}/recap ---------- */
@@ -831,6 +881,8 @@ export interface SeasonRecap {
   knockers: Array<{ player: number; knocks: number; heats: number }>;
   /** Лучший заход сезона по киллам; map - код карты захода. */
   bestKnock?: { match: number; player: number; knocks: number; round: number; map: string };
+  /** Больше всего киллов стороны за все её заходы одного матча. */
+  bestMatchKnock?: { match: number; player: number; knocks: number };
   /** Заходов на каждом месте, с первого. */
   places: number[];
   placers: RecapPlacer[];
@@ -895,7 +947,7 @@ export interface MatchLogEntry {
   id: string;
   roundNumber: number;
   participantId?: string | null;
-  kind: "task" | "points" | "knock" | "legendary" | "map" | "place";
+  kind: "task" | "points" | "knock" | "legendary" | "map" | "place" | "duel";
   text: string;
   delta: number;
   createdAt: string;
@@ -946,6 +998,12 @@ export interface MatchState {
   patches?: MatchPatch[];
   /** Сторона, чей заход идёт: её задания и счёт показывает оверлей; приходит только в идущем раунде. */
   focus?: string;
+  /** Жетоны ×2 игроков на этот матч. */
+  doubles?: DoubleToken[];
+  /** Сколько жетонов ×2 у каждого игрока сторон. */
+  doubleWallet?: Record<string, number>;
+  /** Шансы на победу перед матчем и сейчас; у составов их нет. */
+  chance?: MatchChance;
 }
 
 /** Сторона матча для его страницы. У сыгранного матча mmr - рейтинг перед ним, у остальных - текущий,
@@ -960,10 +1018,12 @@ export interface MatchupSide {
   wins: number;
   losses: number;
   isNew: boolean;
-  /** Шанс победы по MMR, проценты. */
+  /** Шанс на победу перед матчем, проценты. */
   winChance?: number;
   winGain?: number;
   lossDrop?: number;
+  /** Жетон ×2: и победа, и поражение вдвое. */
+  double?: boolean;
 }
 
 /** Другая сыгранная встреча тех же сторон. winner: 0 - A, 1 - B, -1 - ничья. */
@@ -980,6 +1040,8 @@ export interface Matchup {
   season?: { id: string; name: string; kFactor: number };
   sides: MatchupSide[];
   headToHead: { wins: [number, number]; draws: number; matches: HeadToHeadMatch[] };
+  /** Шанс ничьей перед матчем, проценты. */
+  drawChance?: number;
 }
 
 /** GET /api/matches/current: идущий матч или, если никто не играет, последний сыгранный. */
@@ -1001,6 +1063,8 @@ export interface MatchPlayer {
   isPlaceholder: boolean;
   /** Матчей в прошлых сезонах: при равном MMR сторона A - у кого меньше. */
   prevGames: number;
+  /** Сегодня играет без очереди. */
+  priority?: boolean;
 }
 
 /** Ответ GET /api/rules — ОБЁРНУТ в { tasks (задания и протоколы), legendary }. */
@@ -1073,4 +1137,105 @@ export interface Belt {
   /** Защит за всё время для тега «Почётный носитель». */
   honorAt: number;
   reigns: BeltReign[];
+}
+
+/** Виды жетонов. */
+export type TokenKind = "double" | "priority" | "reset";
+
+/** Жетоны игрока и когда их можно тратить. */
+export interface TokenWallet {
+  double: number;
+  priority: number;
+  reset: number;
+  /** «Без очереди» действует до конца игрового дня. */
+  priorityUntil?: string | null;
+  /** Раньше этого времени новый «Без очереди» не активировать. */
+  priorityNext?: string | null;
+  lastReset?: string | null;
+  /** В текущем сезоне рейтинг уже сброшен. */
+  resetUsed?: boolean;
+}
+
+/** Строка журнала жетонов: выдача (+N) или трата (-1). */
+export interface TokenEntry {
+  id: string;
+  kind: TokenKind;
+  delta: number;
+  note?: string;
+  tournamentId?: string | null;
+  /** Матч, на который потрачен жетон ×2. */
+  match?: string;
+  /** Кто выдал или активировал. */
+  by?: string;
+  createdAt: string;
+}
+
+/** Жетон ×2, поставленный игроком на матч. */
+export interface DoubleToken {
+  participantId: string;
+  userId: string;
+}
+
+/** Матч игрока, который ещё не начался: на него можно поставить жетон ×2. */
+export interface PendingMatch {
+  tournamentId: string;
+  title: string;
+  mode: TournamentMode;
+  startsAt?: string | null;
+  active: boolean;
+  /** Почему нельзя поставить: например, у напарника жетон уже стоит. */
+  blocked?: string;
+}
+
+/** Что модератор видит на странице игрока: журнал жетонов и матчи под жетон ×2. */
+export interface PlayerModeration {
+  ledger: TokenEntry[];
+  matches: PendingMatch[];
+}
+
+/** Свои жетоны с MMR и причиной, по которой рейтинг сейчас не сбросить. */
+export interface MyTokens {
+  tokens: TokenWallet;
+  resetBlocked?: string;
+  mmr: number;
+  startMmr: number;
+}
+
+/** Шансы стороны A, ничьей и стороны B, доли от 1; в сумме 1. */
+export interface Chance {
+  a: number;
+  draw: number;
+  b: number;
+}
+
+export interface MatchChance {
+  pre: Chance;
+  now: Chance;
+}
+
+/** Шанс после действия в пульте или закрытия захода: точка графика матча. */
+export interface ChancePoint {
+  at: string;
+  kind: "start" | "knock" | "task" | "points" | "legendary" | "raid" | "duel" | "end" | "now";
+  round: number;
+  /** 0 - A, 1 - B, -1 - без стороны. */
+  side: number;
+  text: string;
+  delta?: number;
+  score: [number, number];
+  chance: Chance;
+}
+
+/** GET /api/tournaments/{id}/chance - как менялся шанс по ходу матча. */
+export interface ChanceTrail {
+  points: ChancePoint[];
+  /** Матч идёт: график ещё растёт. */
+  live: boolean;
+}
+
+/** Точка графика шанса в оверлее. */
+export interface ChanceDot {
+  a: number;
+  draw: number;
+  round: number;
 }

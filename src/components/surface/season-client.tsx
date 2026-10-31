@@ -1,5 +1,6 @@
 "use client";
 
+import { ProfileLink } from "@/components/surface/player-link";
 import * as React from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
@@ -170,9 +171,9 @@ export function SeasonYou() {
             </option>
           ))}
         </select>
-        <Link className="sf-more" href={`/profile/${encodeURIComponent(p.login)}`}>
+        <ProfileLink className="sf-more" login={p.login}>
           Полный профиль
-        </Link>
+        </ProfileLink>
       </div>
       <div className="sn-you-head">
         <span className="rk">#{p.rank}</span>

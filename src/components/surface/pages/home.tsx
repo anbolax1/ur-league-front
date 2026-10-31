@@ -8,6 +8,7 @@ import { LiveMatch, OrganizerBar } from "@/components/surface/live-match";
 import { HowSection } from "@/components/surface/how-section";
 import { SurfaceHighlights } from "@/components/surface/highlights";
 import { BeltHome } from "@/components/surface/belt-parts";
+import { PrizePool } from "@/components/surface/prize-pool";
 
 /** Главная страница лиги. */
 export async function SurfaceHome() {
@@ -38,6 +39,7 @@ export async function SurfaceHome() {
       <Hero season={season} />
       {show && <ShowSection t={show} matchup={showMatchup} />}
       <Schedule live={match.current} shows={shows} />
+      <PrizePool season={season} />
       <BeltHome belt={belt} />
       {lastState && <LastMatch st={lastState} />}
       <Ticker matches={finished} />

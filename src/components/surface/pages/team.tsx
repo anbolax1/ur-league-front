@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProfileLink } from "@/components/surface/player-link";
 import "./profile.css";
 import "./team.css";
 import { getMaps, getSeasons, getTeam, getTeamLeaderboard } from "@/lib/queries";
@@ -35,14 +36,14 @@ function TeamCard({ team, name, season, stats, final }: { team: TeamProfile; nam
       </div>
       <div className={`tm-photos ${members.length > 2 ? "trio" : ""}`}>
         {members.map((m) => (
-          <Link key={m.userId || m.login} href={`/profile/${m.login}`} className={`sf-id-photo ${m.avatarUrl ? "has-img" : ""}`} aria-label={`Профиль ${m.displayName || m.login}`}>
+          <ProfileLink key={m.userId || m.login} login={m.login} className={`sf-id-photo ${m.avatarUrl ? "has-img" : ""}`} aria-label={`Профиль ${m.displayName || m.login}`}>
             {m.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- аватар со стороннего CDN
               <img src={m.avatarUrl} alt="" />
             ) : (
               <b>{initials(m.displayName || m.login)}</b>
             )}
-          </Link>
+          </ProfileLink>
         ))}
       </div>
       <div className="sf-id-body">
@@ -52,7 +53,7 @@ function TeamCard({ team, name, season, stats, final }: { team: TeamProfile; nam
             {members.map((m, i) => (
               <span key={m.userId || m.login}>
                 {i > 0 && " & "}
-                <Link href={`/profile/${m.login}`}>{m.displayName || m.login}</Link>
+                <ProfileLink login={m.login}>{m.displayName || m.login}</ProfileLink>
               </span>
             ))}
           </p>

@@ -5,6 +5,7 @@ import { getMe } from "@/lib/queries";
 import { roleAtLeast } from "@/lib/roles";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
+import { ModeratorGuard } from "@/components/admin/moderator-guard";
 
 export const metadata = { title: "Кабинет — Лига Ultimate Royale" };
 
@@ -13,12 +14,12 @@ export const metadata = { title: "Кабинет — Лига Ultimate Royale" }
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await getMe();
 
-  if (!user || !roleAtLeast(user.role, "superadmin")) {
+  if (!user || !roleAtLeast(user.role, "moderator")) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-        <h1 className="text-2xl">Доступно только организатору</h1>
+        <h1 className="text-2xl">Доступно организатору и модераторам</h1>
         <p className="max-w-md text-muted">
-          Кабинет открыт пользователям с ролью организатора.
+          Кабинет открыт организатору, а модератору — раздел проверки профилей.
         </p>
         <div className="flex flex-wrap justify-center gap-3 pt-2">
           {!user && (
@@ -40,7 +41,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <AdminTopbar />
         <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row">
           <AdminSidebar />
-          <main className="min-w-0 flex-1">{children}</main>
+          <main className="min-w-0 flex-1">
+            <ModeratorGuard>{children}</ModeratorGuard>
+          </main>
         </div>
       </div>
     </AuthProvider>

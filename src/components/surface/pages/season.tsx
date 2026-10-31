@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProfileLink } from "@/components/surface/player-link";
 import type { ReactNode } from "react";
 import "./season.css";
 import type { RecapMatch, SeasonRecap } from "@/lib/types";
@@ -272,9 +273,9 @@ function FinalSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                 const p = recap.players[m.p[s]];
                 const node = (
                   <div key={s} className={`sn-side ${k ? "b" : "a"}`}>
-                    <Link className="nm" href={`/profile/${encodeURIComponent(p.login)}`} style={nameSize(p.login, 60, "100cqw")}>
+                    <ProfileLink className="nm" login={p.login} style={nameSize(p.login, 60, "100cqw")}>
                       {p.login}
-                    </Link>
+                    </ProfileLink>
                     <span className="meta">
                       {place(m.p[s]) ? `#${place(m.p[s])} до матча · ` : ""}
                       {m.before[s]}
@@ -634,6 +635,7 @@ function HeatsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
   const placed = bins.reduce((s, x) => s + x.n, 0);
   const kMax = Math.max(1, ...recap.knockers.map((k) => k.knocks));
   const bk = recap.bestKnock;
+  const bm = recap.bestMatchKnock;
   const chickens = recap.placers.filter((p) => p.chickens > 0).slice(0, LIST_LEN);
   const cMax = Math.max(1, ...chickens.map((p) => p.chickens));
   const steady = recap.placers
@@ -744,6 +746,16 @@ function HeatsSection({ recap, tone }: { recap: SeasonRecap; tone: Tone }) {
                   Рекорд одного захода: {nameOf(recap, bk.player)} - {pl(bk.knocks, W_KNOCK)} против{" "}
                   {nameOf(recap, recap.matches[bk.match].p.find((p) => p !== bk.player) ?? 0)}
                   {names[bk.map] ? `, ${names[bk.map]}` : ""}, {dLong(recap.matches[bk.match].at)}.
+                </p>
+              )}
+              {bm && (
+                <p className="sn-cap">
+                  Рекорд одного матча:{" "}
+                  <Link href={`/tournament/${recap.matches[bm.match].id}`}>
+                    {nameOf(recap, bm.player)} - {pl(bm.knocks, W_KNOCK)} против{" "}
+                    {nameOf(recap, recap.matches[bm.match].p.find((p) => p !== bm.player) ?? 0)}
+                  </Link>
+                  , {dLong(recap.matches[bm.match].at)}.
                 </p>
               )}
             </>

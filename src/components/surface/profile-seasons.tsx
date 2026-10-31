@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useIsHidden } from "@/components/surface/player-link";
 import Link from "next/link";
 import { seasonStats } from "@/lib/mmr-stats";
 import { mapImage } from "@/lib/match";
@@ -251,7 +252,10 @@ export function ProfileSeasons({
         </div>
       </dl>
 
-      <ChartLegend corrections={segments.some((s) => s.points.some((p) => p.correction))} />
+      <ChartLegend
+        corrections={segments.some((s) => s.points.some((p) => p.correction))}
+        resets={segments.some((s) => s.points.some((p) => p.reset))}
+      />
       <ProfileChart key={sel} segments={segments} />
 
       {analytics?.knocks?.heats ? <Knocks k={analytics.knocks} all={sel === ALL} /> : null}
@@ -286,7 +290,7 @@ export function ProfileSeasons({
 }
 
 /** Легенда графика MMR. */
-export function ChartLegend({ corrections }: { corrections: boolean }) {
+export function ChartLegend({ corrections, resets = false }: { corrections: boolean; resets?: boolean }) {
   return (
     <div className="pf-legend" aria-hidden>
       <span>
@@ -298,6 +302,11 @@ export function ChartLegend({ corrections }: { corrections: boolean }) {
       {corrections && (
         <span>
           <i className="c" /> сверка рейтинга
+        </span>
+      )}
+      {resets && (
+        <span>
+          <i className="r" /> сброс рейтинга
         </span>
       )}
       <span>
@@ -318,6 +327,7 @@ export function MapsAndRivals({
   opponents: OpponentStat[];
   maps: Array<{ code: string; name: string }>;
 }) {
+  const isHidden = useIsHidden();
   const mapInfo = (name: string) => maps.find((m) => norm(m.name) === norm(name));
   return (
     <div className="sf-prof-cols">
@@ -361,7 +371,7 @@ export function MapsAndRivals({
         {opponents.length ? (
           <ul className="sf-hist">
             {opponents.map((o, i) => {
-              const href = o.login ? `/profile/${o.login}` : o.teamKey ? `/teams/${encodeURIComponent(o.teamKey)}` : "";
+              const href = o.login ? (isHidden(o.login) ? "" : `/profile/${o.login}`) : o.teamKey ? `/teams/${encodeURIComponent(o.teamKey)}` : "";
               const body = (
                 <>
                   <span className={`sf-res ${o.wins >= o.losses ? "w" : "l"}`}>

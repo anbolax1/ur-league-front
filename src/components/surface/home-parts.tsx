@@ -1,20 +1,25 @@
 import Link from "next/link";
+import { ProfileLink } from "@/components/surface/player-link";
+import { TwitchIcon, YouTubeIcon } from "@/components/icons";
+import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
 import type { CSSProperties, ReactNode } from "react";
+import { drawLabel, DRAW_SHOWN } from "@/lib/chance";
 import { isShowMatch, matchSides, roundsLabel, stageLabel } from "@/lib/match";
 import type { LeaderboardRow, MatchState, Matchup, MatchupSide, Season, Tournament } from "@/lib/types";
 import { Arrow, ScheduleIcon, SecHead, TagStamps, signed } from "@/components/surface/ui";
 import { CountUp, FitLine, FlipCountdown, GrowOnView, Parallax, ShortCountdown } from "@/components/surface/motion";
 import { dayMonth, hhmm, shortDate, splitTitle, weekdayDate, weekdayLong, winrate } from "@/components/surface/fmt";
 
-/** Шансы сторон по MMR полосой в цветах сторон. */
-export function Odds({ a, b, nameA, nameB, label }: { a: number; b: number; nameA: string; nameB: string; label: string }) {
+/** Шансы сторон полосой в цветах сторон; ничья (её решает дуэль) - подписью. */
+export function Odds({ a, b, draw = 0, nameA, nameB, label }: { a: number; b: number; draw?: number; nameA: string; nameB: string; label: string }) {
+  const withDraw = draw >= DRAW_SHOWN;
   return (
     <div className="sf-odds">
       <div className="sf-odds-head">
         <span>
           <b>{a}%</b> {nameA}
         </span>
-        <span>{label}</span>
+        <span>{withDraw ? `${label} · ${drawLabel(draw)}` : label}</span>
         <span>
           {nameB} <b>{b}%</b>
         </span>
@@ -60,6 +65,14 @@ export function Hero({ season }: { season?: Season }) {
             </Link>
             <a className="sf-btn sf-btn-line" href="#how">
               Как проходит матч
+            </a>
+            <a className="sf-btn sf-btn-line" href={STREAM_URL} target="_blank" rel="noopener noreferrer">
+              <TwitchIcon />
+              Twitch
+            </a>
+            <a className="sf-btn sf-btn-line" href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
+              <YouTubeIcon />
+              YouTube
             </a>
           </div>
         </div>
@@ -187,7 +200,7 @@ function GeneratedPoster({ t }: { t: Tournament }) {
 export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | null }) {
   const [a, b] = splitTitle(t.title);
   const [sa, sb] = matchup?.sides ?? [];
-  const chance = sa?.winChance != null && sb?.winChance != null ? [sa.winChance, sb.winChance] : null;
+  const chance = sa?.winChance != null && sb?.winChance != null ? [sa.winChance, matchup?.drawChance ?? 0, sb.winChance] : null;
   const standing = (s?: MatchupSide) =>
     !s ? "" : s.isNew ? "новичок сезона" : [s.place ? `${s.place} место` : "", `${s.wins}–${s.losses} в сезоне`].filter(Boolean).join(" · ");
 
@@ -202,7 +215,7 @@ export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | 
         <div className="sf-show-grid">
           <div className="sf-poster">
             {t.previewUrl ? (
-              <div className="sf-poster-in is-img">
+              <div className="sf-poster-in is-img" style={{ "--poster": `url("${t.previewUrl}")` } as CSSProperties}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- постер из хранилища медиа */}
                 <img src={t.previewUrl} alt={`Постер шоу-матча ${t.title}`} />
               </div>
@@ -234,9 +247,9 @@ export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | 
                   </>
                 );
                 return login && t.mode === "1x1" ? (
-                  <Link key={x.color} className="sf-side-row" href={`/profile/${login}`}>
+                  <ProfileLink key={x.color} className="sf-side-row" login={login}>
                     {body}
-                  </Link>
+                  </ProfileLink>
                 ) : (
                   <div key={x.color} className="sf-side-row">
                     {body}
@@ -244,7 +257,7 @@ export function ShowSection({ t, matchup }: { t: Tournament; matchup: Matchup | 
                 );
               })}
             </div>
-            {chance && <Odds a={chance[0]} b={chance[1]} nameA={a} nameB={b} label="шансы по MMR" />}
+            {chance && <Odds a={chance[0]} b={chance[2]} draw={chance[1]} nameA={a} nameB={b} label="шанс на победу" />}
             <div className="sf-btn-row">
               <Link className="sf-btn sf-btn-amber" href={`/tournament/${t.id}`}>
                 Страница матча
@@ -304,9 +317,9 @@ export function Leaders({ rows, season }: { rows: LeaderboardRow[]; season?: Sea
               1
             </span>
             <div>
-              <Link className="sf-champ-name" href={`/profile/${c.login}`}>
+              <ProfileLink className="sf-champ-name" login={c.login}>
                 {name(c)}
-              </Link>
+              </ProfileLink>
               <TagStamps tags={c.tags} />
             </div>
             <dl className="sf-champ-stats">
@@ -338,9 +351,9 @@ export function Leaders({ rows, season }: { rows: LeaderboardRow[]; season?: Sea
             {list.map((r, i) => (
               <li key={r.userId || r.login} style={{ "--k": i } as CSSProperties}>
                 <span className="r">{i + 2}</span>
-                <Link className="n" href={`/profile/${r.login}`}>
+                <ProfileLink className="n" login={r.login}>
                   {name(r)}
-                </Link>
+                </ProfileLink>
                 <span className="wlt" title={`${r.wins} побед, ${r.losses} поражений`}>
                   {r.wins}–{r.losses}
                 </span>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ProfileLink } from "@/components/surface/player-link";
 import type { Belt, BeltReign } from "@/lib/types";
 import { getBelt, getSeasons } from "@/lib/queries";
 import { shortDate, dayMonth } from "@/components/surface/fmt";
@@ -52,9 +52,9 @@ function Plate({ r, now }: { r: BeltReign; now: number }) {
         {shortDate(r.from)} — {r.to ? shortDate(r.to) : "сейчас"}
         {r.time > 1 ? ` · ${r.time}-й раз` : ""}
       </span>
-      <Link href={`/profile/${r.holder.login}`} className={`bl-plate-name ${holderName(r.holder).length > 9 ? "long" : ""}`}>
+      <ProfileLink login={r.holder.login} className={`bl-plate-name ${holderName(r.holder).length > 9 ? "long" : ""}`}>
         {holderName(r.holder)}
-      </Link>
+      </ProfileLink>
       <span className="bl-plate-meta">
         {days} {plural(days, W_DAY)} · {r.defenses.length} {plural(r.defenses.length, W_DEF)}
       </span>
@@ -113,7 +113,7 @@ function Records({ belt, stats, now }: { belt: Belt; stats: BeltHolderStats[]; n
         <ol className="bl-honor-list">
           {honor.map((s) => (
             <li key={s.player.userId}>
-              <Link href={`/profile/${s.player.login}`}>{holderName(s.player)}</Link>
+              <ProfileLink login={s.player.login}>{holderName(s.player)}</ProfileLink>
               <span className="bl-honor-bar" aria-hidden>
                 <i style={{ width: `${Math.min(100, (s.defenses * 100) / belt.honorAt)}%` }} />
               </span>
