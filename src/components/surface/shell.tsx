@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { getCurrentMatch, getSeasons, getTournaments } from "@/lib/queries";
 import { isShowMatch } from "@/lib/match";
 import { SurfaceNav, type NavLive } from "@/components/surface/nav";
+import { QueueCallBanner } from "@/components/surface/queue-call";
 import { SurfaceFooter, type FooterSeason } from "@/components/surface/footer";
 
 /** Ближайший по дате анонс. */
@@ -31,6 +32,7 @@ export async function SurfaceShell({ children }: { children: ReactNode }) {
         К основному содержимому
       </a>
       <SurfaceNav live={live} />
+      <QueueCallBanner />
       <main id="main" className="sf-main">
         {children}
       </main>

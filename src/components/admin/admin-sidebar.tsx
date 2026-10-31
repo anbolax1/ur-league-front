@@ -6,9 +6,13 @@ import { useAuth } from "@/lib/auth";
 import { roleAtLeast } from "@/lib/roles";
 
 /** Разделы, открытые модератору: остальное кабинета только для организатора. */
-const MODERATOR_LINKS = [{ href: "/admin/moderation", label: "Проверка" }];
+const MODERATOR_LINKS = [
+  { href: "/admin/queue", label: "Очередь" },
+  { href: "/admin/moderation", label: "Проверка" },
+];
 
 const LINKS = [
+  { href: "/admin/queue", label: "Очередь" },
   { href: "/admin/moderation", label: "Проверка" },
   { href: "/admin/matches", label: "Матчи" },
   { href: "/admin/news", label: "Новости" },
