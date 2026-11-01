@@ -70,6 +70,8 @@ const SAMPLE_PARTS: { uses: (w: WidgetInstance) => boolean; missing: string; has
     has: (s) => !!s.complications?.length || !!s.complication,
     part: { complications: SAMPLE_STATE.complications },
   },
+  // Таймер запускает ведущий; в превью его показывает сам виджет условными 02:30, поэтому данных не добавляем.
+  { uses: (w) => w.type === "tasksV2" && !!w.showTimer, missing: "запущенного таймера", has: (s) => !!s.timer, part: {} },
   { uses: ofType("chance"), missing: "шанса на победу", has: (s) => !!s.chance, part: SAMPLE_CHANCE },
   // После матча на табло остаётся только итог, поэтому и шанс под счётом в превью - из примера.
   {

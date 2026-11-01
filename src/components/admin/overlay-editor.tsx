@@ -143,6 +143,7 @@ function showOptions(w: WidgetInstance): ShowOption[] {
   }
   if (w.type === "tasksV2") {
     out.push({ key: "opp", label: "Задания противника", title: "задания противника, которые сторона в кадре может украсть за +1", on: !!w.showOpponentContracts, patch: (on) => ({ showOpponentContracts: on }) });
+    out.push({ key: "timer", label: "Таймер", title: "сколько осталось на задание на время, когда ведущий запустил таймер в пульте", on: !!w.showTimer, patch: (on) => ({ showTimer: on }) });
   }
   return out;
 }

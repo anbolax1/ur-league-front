@@ -64,3 +64,37 @@
   color: rgba(235, 226, 207, 0.6);
   font: 800 16px/1 var(--font-montserrat), sans-serif;
 }
+/* Таймер задания на время: строка над списком, плашка как у «вида» и цифры в тёмном поле */
+.tw-timer {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+.tw-timer-label {
+  padding: 0 10px;
+  background: #57ef7e;
+  color: #120918;
+  font: 900 18px/36px var(--font-montserrat), sans-serif;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+.tw-timer-clock {
+  min-width: 96px;
+  padding: 0 10px;
+  border: 1px solid #57ef7e;
+  background: #120918;
+  color: #57ef7e;
+  font: 900 22px/34px var(--font-montserrat), sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.tw-timer-alert {
+  border-color: #f55841;
+  color: #f55841;
+}
+.tw-timer-over {
+  border-color: #f55841;
+  background: #f55841;
+  color: #120918;
+}

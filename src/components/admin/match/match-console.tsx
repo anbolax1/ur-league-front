@@ -378,6 +378,8 @@ export function MatchConsole({
           onKnock={(pid, delta) => act(`/tournaments/${id}/knocks`, { participantId: pid, delta })}
           onPoints={(pid, delta, label) => act(`/tournaments/${id}/points`, { participantId: pid, delta, label })}
           onLegendary={creditLegendary}
+          onTimerStart={(seconds) => void act(`/tournaments/${id}/timer`, { seconds }, "timer")}
+          onTimerStop={() => void send(() => api.del<MatchState>(`/tournaments/${id}/timer`))}
         />
       )}
 

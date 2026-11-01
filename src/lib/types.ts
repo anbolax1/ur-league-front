@@ -525,6 +525,14 @@ export interface LiveState {
   chanceTrail?: ChanceDot[];
   /** Счёт после всех заходов равный: стороны играют дуэль до первого килла. */
   duel?: boolean;
+  /** Таймер задания на время: пока ведущий не запустил, его нет. */
+  timer?: LiveTimer | null;
+}
+
+/** Отсчёт задания на время: endsAt - конец в миллисекундах Unix, durationSec - сколько было задано. */
+export interface LiveTimer {
+  durationSec: number;
+  endsAt: number;
 }
 
 /** Пояс лиги в идущем матче. */
@@ -587,6 +595,8 @@ export interface WidgetInstance {
   showChance?: boolean;
   /** Табло: полоса шанса под счётом - доли сторон, их шансы по краям и шанс ничьей в подписи. */
   showChanceBar?: boolean;
+  /** Задания: таймер задания на время, пока ведущий его запустил. */
+  showTimer?: boolean;
   /** Привязка к краю (tl|tc|tr|ml|c|mr|bl|bc|br); "" — свободно. При изменении глобального отступа привязанные виджеты сдвигаются. */
   anchor?: string;
   bg: OverlayBg;
@@ -998,6 +1008,8 @@ export interface MatchState {
   patches?: MatchPatch[];
   /** Сторона, чей заход идёт: её задания и счёт показывает оверлей; приходит только в идущем раунде. */
   focus?: string;
+  /** Таймер задания на время, пока он запущен; приходит только в идущем раунде. */
+  timer?: LiveTimer | null;
   /** Жетоны ×2 игроков на этот матч. */
   doubles?: DoubleToken[];
   /** Сколько жетонов ×2 у каждого игрока сторон. */

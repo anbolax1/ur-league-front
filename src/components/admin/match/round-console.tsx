@@ -16,6 +16,7 @@ import {
   taskTitle,
   totalScore,
 } from "@/lib/match";
+import { TaskTimer } from "./task-timer";
 import type { CatalogLegendary, MapInfo, MatchLogEntry, MatchState, Participant, Round, RoundBonusTask } from "@/lib/types";
 
 /** Цвета сторон как на табло: A - оранжевая, B - бирюзовая. */
@@ -351,6 +352,8 @@ export function RoundConsole({
   onKnock,
   onPoints,
   onLegendary,
+  onTimerStart,
+  onTimerStop,
 }: {
   st: MatchState;
   sides: [Participant | null, Participant | null];
@@ -370,6 +373,8 @@ export function RoundConsole({
   onKnock: (participantId: string, delta: 1 | -1) => void;
   onPoints: (participantId: string, delta: number, label: string) => void;
   onLegendary: (legendaryId: string, participantId: string) => void;
+  onTimerStart: (seconds: number) => void;
+  onTimerStop: () => void;
 }) {
   const [legFor, setLegFor] = React.useState<string | null>(null);
   const round = st.currentRound || 1;
@@ -401,6 +406,8 @@ export function RoundConsole({
             <RoundCard key={r.id} st={st} r={r} now={r.number === round} sides={sides} />
           ))}
         </div>
+
+        <TaskTimer timer={st.timer} onStart={onTimerStart} onStop={onTimerStop} />
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-[var(--border)] bg-surface-2/50 px-5 py-2.5">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
