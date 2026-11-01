@@ -99,6 +99,27 @@ export function UsersManager({
     }
   }
 
+  // Сброс пароля: старый пароль и сессии закрываются, игрок задаёт новый по свежей ссылке.
+  const [toReset, setToReset] = React.useState<UserOverview | null>(null);
+  const [resetBusy, setResetBusy] = React.useState(false);
+  const [resetError, setResetError] = React.useState("");
+
+  async function resetPassword(u: UserOverview) {
+    setResetBusy(true);
+    setResetError("");
+    try {
+      const res = await api.post<{ token: string }>(`/users/${u.id}/reset-password`, {});
+      setClaimLink((prev) => ({ ...prev, [u.id]: `${window.location.origin}/claim/${res.token}` }));
+      // Аккаунт без пароля - как заглушка: ниже в строке появится блок со ссылкой.
+      setItems((list) => list.map((it) => (it.id === u.id ? { ...it, isPlaceholder: true } : it)));
+      setToReset(null);
+    } catch (e) {
+      setResetError(errorText(e, "Не удалось сбросить пароль."));
+    } finally {
+      setResetBusy(false);
+    }
+  }
+
   async function setHidden(u: UserOverview, hidden: boolean) {
     setHideBusy(true);
     setHideError("");
@@ -344,6 +365,24 @@ export function UsersManager({
                                 </span>
                               </div>
                             )}
+                            {!u.isPlaceholder && currentUser?.id !== u.id && (
+                              <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-[var(--border)] pb-4">
+                                <span className="text-xs uppercase tracking-wide text-muted">Пароль</span>
+                                <button
+                                  type="button"
+                                  className="btn btn-ghost btn-sm"
+                                  onClick={() => {
+                                    setResetError("");
+                                    setToReset(u);
+                                  }}
+                                >
+                                  <span>Сбросить пароль</span>
+                                </button>
+                                <span className="w-full text-xs text-muted">
+                                  Старый пароль перестанет работать, игрок выйдет везде. Вы получите ссылку: по ней он задаст новый пароль.
+                                </span>
+                              </div>
+                            )}
                             {u.isPlaceholder && (
                               <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-[var(--border)] pb-4">
                                 <span className="text-xs uppercase tracking-wide text-muted">Доступ игроку</span>
@@ -448,6 +487,22 @@ export function UsersManager({
           hint={query ? "Измени запрос поиска." : "Здесь появятся зарегистрированные пользователи."}
         />
       )}
+
+      <ConfirmDialog
+        open={toReset !== null}
+        title="Сбросить пароль?"
+        message={
+          <>
+            {toReset ? userName(toReset) : "Игрок"} не сможет войти со старым паролем, а открытые сессии закроются. Вы получите ссылку для
+            нового пароля - передайте её игроку.
+          </>
+        }
+        confirmLabel="Сбросить"
+        busy={resetBusy}
+        error={resetError}
+        onConfirm={() => toReset && resetPassword(toReset)}
+        onCancel={() => setToReset(null)}
+      />
 
       <ConfirmDialog
         open={toHide !== null}
