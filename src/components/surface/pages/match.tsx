@@ -12,6 +12,7 @@ import {
   heatOf,
   isShowMatch,
   mapImage,
+  matchK,
   matchSides,
   placeLabel,
   roundBreakdown,
@@ -151,16 +152,19 @@ function SideColumn({ st, round, p, other }: { st: MatchState; round: number; p:
         <ul>
           {tasks.map((x) => {
             const own = x.completedBy === x.participantId;
-            const byOpp = !!x.completedBy && !own;
+            const byOpp = !!x.opponentBy;
             return (
-              <li key={x.id} className={x.completedBy ? "" : "miss"}>
+              <li key={x.id} className={own || byOpp ? "" : "miss"}>
                 <span className={`sf-k ${x.category === "protocol" ? "pr" : x.mapCode ? "map" : ""}`}>{taskKindLabel(x)}</span>
                 <span>
                   <b>«{taskTitle(x)}»</b>
                   {taskDescription(x) && ` — ${taskDescription(x)}`}
                   {byOpp && <em> Выполнил соперник.</em>}
                 </span>
-                <span className={`got ${own ? "own" : byOpp ? "cross" : "miss"}`}>{own ? `+${x.points}` : byOpp ? `+${CROSS_POINTS} ему` : "—"}</span>
+                <span className={`got ${own ? "own" : byOpp ? "cross" : "miss"}`}>
+                  {own ? `+${x.points}` : byOpp ? `+${CROSS_POINTS} ему` : "—"}
+                  {own && byOpp ? `, +${CROSS_POINTS} сопернику` : ""}
+                </span>
               </li>
             );
           })}
@@ -547,7 +551,7 @@ export async function SurfaceMatch({ id }: { id: string }) {
             {showFlow && trail && a && b && <MatchFlow id={id} initial={trail} names={[a.name, b.name]} rounds={rounds.length || t.totalRounds} />}
             {showRounds && <Rounds st={st} rounds={rounds} sides={sides} finished={finished} />}
             {showElo && (
-              <EloBlock a={a} b={b} ca={ca} cb={cb} k={matchup?.season?.kFactor} mult={mult} da={!!ia?.double} db={!!ib?.double} />
+              <EloBlock a={a} b={b} ca={ca} cb={cb} k={matchK(matchup?.season?.kFactor, t.totalRounds)} mult={mult} da={!!ia?.double} db={!!ib?.double} />
             )}
             {!live && beltBlock}
             {patches.length > 0 && <MatchPatches patches={patches} sides={sides} live={live} />}

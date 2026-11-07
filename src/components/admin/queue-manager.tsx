@@ -239,6 +239,7 @@ function MatchPanel({
           <label className="flex items-center gap-2">
             <span className="text-muted">Раундов</span>
             <select className="input h-8 py-0" value={rounds} onChange={(e) => setRounds(Number(e.target.value))}>
+              <option value={1}>1 (MMR вдвое меньше)</option>
               <option value={2}>2</option>
               <option value={3}>3</option>
             </select>

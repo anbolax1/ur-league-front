@@ -19,8 +19,8 @@ export function roundTasks(st: MatchState, round: number, sides: [Participant | 
       who: name(t.participantId),
       name: taskTitle(t),
       points: t.points,
-      result: !t.completedBy ? "miss" : t.completedBy === t.participantId ? "own" : "cross",
-      by: t.completedBy && t.completedBy !== t.participantId ? name(t.completedBy) : undefined,
+      result: t.completedBy === t.participantId ? (t.opponentBy ? "both" : "own") : t.opponentBy ? "cross" : "miss",
+      by: t.opponentBy ? name(t.opponentBy) : undefined,
     }));
 }
 

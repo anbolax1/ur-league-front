@@ -211,7 +211,7 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
   const [first, setFirst] = React.useState<MatchPlayer | null>(null);
   const [second, setSecond] = React.useState<MatchPlayer | null>(null);
   const [teams, setTeams] = React.useState<[TeamDraft, TeamDraft]>(NO_TEAMS);
-  const [rounds, setRounds] = React.useState<2 | 3>(2);
+  const [rounds, setRounds] = React.useState<1 | 2 | 3>(2);
   const [prize, setPrize] = React.useState("");
   const [preview, choosePreview] = useChosenPreview();
   const [busy, setBusy] = React.useState(false);
@@ -377,20 +377,23 @@ export function NewMatchForm({ liveMatchId = "", belt = null }: { liveMatchId?: 
         <div className="space-y-1.5">
           <span className="field-label">Раунды</span>
           <div className="seg">
-            {([2, 3] as const).map((n) => (
+            {([1, 2, 3] as const).map((n) => (
               <button
                 key={n}
                 type="button"
-                className={`seg-btn ${show && n === 2 ? "opacity-50" : ""}`}
+                className={`seg-btn ${show && n !== 3 ? "opacity-50" : ""}`}
                 aria-pressed={roundCount === n}
-                disabled={show && n === 2}
-                title={show ? "У шоу-матча всегда три раунда" : n === 3 ? "Три раунда, как в шоу-матче" : undefined}
+                disabled={show && n !== 3}
+                title={
+                  show ? "У шоу-матча всегда три раунда" : n === 3 ? "Три раунда, как в шоу-матче" : n === 1 ? "Один раунд: MMR меняется вдвое меньше" : undefined
+                }
                 onClick={() => setRounds(n)}
               >
                 <span>{n}</span>
               </button>
             ))}
           </div>
+          {roundCount === 1 && <span className="block text-xs text-muted">В матче на один раунд MMR меняется вдвое меньше.</span>}
         </div>
       </Panel>
 

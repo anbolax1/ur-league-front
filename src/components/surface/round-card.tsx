@@ -6,8 +6,8 @@ export interface RoundTaskView {
   id: string;
   who: string;
   name: string;
-  /** own - выполнил владелец, cross - соперник, miss - не выполнено. */
-  result: "own" | "cross" | "miss";
+  /** own - выполнил владелец, cross - соперник, both - оба, miss - не выполнено. */
+  result: "own" | "cross" | "both" | "miss";
   points: number;
   by?: string;
 }
@@ -83,7 +83,7 @@ export function RoundCard({
                 <li key={t.id} className={t.result === "miss" ? "miss" : ""}>
                   <span className="who">{t.who}</span>
                   <span>{t.name}</span>
-                  <span className="pts">{t.result === "own" ? `+${t.points}` : t.result === "cross" ? `+1 ${t.by ?? ""}` : "—"}</span>
+                  <span className="pts">{t.result === "own" ? `+${t.points}` : t.result === "cross" ? `+1 ${t.by ?? ""}` : t.result === "both" ? `+${t.points}, +1 ${t.by ?? ""}` : "—"}</span>
                 </li>
               ))}
             </ul>

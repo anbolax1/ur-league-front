@@ -419,6 +419,8 @@ export interface RoundBonusTask {
   valueType: ValueType;
   times: number;
   completedBy?: string | null;
+  /** Сторона, засчитавшая задание соперника (+1); владелец при этом тоже мог его выполнить. */
+  opponentBy?: string | null;
   name?: string;
   category: TaskCategory;
   mapCode?: string;

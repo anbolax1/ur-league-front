@@ -121,9 +121,9 @@ export function roundBreakdown(st: MatchState, round: number, participantId: str
   const manual = manualPoints(st, round, participantId) - knocks * KNOCK_POINTS;
   const out: RoundBreakdown = { tasks: 0, cross: 0, knocks, manual, legendary: 0 };
   for (const t of st.tasks) {
-    if (t.roundNumber !== round || t.completedBy !== participantId) continue;
-    if (t.participantId === participantId) out.tasks += t.points;
-    else out.cross += CROSS_POINTS;
+    if (t.roundNumber !== round) continue;
+    if (t.participantId === participantId && t.completedBy === participantId) out.tasks += t.points;
+    if (t.opponentBy === participantId) out.cross += CROSS_POINTS;
   }
   for (const l of st.legendary) {
     if (l.roundNumber === round && l.participantId === participantId) out.legendary += l.points ?? 0;
@@ -160,6 +160,11 @@ export function isShowMatch(t: Pick<Tournament, "format">): boolean {
 }
 
 /** «2 раунда», «3 раунда», «1 раунд». */
+/** K-фактор матча: в матче на один раунд рейтинг меняется вдвое слабее (как на сервере). */
+export function matchK(k: number | undefined, totalRounds: number): number | undefined {
+  return k && totalRounds === 1 ? Math.max(Math.floor(k / 2), 1) : k;
+}
+
 export function roundsLabel(n: number): string {
   return n === 1 ? "1 раунд" : `${n} раунда`;
 }

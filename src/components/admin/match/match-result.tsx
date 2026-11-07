@@ -1,11 +1,20 @@
 import Link from "next/link";
 import { Panel } from "@/components/ui/card";
 import { TrophyIcon } from "@/components/icons";
-import { roundMapsLabel, roundPlacesLabel, roundScore, totalScore } from "@/lib/match";
+import { roundMapsLabel, roundPlacesLabel, roundsLabel, roundScore, totalScore } from "@/lib/match";
 import type { MatchState, Participant } from "@/lib/types";
 
 /** Итог матча: победитель, счёт по раундам и изменение MMR. */
-export function MatchResult({ st, sides }: { st: MatchState; sides: [Participant | null, Participant | null] }) {
+export function MatchResult({
+  st,
+  sides,
+  onFix,
+}: {
+  st: MatchState;
+  sides: [Participant | null, Participant | null];
+  /** Открыть пульт для исправления счёта; нет - в матче не сыграно ни одного раунда. */
+  onFix?: () => void;
+}) {
   const t = st.tournament;
   const [a, b] = sides;
   const winner = (t.participants ?? []).find((p) => p.id === t.winnerParticipantId) ?? null;
@@ -22,7 +31,7 @@ export function MatchResult({ st, sides }: { st: MatchState; sides: [Participant
           <span className="field-label text-accent">{winner ? "Победа" : "Ничья"}</span>
           <div className="truncate font-display text-3xl uppercase">{winner ? winner.name : "Ничья — MMR не меняется"}</div>
           <div className="text-sm text-muted">
-            {t.mode} · {rounds.length} раунда{t.ratingMultiplier === 2 ? " · рейтинг ×2" : ""}
+            {t.mode} · {roundsLabel(rounds.length)}{t.ratingMultiplier === 2 ? " · рейтинг ×2" : ""}
           </div>
         </div>
         <div className="flex items-center gap-3 font-display text-5xl leading-none tnum">
@@ -81,6 +90,11 @@ export function MatchResult({ st, sides }: { st: MatchState; sides: [Participant
         <Link href={`/tournament/${t.id}`} className="btn btn-ghost btn-sm">
           <span>Страница матча</span>
         </Link>
+        {onFix && (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onFix}>
+            <span>Исправить матч</span>
+          </button>
+        )}
         <Link href="/admin/matches" className="btn btn-primary ml-auto">
           <span>Новый матч</span>
         </Link>
