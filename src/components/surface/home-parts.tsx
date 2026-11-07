@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ProfileLink } from "@/components/surface/player-link";
-import { TwitchIcon, YouTubeIcon } from "@/components/icons";
-import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
+import { TelegramIcon, TwitchIcon, YouTubeIcon } from "@/components/icons";
+import { STREAM_URL, TELEGRAM_URL, YOUTUBE_URL } from "@/lib/links";
 import type { CSSProperties, ReactNode } from "react";
 import { drawLabel, DRAW_SHOWN } from "@/lib/chance";
 import { isShowMatch, matchSides, roundsLabel, stageLabel } from "@/lib/match";
@@ -73,6 +73,10 @@ export function Hero({ season }: { season?: Season }) {
             <a className="sf-btn sf-btn-line" href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
               <YouTubeIcon />
               YouTube
+            </a>
+            <a className="sf-btn sf-btn-line" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
+              <TelegramIcon />
+              Telegram
             </a>
           </div>
         </div>

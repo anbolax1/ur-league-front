@@ -4,9 +4,6 @@ import * as React from "react";
 import { api, errorText } from "@/lib/api";
 import type { User } from "@/lib/types";
 
-/** Ранги PUBG Mobile от низшего к высшему: игрок выбирает свой, по нему ведущий подбирает состав. */
-export const RANKS = ["Бронза", "Серебро", "Золото", "Платина", "Алмаз", "Корона", "Туз", "Мастер Туза", "Доминатор Туза", "Завоеватель"];
-
 /** Целое из поля: пусто - null, не число - NaN. */
 function parseCount(v: string): number | null {
   const t = v.replace(/\s/g, "");

@@ -4,7 +4,7 @@ import "./profile.css";
 import { getBelt, getHighlights, getMaps, getMe, getPlayer, getPlayerModeration, getSeasons } from "@/lib/queries";
 import { roleAtLeast } from "@/lib/roles";
 import { ProfileModeration } from "@/components/surface/profile-moderation";
-import type { PlayerPatch, PlayerProfile, Season } from "@/lib/types";
+import type { PlayerPatch, PlayerProfile, Season, TokenWallet } from "@/lib/types";
 import { ArrowBack, TagStamps } from "@/components/surface/ui";
 import { SurfaceHighlights } from "@/components/surface/highlights";
 import { ProfileSeasons } from "@/components/surface/profile-seasons";
@@ -45,6 +45,12 @@ function codeLine(login: string, season: Season | undefined, mmr: number, place:
   return [`UR<<${name}${"<".repeat(Math.max(4, 14 - name.length))}`, `S${no}<${String(mmr).padStart(4, "0")}<${String(place).padStart(2, "0")}`];
 }
 
+/** Баланс жетонов одной строкой: «×2: 1 · без очереди: 0 · сброс: 1». */
+function tokensLine(wallet?: TokenWallet): string {
+  if (!wallet) return "—";
+  return `×2: ${wallet.double} · без очереди: ${wallet.priority} · сброс: ${wallet.reset}`;
+}
+
 function IdCard({ profile, season }: { profile: PlayerProfile; season?: Season }) {
   const { user, mmrSolo, mmrDuo, mmrTrio, mmr1x1, stats } = profile;
   const name = user.displayName || user.login;
@@ -62,6 +68,7 @@ function IdCard({ profile, season }: { profile: PlayerProfile; season?: Season }
     { k: "Чикены", v: stats.chickens ? String(stats.chickens) : "пока нет" },
     { k: "Задания", v: stats.tasksOffered ? `${stats.tasksDone} из ${stats.tasksOffered}${stats.tasksCross ? ` · чужих ${stats.tasksCross}` : ""}` : "пока нет" },
     { k: "Легендарки", v: stats.legendaries ? String(stats.legendaries) : "пока нет" },
+    { k: "Жетоны", v: tokensLine(profile.tokens) },
     { k: "Победы 1×1", v: stats.soloPlayed ? `${stats.soloWins} из ${stats.soloPlayed} · ${winrate(stats.soloWins, stats.soloPlayed - stats.soloWins)}%` : "нет матчей" },
     { k: "Победы 2×2", v: stats.duoPlayed ? `${stats.duoWins} из ${stats.duoPlayed} · ${winrate(stats.duoWins, stats.duoPlayed - stats.duoWins)}%` : "нет матчей" },
     { k: "Победы 3×3", v: stats.trioPlayed ? `${stats.trioWins} из ${stats.trioPlayed} · ${winrate(stats.trioWins, stats.trioPlayed - stats.trioWins)}%` : "нет матчей" },

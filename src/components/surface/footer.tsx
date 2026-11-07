@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { TwitchIcon, YouTubeIcon } from "@/components/icons";
-import { STREAM_URL, YOUTUBE_URL } from "@/lib/links";
+import { TelegramIcon, TwitchIcon, YouTubeIcon } from "@/components/icons";
+import { STREAM_URL, TELEGRAM_URL, YOUTUBE_URL } from "@/lib/links";
 import { Mark, Wordmark } from "@/components/surface/brand";
 
 /** Сезон для ссылки на его итоги: идущий, а между сезонами - последний. */
@@ -29,6 +29,7 @@ function more(season?: FooterSeason | null) {
 const SOCIALS = [
   { label: "Twitch", href: STREAM_URL, Icon: TwitchIcon },
   { label: "YouTube", href: YOUTUBE_URL, Icon: YouTubeIcon },
+  { label: "Telegram", href: TELEGRAM_URL, Icon: TelegramIcon },
 ];
 
 export function SurfaceFooter({ season }: { season?: FooterSeason | null }) {

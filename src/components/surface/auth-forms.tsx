@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { User } from "@/lib/types";
 import { useAuthForm } from "@/components/domain/auth-form";
 import { useClaimForm } from "@/components/domain/claim-form";
-import { RANKS, useJoinRequest } from "@/components/domain/register-form";
+import { useJoinRequest } from "@/components/domain/register-form";
 
 /** Вход или регистрация по логину и паролю. */
 export function SurfaceAuthForm({ mode, redirectTo }: { mode: "login" | "register"; redirectTo?: string }) {
@@ -148,9 +148,15 @@ export function SurfaceJoinForm({ user }: { user: User }) {
         <h2 className="sf-h-up">
           заявка в пуле
         </h2>
-        <p className="au-text">Ты в общем списке участников. Организатор позовёт тебя на матч — статус появится в профиле.</p>
+        <p className="au-text">
+          Ты в общем списке участников. Теперь встань в очередь: ведущий приглашает на стриме в порядке очереди, статус заявки виден в
+          профиле.
+        </p>
         <div className="au-actions">
-          <Link className="sf-btn sf-btn-ink" href="/profile">
+          <Link className="sf-btn sf-btn-ink" href="/queue">
+            Встать в очередь
+          </Link>
+          <Link className="sf-btn sf-btn-ink-line" href="/profile">
             В профиль
           </Link>
           <button type="button" className="sf-btn sf-btn-ink-line" onClick={() => f.setStatus("idle")}>
@@ -165,7 +171,7 @@ export function SurfaceJoinForm({ user }: { user: User }) {
     <form className="au-form" onSubmit={f.onSubmit}>
       <p className="au-text">
         Вошёл как <b>{user.displayName || user.login}</b>. Заполни анкету из своего профиля в PUBG Mobile — по ней ведущий подберёт тебе
-        состав и позовёт в группу.
+        состав. После заявки встань в очередь: ведущий приглашает на стриме в порядке очереди.
       </p>
       <div className="au-pair">
         <div className="sf-field">
@@ -203,14 +209,14 @@ export function SurfaceJoinForm({ user }: { user: User }) {
           <label className="sf-field-label" htmlFor="au-rank">
             Ранг
           </label>
-          <select id="au-rank" className="sf-select" value={f.rank} onChange={(e) => f.setRank(e.target.value)}>
-            <option value="">Не указан</option>
-            {RANKS.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+          <input
+            id="au-rank"
+            className="sf-input"
+            maxLength={40}
+            placeholder="Впиши свой ранг в игре"
+            value={f.rank}
+            onChange={(e) => f.setRank(e.target.value)}
+          />
         </div>
         <div className="sf-field">
           <label className="sf-field-label" htmlFor="au-kd">
