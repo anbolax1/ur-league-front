@@ -322,7 +322,7 @@ function Row({ e, mine, serverNow }: { e: QueueEntry; mine: boolean; serverNow: 
         <small>в очереди с</small> {clock(e.joinedAt)}
       </span>
       <span className={`qu-today ${e.todayMatches > 0 ? "has" : ""}`}>
-        <small>сегодня</small> {todayLabel(e.todayMatches)}
+        <small>за стрим</small> {todayLabel(e.todayMatches)}
       </span>
       <span className="qu-state">
         <span className={`qu-badge ${entryTone(e)}`}>{entryStatusLabel(e)}</span>

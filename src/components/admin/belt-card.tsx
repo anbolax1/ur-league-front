@@ -1,13 +1,71 @@
+"use client";
+
+import * as React from "react";
 import Link from "next/link";
-import type { Belt } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import type { Belt, MatchPlayer } from "@/lib/types";
+import { api, errorText } from "@/lib/api";
 import { fmtDate } from "@/lib/format";
 import { Panel } from "@/components/ui/card";
 import { BeltArt } from "@/components/surface/belt-art";
 import { W_DEF, W_GAMEDAY, holderName } from "@/components/surface/belt-lib";
 import { plural } from "@/components/surface/season-lib";
+import { PlayerPicker } from "@/components/admin/match/player-picker";
 
 /** Осталось столько игровых дней без матча - карточка подсвечивает, что носителю пора дать матч. */
 const RUST_WARN = 2;
+
+/** Передача пояса без матча: носитель ушёл из лиги, организатор отдаёт пояс другому игроку. */
+function BeltTransfer({ belt }: { belt: Belt }) {
+  const router = useRouter();
+  const [players, setPlayers] = React.useState<MatchPlayer[]>([]);
+  const [picked, setPicked] = React.useState<MatchPlayer | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState("");
+
+  React.useEffect(() => {
+    api.get<MatchPlayer[]>("/match-players").then(setPlayers).catch(() => setPlayers([]));
+  }, []);
+
+  const send = async () => {
+    if (!picked || !belt.holder) return;
+    if (!window.confirm(`Передать пояс от ${holderName(belt.holder)} к ${picked.displayName || picked.login} без матча?`)) return;
+    setBusy(true);
+    setErr("");
+    try {
+      await api.post("/belt/transfer", { toUserId: picked.id });
+      setPicked(null);
+      router.refresh();
+    } catch (e) {
+      setErr(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!belt.holder) return null;
+  return (
+    <div className="max-w-md space-y-2">
+      <PlayerPicker
+        inputId="belt-transfer"
+        players={players}
+        applicants={new Set()}
+        exclude={belt.holder.userId}
+        onPick={setPicked}
+        busy={busy}
+      />
+      {picked && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="chip">{picked.displayName || picked.login}</span>
+          <button type="button" className="btn btn-danger btn-sm" disabled={busy} onClick={send}>
+            <span>Передать пояс</span>
+          </button>
+        </div>
+      )}
+      {err && <p className="text-sm text-danger">{err}</p>}
+    </div>
+  );
+}
 
 /** Пояс лиги в кабинете: у кого он и сколько игровых дней носитель может не играть, пока пояс не выпал. */
 export function BeltAdminCard({ belt }: { belt: Belt | null }) {
@@ -65,6 +123,7 @@ export function BeltAdminCard({ belt }: { belt: Belt | null }) {
               {hot && " Поставьте ему обычный матч."}
             </p>
             <p className="text-xs text-muted">Игровой день — день, когда в лиге был хотя бы один обычный матч 1×1. Шоу-матчи пояс не разыгрывают.</p>
+            <BeltTransfer belt={belt} />
           </>
         ) : (
           <p className="text-sm text-muted">

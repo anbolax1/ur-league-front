@@ -84,7 +84,7 @@ function StatusText({ e }: { e: QueueEntry }) {
 
 /** Сколько матчей человек сыграл сегодня: сыгравшие стоят позади тех, кто ещё не играл. */
 function TodayChip({ n }: { n: number }) {
-  return <span className={n > 0 ? "font-semibold text-primary" : ""}>сегодня: {todayLabel(n)}</span>;
+  return <span className={n > 0 ? "font-semibold text-primary" : ""}>за стрим: {todayLabel(n)}</span>;
 }
 
 /* ---------- Создание и настройки сессии ---------- */

@@ -2439,6 +2439,12 @@ a.sf-side-name:hover {
   outline: 2px solid var(--sf-amber);
   outline-offset: 4px;
 }
+.sf-calc-x2-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  justify-self: start;
+}
 .sf-calc-x2 {
   display: inline-flex;
   align-items: center;

@@ -342,14 +342,14 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
     tabRefs.current[to]?.focus({ preventScroll: true });
   };
 
-  /* ----- калькулятор: как на сайте - победитель получает round(K × ожидание проигравшего) × множитель ----- */
+  /* ----- калькулятор: победитель получает round(K × ожидание проигравшего); жетон ×2 удваивает только своего игрока ----- */
   const [ca, setCa] = React.useState(calc.a);
   const [cb, setCb] = React.useState(calc.b);
-  const [x2, setX2] = React.useState(false);
+  const [x2a, setX2a] = React.useState(false);
+  const [x2b, setX2b] = React.useState(false);
   const eA = 1 / (1 + Math.pow(10, (cb - ca) / 400));
-  const mult = x2 ? 2 : 1;
-  const winA = Math.round(k * (1 - eA)) * mult;
-  const winB = Math.round(k * eA) * mult;
+  const magA = Math.round(k * (1 - eA)); // изменение при победе A
+  const magB = Math.round(k * eA); // изменение при победе B
   const chanceA = Math.round(eA * 100);
   const fill = (v: number) => ({ "--fill": `${(((v - 800) / 800) * 100).toFixed(1)}%` }) as React.CSSProperties;
   const userCalc = () => setAuto(false);
@@ -436,8 +436,8 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
               </Panel>
               <Panel i={3} step={step} title="рейтинг эло">
                 <p>
-                  В начале сезона у всех <b>{start} MMR</b>, коэффициент <b>K = {k}</b>. Сколько получает победитель, столько теряет проигравший. Победа над
-                  сильным даёт больше, поражение от слабого стоит дороже. Ничья MMR не меняет. Подвигай ползунки справа.
+                  В начале сезона у всех <b>{start} MMR</b>, коэффициент <b>K = {k}</b>. Победа над
+                  сильным даёт больше, поражение от слабого стоит дороже. Жетон ×2 удваивает изменение только того, кто его поставил. Ничья MMR не меняет. Подвигай ползунки справа.
                 </p>
                 <Link className="sf-more" href="/rating">
                   Таблица лидеров <Arr />
@@ -555,11 +555,18 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
                     <input id="calc-b" type="range" min={800} max={1600} step={1} value={cb} style={fill(cb)} onChange={(e) => (userCalc(), setCb(+e.target.value))} />
                   </div>
                 </div>
-                <label className="sf-calc-x2" htmlFor="calc-x2">
-                  <input id="calc-x2" type="checkbox" checked={x2} onChange={(e) => (userCalc(), setX2(e.target.checked))} />
-                  <span />
-                  Матч ×2
-                </label>
+                <div className="sf-calc-x2-row">
+                  <label className="sf-calc-x2" htmlFor="calc-x2a">
+                    <input id="calc-x2a" type="checkbox" checked={x2a} onChange={(e) => (userCalc(), setX2a(e.target.checked))} />
+                    <span />
+                    Жетон ×2 у A
+                  </label>
+                  <label className="sf-calc-x2" htmlFor="calc-x2b">
+                    <input id="calc-x2b" type="checkbox" checked={x2b} onChange={(e) => (userCalc(), setX2b(e.target.checked))} />
+                    <span />
+                    Жетон ×2 у B
+                  </label>
+                </div>
                 <div className="sf-odds">
                   <div className="sf-odds-bar" aria-hidden>
                     <i style={{ flexGrow: chanceA, background: "var(--sf-a)" }} />
@@ -583,13 +590,13 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
                     <span className="sf-calc-ln">
                       <em>A</em>
                       <b className="sf-up">
-                        <Tween value={winA} format={signed} replay={calcReplay} />
+                        <Tween value={magA * (x2a ? 2 : 1)} format={signed} replay={calcReplay} />
                       </b>
                     </span>
                     <span className="sf-calc-ln">
                       <em>B</em>
                       <b className="sf-down">
-                        <Tween value={-winA} format={signed} replay={calcReplay} />
+                        <Tween value={-magA * (x2b ? 2 : 1)} format={signed} replay={calcReplay} />
                       </b>
                     </span>
                   </div>
@@ -601,25 +608,25 @@ export function HowItWorks({ maps, example, k, start, calc }: { maps: MapInfo[];
                     <span className="sf-calc-ln">
                       <em>B</em>
                       <b className="sf-up">
-                        <Tween value={winB} format={signed} replay={calcReplay} />
+                        <Tween value={magB * (x2b ? 2 : 1)} format={signed} replay={calcReplay} />
                       </b>
                     </span>
                     <span className="sf-calc-ln">
                       <em>A</em>
                       <b className="sf-down">
-                        <Tween value={-winB} format={signed} replay={calcReplay} />
+                        <Tween value={-magB * (x2a ? 2 : 1)} format={signed} replay={calcReplay} />
                       </b>
                     </span>
                   </div>
                 </div>
                 <p className="sf-calc-f">
-                  Ожидание - шанс по одному MMR, из него считается рейтинг. Победитель получает столько, сколько теряет проигравший: <b>{k} × ожидание проигравшего</b>
-                  {x2 ? ", в матче ×2 — вдвое" : ""}. Ничья MMR не меняет.
+                  Ожидание - шанс по одному MMR, из него считается рейтинг: <b>{k} × ожидание проигравшего</b>. Жетон ×2 удваивает изменение только того,
+                  кто его поставил: победитель с жетоном получает вдвое, проигравший с жетоном теряет вдвое. Ничья MMR не меняет.
                   {calc.nameA && calc.nameB && (
                     <>
                       <br />
                       Сейчас стоят {calc.nameA} и {calc.nameB} перед матчем {calc.date}.
-                      {calc.mult && calc.mult > 1 && calc.delta ? ` Тот матч был ×${calc.mult} — включи и увидишь его ${signed(calc.delta)}.` : ""}
+                      {calc.mult && calc.mult > 1 && calc.delta ? ` Тот матч шёл с множителем ×${calc.mult} - он удваивает обе стороны, это не жетон.` : ""}
                     </>
                   )}
                 </p>

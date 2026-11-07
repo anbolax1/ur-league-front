@@ -1117,14 +1117,14 @@ export interface BeltReign {
   holder: BeltPlayer;
   from: string;
   to?: string;
-  /** first - первый матч лиги, take - обыграл носителя, pick - подобрал ничей пояс. */
-  how: "first" | "take" | "pick";
+  /** first - первый матч лиги, take - обыграл носителя, pick - подобрал ничей пояс, hand - передан организатором. */
+  how: "first" | "take" | "pick" | "hand";
   matchId: string;
   opponent?: BeltPlayer;
   score?: [number, number];
   defenses: BeltDefense[];
-  /** lost - проиграл, drop - выпал; нет - держит сейчас. */
-  end?: "lost" | "drop";
+  /** lost - проиграл, drop - выпал, hand - передан организатором; нет - держит сейчас. */
+  end?: "lost" | "drop" | "hand";
   lostTo?: BeltPlayer;
   /** В который раз игрок берёт пояс. */
   time: number;
@@ -1281,7 +1281,7 @@ export interface QueueMember {
   displayName: string;
   avatarUrl: string;
   /** Подтверждённые модератором часы в игре и ноки за всё время. */
-  /** Матчей, сыгранных сегодня. */
+  /** Матчей, сыгранных с начала сессии очереди (за стрим). */
   todayMatches: number;
   ready: boolean;
   readyAt?: string | null;
@@ -1297,7 +1297,7 @@ export interface QueueEntry {
   members: QueueMember[];
   mmr: number;
   joinedAt: string;
-  /** Матчей за сегодня; у команды - у самого игравшего из двух. */
+  /** Матчей с начала сессии очереди; у команды - у самого игравшего из двух. */
   todayMatches: number;
   performedCount: number;
   skippedCount: number;

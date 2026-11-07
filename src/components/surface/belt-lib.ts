@@ -36,6 +36,7 @@ export function howTaken(r: BeltReign): string {
   const opp = r.opponent ? holderName(r.opponent) : "";
   if (r.how === "first") return `выиграл первый матч лиги${opp ? ` у ${opp}` : ""}`;
   if (r.how === "pick") return `подобрал ничей пояс${opp ? `, обыграв ${opp}` : ""}`;
+  if (r.how === "hand") return `получил от организатора${opp ? ` (пояс был у ${opp})` : ""}`;
   return `обыграл носителя${opp ? ` ${opp}` : ""}`;
 }
 
@@ -43,6 +44,7 @@ export function howTaken(r: BeltReign): string {
 export function howEnded(r: BeltReign, rustLimit: number): string {
   if (r.end === "drop") return `пояс выпал: ${rustLimit} ${plural(rustLimit, W_GAMEDAY)} без матча`;
   if (r.end === "lost") return `проиграл ${r.lostTo ? holderName(r.lostTo) : "сопернику"}`;
+  if (r.end === "hand") return `пояс передан ${r.lostTo ? holderName(r.lostTo) : "другому игроку"} организатором`;
   return "держит сейчас";
 }
 
@@ -92,7 +94,7 @@ export function matchBelt(belt: Belt | null, t: Tournament, users: string[]): Ma
   if (t.status === "finished") {
     for (let i = 0; i < belt.reigns.length; i++) {
       const r = belt.reigns[i];
-      if (r.matchId === t.id) return { kind: r.how, reign: r, prev: belt.reigns[i - 1] ?? null };
+      if (r.how !== "hand" && r.matchId === t.id) return { kind: r.how, reign: r, prev: belt.reigns[i - 1] ?? null };
       const d = r.defenses.findIndex((x) => x.matchId === t.id);
       if (d >= 0) return { kind: "defense", reign: r, n: d + 1 };
     }

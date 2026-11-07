@@ -220,7 +220,7 @@ export function plural(n: number, forms: [string, string, string]): string {
 
 const W_MATCHES: [string, string, string] = ["матч", "матча", "матчей"];
 
-/** «Сегодня: 2 матча» - сколько матчей человек уже сыграл за сегодня. */
+/** «2 матча» - сколько матчей человек уже сыграл на этом стриме (с начала сессии очереди). */
 export function todayLabel(n: number): string {
   return n > 0 ? `${n} ${plural(n, W_MATCHES)}` : "не играл";
 }

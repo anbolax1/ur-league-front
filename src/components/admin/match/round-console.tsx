@@ -44,7 +44,7 @@ const SIDE_STYLE = [
 const KIND_STYLE: Record<string, string> = {
   Задание: "bg-[rgba(255,106,26,0.16)] text-primary-2 shadow-[inset_0_0_0_1px_rgba(255,106,26,0.35)]",
   "На карту": "bg-[rgba(34,211,238,0.12)] text-accent shadow-[inset_0_0_0_1px_rgba(34,211,238,0.3)]",
-  Протокол: "bg-[rgba(192,38,211,0.14)] text-[#e070ff] shadow-[inset_0_0_0_1px_rgba(192,38,211,0.34)]",
+  "На время": "bg-[rgba(192,38,211,0.14)] text-[#e070ff] shadow-[inset_0_0_0_1px_rgba(192,38,211,0.34)]",
 };
 
 function SideTag({ i }: { i: 0 | 1 }) {
@@ -115,7 +115,7 @@ function TaskRow({
   onMark: (id: string, by: "owner" | "opponent" | "none") => void;
   onReroll: (id: string) => void;
 }) {
-  const kind = taskKindLabel(t);
+  const kind = t.category === "protocol" ? "На время" : taskKindLabel(t);
   const byOwner = t.completedBy === t.participantId;
   const byOpp = !!t.completedBy && !byOwner;
   const desc = taskDescription(t);
@@ -136,7 +136,6 @@ function TaskRow({
           <span className={`badge mr-2 ${KIND_STYLE[kind]}`}>
             <span>
               {kind} · {t.points}
-              {t.category === "protocol" ? " · на время" : ""}
             </span>
           </span>
           «{taskTitle(t)}»
@@ -307,29 +306,21 @@ function HeatMap({ maps, code, name, onPick }: { maps: MapInfo[]; code?: string;
   );
 }
 
-/** Место стороны в матче PUBG по экрану итогов захода: очков не даёт, идёт в статистику и «чикены». */
+/** Топ-1 стороны в заходе по экрану итогов: очков не даёт, идёт в статистику и «чикены». */
 function HeatPlace({ place, name, onPick }: { place?: number | null; name: string; onPick: (place: number | null) => void }) {
-  const id = React.useId();
+  const chicken = place === 1;
   return (
     <span className="flex items-center gap-2">
-      <label className="field-label" htmlFor={id}>
-        Место
-      </label>
-      <select
-        id={id}
-        className="input min-h-[40px] w-auto py-0"
-        value={place ?? ""}
-        onChange={(e) => onPick(e.target.value ? Number(e.target.value) : null)}
+      <button
+        type="button"
+        className={`btn btn-sm min-h-[40px] ${chicken ? "btn-primary" : "btn-ghost"}`}
+        onClick={() => onPick(chicken ? null : 1)}
         title="По экрану итогов захода, очков не даёт"
-        aria-label={`Место ${name} в матче`}
+        aria-label={`Топ-1: ${name} взял чикена`}
+        aria-pressed={chicken}
       >
-        <option value="">—</option>
-        {Array.from({ length: 16 }, (_, i) => i + 1).map((n) => (
-          <option key={n} value={n}>
-            {n === 1 ? "1 — чикен" : n}
-          </option>
-        ))}
-      </select>
+        <span>{chicken ? "Чикен взят" : "Топ 1 — чикен"}</span>
+      </button>
     </span>
   );
 }

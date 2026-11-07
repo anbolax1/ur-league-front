@@ -40,6 +40,7 @@ function rules(belt: Belt): { title: string; text: string }[] {
 function howShort(r: BeltReign): string {
   if (r.how === "first") return "первый матч лиги";
   if (r.how === "pick") return "подобрал ничей пояс";
+  if (r.how === "hand") return "получил от организатора";
   return r.opponent ? `обыграл ${holderName(r.opponent)}` : "обыграл носителя";
 }
 
@@ -48,6 +49,7 @@ function Plate({ r, now }: { r: BeltReign; now: number }) {
   return (
     <li className={`bl-plate ${r.end ? "" : "now"}`}>
       {r.end === "drop" && <span className="bl-plate-drop">выпал</span>}
+      {r.end === "hand" && <span className="bl-plate-drop">передан</span>}
       <span className="bl-plate-dates">
         {shortDate(r.from)} — {r.to ? shortDate(r.to) : "сейчас"}
         {r.time > 1 ? ` · ${r.time}-й раз` : ""}
@@ -190,7 +192,7 @@ export async function SurfaceBelt() {
             ))}
           </ol>
           <p className="bl-rules-note">
-            Пояс считается сам: его выводят из сыгранных матчей, как нашивки, руками его никто не вписывает. Если матч отменят или поправят, пояс пересчитается.
+            Пояс считается сам: его выводят из сыгранных матчей, как нашивки. Если матч отменят или поправят, пояс пересчитается. Единственное исключение — организатор может передать пояс другому игроку без матча, если носитель больше не играет; такая передача отмечена в истории.
           </p>
         </div>
       </section>
