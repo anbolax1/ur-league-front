@@ -135,12 +135,15 @@ function TaskRow({
   t,
   owner,
   opponent,
+  oppLocked,
   onMark,
   onReroll,
 }: {
   t: RoundBonusTask;
   owner: Participant;
   opponent: Participant | null;
+  /** Сопернику уже засчитано другое задание этой стороны: за раунд можно одно. */
+  oppLocked: boolean;
   onMark: (id: string, by: "owner" | "opponent" | "owner_off" | "opponent_off") => void;
   /** Нет - задание не перебросить: раунд уже сыгран. */
   onReroll?: (id: string) => void;
@@ -175,8 +178,10 @@ function TaskRow({
       {/* Кнопки узкие, без лишних слов: место в строке отдано названию задания. Повторное нажатие снимает зачёт. */}
       <button
         type="button"
-        className={`btn btn-sm flex-none text-ok [&::before]:shadow-[inset_0_0_0_1px_rgba(52,211,153,0.5)] ${
-          byOwner ? "[&::before]:bg-[rgba(52,211,153,0.3)]" : "[&::before]:bg-[rgba(52,211,153,0.12)]"
+        className={`btn btn-sm flex-none ${
+          byOwner
+            ? "text-[#04170f] [&::before]:bg-ok [&::before]:shadow-[0_0_14px_rgba(52,211,153,0.45)]"
+            : "text-ok [&::before]:shadow-[inset_0_0_0_1px_rgba(52,211,153,0.6)]"
         }`}
         aria-pressed={byOwner}
         onClick={() => onMark(t.id, byOwner ? "owner_off" : "owner")}
@@ -191,8 +196,9 @@ function TaskRow({
           type="button"
           className={`btn btn-cyan btn-sm flex-none ${byOpp ? "" : "opacity-80"}`}
           aria-pressed={byOpp}
+          disabled={!byOpp && oppLocked}
           onClick={() => onMark(t.id, byOpp ? "opponent_off" : "opponent")}
-          title={byOpp ? `Снять зачёт ${rival}` : `Выполнил ${rival}: +${CROSS_POINTS} ему`}
+          title={byOpp ? `Снять зачёт ${rival}` : oppLocked ? `${rival} уже засчитал другое задание в этом раунде` : `Выполнил ${rival}: +${CROSS_POINTS} ему`}
           aria-label={byOpp ? `Снять зачёт «${taskTitle(t)}» ${rival}` : `Засчитать «${taskTitle(t)}» сопернику, +${CROSS_POINTS}`}
         >
           {byOpp && <CheckIcon />}
@@ -530,7 +536,17 @@ export function RoundConsole({
                   )}
                 </div>
                 {tasks.length ? (
-                  tasks.map((t) => <TaskRow key={t.id} t={t} owner={p} opponent={opp} onMark={onMark} onReroll={fix ? undefined : onReroll} />)
+                  tasks.map((t) => (
+                    <TaskRow
+                      key={t.id}
+                      t={t}
+                      owner={p}
+                      opponent={opp}
+                      oppLocked={tasks.some((x) => x.id !== t.id && !!x.opponentBy)}
+                      onMark={onMark}
+                      onReroll={fix ? undefined : onReroll}
+                    />
+                  ))
                 ) : (
                   <p className="text-sm text-muted">Задания раунда не выданы — в каталоге не нашлось подходящих.</p>
                 )}
