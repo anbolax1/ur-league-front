@@ -65,12 +65,11 @@ jobs:
           tar -C .deploybuild -czf - . | $SSH "$SSH_USER@$SSH_HOST" 'tar -C ~/ur-front_new -xzf -'
           $SSH "$SSH_USER@$SSH_HOST" '
             set -e
-            export XDG_RUNTIME_DIR=/run/user/$(id -u)
             test -f ~/ur-front_new/frontend/server.js
             rm -rf ~/ur-front_old
             mv ~/ur-front ~/ur-front_old
             mv ~/ur-front_new ~/ur-front
-            systemctl --user restart ur-front
+            sudo systemctl restart ur-front
             sleep 2
             curl -fsS -o /dev/null -w "front %{http_code}\n" localhost:3010
           '
