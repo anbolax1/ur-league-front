@@ -22,12 +22,21 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Выделение текста мышью с выходом за край окна даёт click на фоне - закрываем, только если и нажали на фоне.
+  const pressedOnScrim = React.useRef(false);
+
   if (!open) return null;
 
   return (
     <div
       className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
-      onClick={onClose}
+      onMouseDown={(e) => {
+        pressedOnScrim.current = e.target === e.currentTarget;
+      }}
+      onClick={(e) => {
+        if (pressedOnScrim.current && e.target === e.currentTarget) onClose();
+        pressedOnScrim.current = false;
+      }}
       role="presentation"
     >
       <div
